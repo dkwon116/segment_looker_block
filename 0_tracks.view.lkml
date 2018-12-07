@@ -5,11 +5,13 @@ view: tracks {
     primary_key: yes
     type: string
     sql: ${TABLE}.id ;;
+    hidden: yes
   }
 
   dimension: anonymous_id {
     type: string
     sql: ${TABLE}.anonymous_id ;;
+    hidden: yes
   }
 
   dimension: event {
@@ -22,15 +24,21 @@ view: tracks {
     sql: ${TABLE}.event_text ;;
   }
 
+  dimension: context_page_url {
+    type: string
+    sql: ${TABLE}.context_page_url ;;
+  }
+
   dimension_group: received {
     type: time
-    timeframes: [raw, time, date, week, month]
+    hidden: yes
+    timeframes: [raw, time, hour, date, week, month]
     sql: ${TABLE}.received_at ;;
   }
 
   dimension: user_id {
     type: string
-    # hidden: true
+    hidden: yes
     sql: ${TABLE}.user_id ;;
   }
 
@@ -44,9 +52,10 @@ view: tracks {
   dimension: event_id {
     type: string
     sql: CONCAT(cast(${received_raw} AS string), ${anonymous_id}) ;;
+    hidden: yes
   }
 
-  measure: count {
+  measure: count_track {
     type: count
     drill_fields: [id, users.context_library_name, users.id]
   }

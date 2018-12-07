@@ -12,7 +12,7 @@ explore: event_facts {
   label: "Events"
 
   join: pages {
-    view_label: "Events"
+    view_label: "Page Events"
     type: left_outer
     sql_on: event_facts.timestamp = pages.timestamp
       and event_facts.anonymous_id = pages.anonymous_id
@@ -21,14 +21,14 @@ explore: event_facts {
   }
 
   join: tracks {
-    view_label: "Events"
+    view_label: "Track Events"
     type: left_outer
     sql_on: event_facts.event_id = concat(tracks.event_id, '-t')
       and event_facts.timestamp = tracks.timestamp
       and event_facts.anonymous_id = tracks.anonymous_id
        ;;
     relationship: one_to_one
-    fields: []
+#     fields: []
   }
 
   join: page_facts {
@@ -41,17 +41,24 @@ explore: event_facts {
     relationship: one_to_one
   }
 
-  join: sessions_pg_trk {
+  join: sessions {
     view_label: "Sessions"
     type: left_outer
-    sql_on: ${event_facts.session_id} = ${sessions_pg_trk.session_id} ;;
+    sql_on: ${event_facts.session_id} = ${sessions.session_id} ;;
     relationship: many_to_one
   }
 
-  join: session_pg_trk_facts {
+  join: session_facts {
     view_label: "Sessions"
     type: left_outer
-    sql_on: ${event_facts.session_id} = ${session_pg_trk_facts.session_id} ;;
+    sql_on: ${event_facts.session_id} = ${session_facts.session_id} ;;
+    relationship: many_to_one
+  }
+
+  join: user_facts {
+    view_label: "Users"
+    type: left_outer
+    sql_on: ${event_facts.looker_visitor_id}=${user_facts.looker_visitor_id} ;;
     relationship: many_to_one
   }
 }

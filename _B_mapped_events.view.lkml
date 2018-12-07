@@ -1,6 +1,7 @@
 # - explore: mapped_events
 view: mapped_events {
   derived_table: {
+    # combine track and pages event into single table
     sql_trigger_value: select count(*) from ${page_aliases_mapping.SQL_TABLE_NAME} ;;
     sql: select *
         ,timestamp_diff(timestamp, lag(timestamp) over(partition by looker_visitor_id order by timestamp), minute) as idle_time_minutes
@@ -9,7 +10,12 @@ view: mapped_events {
           ,t.anonymous_id
           ,coalesce(a2v.looker_visitor_id,a2v.alias) as looker_visitor_id
           ,t.timestamp
+          ,t.event as event
+          ,t.received_at as received
           ,NULL as referrer
+          ,NULL as campaign_source
+          ,NULL as campaign_medium
+          ,NULL as campaign_name
           ,'tracks' as event_source
         from javascript.tracks_view as t
         inner join ${page_aliases_mapping.SQL_TABLE_NAME} as a2v
@@ -21,7 +27,12 @@ view: mapped_events {
           ,t.anonymous_id
           ,coalesce(a2v.looker_visitor_id,a2v.alias) as looker_visitor_id
           ,t.timestamp
+          ,t.name as event
+          ,t.received_at as received
           ,t.referrer as referrer
+          ,t.context_campaign_source as campaign_source
+          ,t.context_campaign_medium as campaign_medium
+          ,t.context_campaign_name as campaign_name
           ,'pages' as event_source
         from javascript.pages_view as t
         inner join ${page_aliases_mapping.SQL_TABLE_NAME} as a2v
@@ -48,8 +59,15 @@ view: mapped_events {
     sql: ${TABLE}.timestamp ;;
   }
 
-  #   - dimension: event
-  #     sql: ${TABLE}.event
+  dimension_group: received {
+    type: time
+    timeframes: [time, date, week, month]
+    sql: ${TABLE}.received ;;
+  }
+
+  dimension: event {
+    sql: ${TABLE}.event ;;
+  }
 
   dimension: referrer {
     sql: ${TABLE}.referrer ;;

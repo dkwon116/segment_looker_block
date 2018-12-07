@@ -6,24 +6,58 @@ view: pages {
     primary_key: yes
     type: string
     sql: ${TABLE}.id ;;
+    hidden: yes
   }
 
   dimension: anonymous_id {
     type: string
     sql: ${TABLE}.anonymous_id ;;
+    hidden: yes
+  }
+
+  dimension: context_campaign_content {
+    type: string
+    sql: ${TABLE}.context_campaign_content ;;
+    group_label: "Campaign"
+  }
+
+  dimension: context_campaign_medium {
+    type: string
+    sql: ${TABLE}.context_campaign_medium ;;
+    group_label: "Campaign"
+  }
+
+  dimension: context_campaign_name {
+    type: string
+    sql: ${TABLE}.context_campaign_name ;;
+    group_label: "Campaign"
+  }
+
+  dimension: context_campaign_source {
+    type: string
+    sql: ${TABLE}.context_campaign_source ;;
+    group_label: "Campaign"
+  }
+
+  dimension: context_campaign_term {
+    type: string
+    sql: ${TABLE}.context_campaign_term ;;
+    group_label: "Campaign"
   }
 
   dimension: context_library_name {
     type: string
     sql: ${TABLE}.context_library_name ;;
+    hidden: yes
   }
 
   dimension: context_library_version {
     type: string
     sql: ${TABLE}.context_library_version ;;
+    hidden: yes
   }
 
-  dimension: name {
+  dimension: page_name {
     type: string
     sql: ${TABLE}.name ;;
   }
@@ -47,11 +81,11 @@ view: pages {
     sql: ${TABLE}.timestamp ;;
   }
 
-  dimension: received {
-    type: date
-    #     timeframes: [raw, time, date, week, month]
-    sql: ${TABLE}.received_at ;;
-  }
+#   dimension: received {
+#     type: date
+#     #     timeframes: [raw, time, date, week, month]
+#     sql: ${TABLE}.received_at ;;
+#   }
 
   dimension: referrer {
     type: string
@@ -70,13 +104,13 @@ view: pages {
 
   dimension: user_id {
     type: string
-    # hidden: true
+    hidden: yes
     sql: ${TABLE}.user_id ;;
   }
 
   measure: count {
     type: count
-    drill_fields: [id, context_library_name, name, users.id]
+    drill_fields: [id, context_library_name, page_name, users.id]
   }
 
   measure: count_visitors {

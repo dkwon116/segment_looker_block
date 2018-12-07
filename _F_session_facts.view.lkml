@@ -1,12 +1,17 @@
-view: session_pg_trk_facts {
+view: session_facts {
   derived_table: {
+#     information about session
     # Rebuilds after track_facts rebuilds
     sql_trigger_value: select COUNT(*) from ${event_facts.SQL_TABLE_NAME} ;;
     sql: select s.session_id
         , first_referrer
         , max(t2s.timestamp) as end_at
         , count(case when t2s.event_source = 'tracks' then 1 else null end) as tracks_count
-      from ${sessions_pg_trk.SQL_TABLE_NAME} as s
+        , count(case when t2s.event_source = 'pages' then 1 else null end) as pages_count
+        , count(case when t2s.event = 'product_viewed' then event_id else null end) as count_product_viewed
+        , count(case when t2s.event = 'product_list_viewed' then event_id else null end) as count_product_list_viewed
+        , count(case when t2s.event = 'outlink_sent' then event_id else null end) as count_outlinked
+      from ${sessions.SQL_TABLE_NAME} as s
         inner join ${event_facts.SQL_TABLE_NAME} as t2s
           on s.session_id = t2s.session_id
           --using(session_id)
@@ -44,6 +49,16 @@ view: session_pg_trk_facts {
     sql: ${TABLE}.tracks_count ;;
   }
 
+  dimension: pages_count {
+    type:  number
+    sql: ${TABLE}.pages_count ;;
+  }
+
+  dimension: total_events {
+    type: number
+    sql: ${tracks_count} + ${pages_count} ;;
+  }
+
   dimension: referrer {
     type: number
     sql: ${TABLE}.referrer ;;
@@ -62,15 +77,16 @@ view: session_pg_trk_facts {
     ]
   }
 
+
   dimension: is_bounced_session {
-    sql: CASE WHEN ${tracks_count} = 1 THEN 'Bounced Session'
+    sql: CASE WHEN ${total_events} = 1 THEN 'Bounced Session'
       ELSE 'Not Bounced Session' END
        ;;
   }
 
   dimension: session_duration_minutes {
     type: number
-    sql: datediff(minutes, ${sessions_pg_trk.start_raw}, ${end_raw}) ;;
+    sql: datediff(minutes, ${sessions.start_raw}, ${end_raw}) ;;
   }
 
   dimension: session_duration_minutes_tiered {
@@ -84,6 +100,11 @@ view: session_pg_trk_facts {
       30,
       60
     ]
+  }
+
+  dimension: products_viewed {
+    type: number
+    sql: ${TABLE}.count_product_viewed ;;
   }
 
   # ----- Measures -----
@@ -104,4 +125,42 @@ view: session_pg_trk_facts {
     value_format_name: decimal_1
     sql: ${tracks_count}::float ;;
   }
+
+  measure: average_events_per_session {
+    type: average
+    sql: ${total_events} ;;
+  }
+
+  measure: products_viewed_total {
+    type: sum
+    sql: ${products_viewed} ;;
+  }
+
+  measure: products_viewed_per_session {
+    type: average
+    sql: ${products_viewed} ;;
+    value_format_name:decimal_2
+  }
+
+  measure: products_viewed_per_converted_user {
+    type: number
+    sql: ${products_viewed_total} / ${event_facts.count_visitors};;
+    value_format_name:decimal_2
+  }
+
+  measure: count_bounced_sessions {
+    type: count_distinct
+    sql: ${is_bounced_session} ;;
+
+    filters: {
+      field: is_bounced_session
+      value: "Bounced Session"
+    }
+  }
+
+  measure: bounce_rate {
+    type: number
+    sql: ${count_bounced_sessions} / ${sessions.count_sessions} ;;
+  }
+
 }

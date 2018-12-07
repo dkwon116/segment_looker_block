@@ -1,5 +1,6 @@
 view: page_facts {
   derived_table: {
+#     converting event to pageview durations and last page view to calculate sessions
     sql_trigger_value: select count(*) from ${mapped_events.SQL_TABLE_NAME} ;;
     sql: SELECT
        e.event_id AS event_id
@@ -13,7 +14,7 @@ FROM ${mapped_events.SQL_TABLE_NAME} AS e
   }
 
   dimension: event_id {
-    #     hidden: true
+    hidden: yes
     primary_key: yes
     sql: ${TABLE}.event_id ;;
   }
