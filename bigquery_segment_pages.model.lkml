@@ -62,3 +62,26 @@ explore: event_facts {
     relationship: many_to_one
   }
 }
+
+explore: funnel_explorer {
+  join: sessions {
+    view_label: "Sessions"
+    foreign_key: session_id
+  }
+
+  join: user_facts {
+    view_label: "Users"
+    foreign_key: sessions.looker_visitor_id
+  }
+
+  join: session_facts {
+    view_label: "Sessions"
+    relationship: one_to_one
+    foreign_key: session_id
+  }
+
+  join: users {
+    relationship: many_to_one
+    sql_on: coalesce(users.mapped_user_id, users.user_id) = sessions.user_id ;;
+  }
+}

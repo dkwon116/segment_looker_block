@@ -19,7 +19,13 @@ view: funnel_explorer {
               THEN tracks_sessions_map.timestamp
               ELSE NULL END
             ) as event3_time
-      FROM ${track_facts.SQL_TABLE_NAME} as tracks_sessions_map
+        , MIN(
+            CASE WHEN
+              {% condition event4 %} tracks_sessions_map.event {% endcondition %}
+              THEN tracks_sessions_map.timestamp
+              ELSE NULL END
+            ) as event4_time
+      FROM ${event_facts.SQL_TABLE_NAME} as tracks_sessions_map
       GROUP BY 1
        ;;
   }
@@ -35,6 +41,11 @@ view: funnel_explorer {
   }
 
   filter: event3 {
+    suggest_explore: event_list
+    suggest_dimension: event_list.event_types
+  }
+
+  filter: event4 {
     suggest_explore: event_list
     suggest_dimension: event_list.event_types
   }
@@ -63,6 +74,12 @@ view: funnel_explorer {
     sql: ${TABLE}.event3_time ;;
   }
 
+  dimension_group: event4 {
+    type: time
+    timeframes: [raw, time]
+    sql: ${TABLE}.event4_time ;;
+  }
+
   dimension: event1_before_event2 {
     type: yesno
     sql: ${event1_time} < ${event2_time} ;;
@@ -73,9 +90,14 @@ view: funnel_explorer {
     sql: ${event2_time} < ${event3_time} ;;
   }
 
+  dimension: event3_before_event4 {
+    type: yesno
+    sql: ${event3_time} < ${event4_time} ;;
+  }
+
   dimension: minutes_in_funnel {
     type: number
-    sql: timestamp_diff(${event1_raw},COALESCE(${event3_raw},${event2_raw}), minute) ;;
+    sql: timestamp_diff(${event1_raw},COALESCE(${event4_raw},${event3_raw},${event2_raw}), minute) ;;
   }
 
   measure: count_sessions {
@@ -139,6 +161,46 @@ view: funnel_explorer {
 
     filters: {
       field: event2_before_event3
+      value: "yes"
+    }
+  }
+
+  measure: count_sessions_event1234 {
+    type: count_distinct
+    sql: ${session_id} ;;
+
+    filters: {
+      field: event1_time
+      value: "NOT NULL"
+    }
+
+    filters: {
+      field: event2_time
+      value: "NOT NULL"
+    }
+
+    filters: {
+      field: event3_time
+      value: "NOT NULL"
+    }
+
+    filters: {
+      field: event4_time
+      value: "NOT NULL"
+    }
+
+    filters: {
+      field: event1_before_event2
+      value: "yes"
+    }
+
+    filters: {
+      field: event2_before_event3
+      value: "yes"
+    }
+
+    filters: {
+      field: event3_before_event4
       value: "yes"
     }
   }

@@ -48,6 +48,12 @@ view: event_facts {
     sql: ${TABLE}.received ;;
   }
 
+  dimension_group: timestamp {
+    type: time
+    timeframes: [time, date, week, month]
+    sql: ${TABLE}.timestamp ;;
+  }
+
   dimension: first_referrer {
     sql: ${TABLE}.first_referrer ;;
   }

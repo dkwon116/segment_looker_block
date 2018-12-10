@@ -107,6 +107,16 @@ view: session_facts {
     sql: ${TABLE}.count_product_viewed ;;
   }
 
+  dimension: product_lists_viewed {
+    type: number
+    sql: ${TABLE}.count_product_list_viewed ;;
+  }
+
+  dimension: outlinked {
+    type: number
+    sql: ${TABLE}.count_outlinked ;;
+  }
+
   # ----- Measures -----
 
   measure: avg_session_duration_minutes {
@@ -134,18 +144,39 @@ view: session_facts {
   measure: products_viewed_total {
     type: sum
     sql: ${products_viewed} ;;
+    group_label: "Product Viewed"
   }
 
   measure: products_viewed_per_session {
     type: average
     sql: ${products_viewed} ;;
     value_format_name:decimal_2
+    group_label: "Product Viewed"
+  }
+
+  measure: total_product_viewed_users {
+    type: count_distinct
+    sql: ${sessions.looker_visitor_id} ;;
+    group_label: "Product Viewed"
+
+    filters: {
+      field: products_viewed
+      value: ">0"
+    }
   }
 
   measure: products_viewed_per_converted_user {
     type: number
-    sql: ${products_viewed_total} / ${event_facts.count_visitors};;
+    sql: ${products_viewed_total} / ${total_product_viewed_users};;
     value_format_name:decimal_2
+    group_label: "Product Viewed"
+  }
+
+  measure: product_viewed_conversion_rate {
+    type: number
+    sql: ${total_product_viewed_users} / ${sessions.count_visitors} ;;
+    value_format_name: percent_0
+    group_label: "Product Viewed"
   }
 
   measure: count_bounced_sessions {
