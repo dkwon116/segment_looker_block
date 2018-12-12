@@ -61,6 +61,13 @@ explore: event_facts {
     sql_on: ${event_facts.looker_visitor_id}=${user_facts.looker_visitor_id} ;;
     relationship: many_to_one
   }
+
+  join: page_aliases_mapping {
+    view_label: "Users"
+    type: left_outer
+    sql_on: ${event_facts.looker_visitor_id}=${page_aliases_mapping.alias} ;;
+    relationship: one_to_many
+  }
 }
 
 explore: funnel_explorer {

@@ -4,7 +4,7 @@ view: session_facts {
     # Rebuilds after track_facts rebuilds
     sql_trigger_value: select COUNT(*) from ${event_facts.SQL_TABLE_NAME} ;;
     sql: select s.session_id
-        , first_referrer
+        , t2s.first_referrer
         , max(t2s.timestamp) as end_at
         , count(case when t2s.event_source = 'tracks' then 1 else null end) as tracks_count
         , count(case when t2s.event_source = 'pages' then 1 else null end) as pages_count
@@ -152,6 +152,7 @@ view: session_facts {
     sql: ${products_viewed} ;;
     value_format_name:decimal_2
     group_label: "Product Viewed"
+    drill_fields: [campaign_details*, product_viewed_details*]
   }
 
   measure: total_product_viewed_users {
@@ -194,4 +195,11 @@ view: session_facts {
     sql: ${count_bounced_sessions} / ${sessions.count_sessions} ;;
   }
 
+  set: campaign_details {
+    fields: [event_facts.first_campaign, event_facts.first_source, event_facts.first_medium, sessions.count_sessions]
+  }
+
+  set: product_viewed_details {
+    fields: [products_viewed_per_session, product_viewed_conversion_rate]
+  }
 }
