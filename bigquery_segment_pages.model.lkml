@@ -65,7 +65,7 @@ explore: event_facts {
   join: page_aliases_mapping {
     view_label: "Users"
     type: left_outer
-    sql_on: ${event_facts.looker_visitor_id}=${page_aliases_mapping.alias} ;;
+    sql_on: ${event_facts.looker_visitor_id}=${page_aliases_mapping.looker_visitor_id} ;;
     relationship: one_to_many
   }
 }
@@ -74,11 +74,6 @@ explore: funnel_explorer {
   join: sessions {
     view_label: "Sessions"
     foreign_key: session_id
-  }
-
-  join: user_facts {
-    view_label: "Users"
-    foreign_key: sessions.looker_visitor_id
   }
 
   join: session_facts {
@@ -91,4 +86,11 @@ explore: funnel_explorer {
     relationship: many_to_one
     sql_on: coalesce(users.mapped_user_id, users.user_id) = sessions.user_id ;;
   }
+
+  join: user_facts {
+    view_label: "Users"
+    foreign_key: sessions.looker_visitor_id
+  }
 }
+
+explore: event_list {}

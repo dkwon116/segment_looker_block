@@ -41,7 +41,7 @@ view: page_aliases_mapping {
         coalesce(first_value(user_id)
             over(
               partition by anonymous_id
-              order by COALESCE(user_id, 'ZZZZZZZZZZZZZZZZZ') desc, timestamp desc
+              order by COALESCE(user_id, 'ZZZZZZZZZZZZZZZZZ'), timestamp desc
               rows between unbounded preceding and unbounded following), anonymous_id) as looker_visitor_id
 
       from all_mappings

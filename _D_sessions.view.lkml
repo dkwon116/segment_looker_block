@@ -64,7 +64,8 @@ where (idle_time_minutes > 30 or idle_time_minutes is null)
   }
 
   measure: count_sessions {
-    type: count
+    type: count_distinct
+    sql: ${session_id} ;;
     drill_fields: [detail*]
   }
 

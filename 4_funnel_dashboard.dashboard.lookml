@@ -8,17 +8,17 @@
   - name: event1
     title: 'First Event'
     type: field_filter
-    model: bigquery_segment_tracks
-    explore: track_facts
-    field: track_facts.event
+    model: bigquery_segment_pages
+    explore: event_facts
+    field: event_facts.event
     default_value: 'signup'
 
   - name: event2
     title: 'Second Event'
     type: field_filter
-    model: bigquery_segment_tracks
-    explore: track_facts
-    field: track_facts.event
+    model: bigquery_segment_pages
+    explore: event_facts
+    field: event_facts.event
     default_value: 'viewed_product'
 
 #   - name: event3
@@ -34,7 +34,7 @@
   - name: add_a_unique_name_1475003582
     title: Untitled Visualization
     type: looker_column
-    model: bigquery_segment_tracks
+    model: bigquery_segment_pages
     explore: funnel_explorer
     measures: [funnel_explorer.count_sessions_event1,
       funnel_explorer.count_sessions_event12, funnel_explorer.count_sessions_event123]
