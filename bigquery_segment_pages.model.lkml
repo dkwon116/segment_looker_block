@@ -94,3 +94,5 @@ explore: funnel_explorer {
 }
 
 explore: event_list {}
+
+explore: concierge_clicked_view {}
