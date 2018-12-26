@@ -117,6 +117,29 @@ view: session_facts {
     sql: ${TABLE}.count_outlinked ;;
   }
 
+  # dimension: days_since_first_visit {
+  #   hidden: yes
+  #   type: number
+  #   sql: DATEDIFF(${sessions.start_raw}, ${user_facts.first_visited});;
+  # }
+
+  # dimension: weeks_since_first_visit {
+  #   type: number
+  #   sql: FLOOR(${days_since_first_visit}/(7)) ;;
+  # }
+
+  # dimension: months_since_first_visit {
+  #   type: number
+  #   sql: FLOOR(${days_since_first_visit}/(30)) ;;
+  # }
+
+  # dimension: months_since_first_visit_tier {
+  #   type: tier
+  #   tiers: [1,3,6,12,24]
+  #   style: integer
+  #   sql: ${months_since_first_visit} ;;
+  # }
+
   # ----- Measures -----
 
   measure: avg_session_duration_minutes {
@@ -168,7 +191,7 @@ view: session_facts {
 
   measure: products_viewed_per_converted_user {
     type: number
-    sql: ${products_viewed_total} / ${total_product_viewed_users};;
+    sql: ${products_viewed_total} / NULLIF(${total_product_viewed_users}, 0);;
     value_format_name:decimal_2
     group_label: "Product Viewed"
   }
@@ -178,6 +201,46 @@ view: session_facts {
     sql: ${total_product_viewed_users} / ${sessions.count_visitors} ;;
     value_format_name: percent_0
     group_label: "Product Viewed"
+  }
+
+#   measures for outlink
+  measure: outlinked_total {
+    type: sum
+    sql: ${outlinked} ;;
+    group_label: "Outlinked"
+  }
+
+  measure: outlinked_per_session {
+    type: average
+    sql: ${outlinked} ;;
+    value_format_name:decimal_2
+    group_label: "Outlinked"
+    drill_fields: [campaign_details*, product_viewed_details*]
+  }
+
+  measure: total_outlinked_users {
+    type: count_distinct
+    sql: ${sessions.looker_visitor_id} ;;
+    group_label: "Outlinked"
+
+    filters: {
+      field: outlinked
+      value: ">0"
+    }
+  }
+
+  measure: outlinked_per_converted_user {
+    type: number
+    sql: ${outlinked_total} / NULLIF(${total_outlinked_users}, 0) ;;
+    value_format_name:decimal_2
+    group_label: "Outlinked"
+  }
+
+  measure: outlinked_conversion_rate {
+    type: number
+    sql: ${total_outlinked_users} / ${sessions.count_visitors} ;;
+    value_format_name: percent_0
+    group_label: "Outlinked"
   }
 
   measure: count_bounced_sessions {
