@@ -140,6 +140,7 @@ view: concierge_clicked_view {
     timeframes: [
       raw,
       time,
+      hour,
       date,
       week,
       month,
@@ -223,6 +224,6 @@ view: concierge_clicked_view {
 
   measure: count {
     type: count
-    drill_fields: [id, context_library_name, name]
+    drill_fields: [name, brand, retailer, user_id]
   }
 }
