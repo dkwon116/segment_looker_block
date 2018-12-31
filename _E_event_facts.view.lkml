@@ -20,6 +20,7 @@ view: event_facts {
         , first_value(t.campaign_source) over (partition by s.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_source
         , first_value(t.campaign_medium) over (partition by s.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_medium
         , first_value(t.campaign_name) over (partition by s.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_campaign
+        , first_value(t.user_agent) over (partition by s.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as user_agent
       from ${mapped_events.SQL_TABLE_NAME} as t
       left join ${sessions.SQL_TABLE_NAME} as s
       on t.looker_visitor_id = s.looker_visitor_id
@@ -101,6 +102,30 @@ view: event_facts {
     sql: ${TABLE}.first_medium ;;
   }
 
+  dimension: user_agent {
+    type: string
+    sql: ${TABLE}.user_agent ;;
+  }
+
+  dimension: device {
+    type: string
+    sql:  CASE
+            WHEN ${user_agent} LIKE '%iPhone%' THEN "iPhone"
+            WHEN ${user_agent} LIKE '%Android%' THEN "Android"
+            ELSE "Other"
+          END;;
+  }
+
+  dimension: in_app {
+    type: string
+    sql:  CASE
+            WHEN ${user_agent} LIKE '%KAKAO%' THEN "Kakao"
+            WHEN ${user_agent} LIKE '%Instagram%' THEN "Insta"
+            WHEN ${user_agent} LIKE '%NAVER%' THEN "Naver"
+            ELSE "Other"
+          END;;
+  }
+
   measure: count_visitors {
     type: count_distinct
     sql: ${looker_visitor_id} ;;
@@ -108,5 +133,6 @@ view: event_facts {
 
   measure: count_events {
     type: count
+    drill_fields: [user_facts.looker_visitor_id, users.name, user_agent]
   }
 }

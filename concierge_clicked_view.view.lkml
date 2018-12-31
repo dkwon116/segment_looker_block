@@ -222,6 +222,12 @@ view: concierge_clicked_view {
     sql: ${TABLE}.value ;;
   }
 
+  dimension: event_id {
+    type: string
+    sql: CONCAT(cast(${timestamp_raw} AS string), ${anonymous_id}) ;;
+    # hidden: yes
+  }
+
   measure: count {
     type: count
     drill_fields: [name, brand, retailer, user_id]

@@ -57,6 +57,12 @@ view: pages {
     hidden: yes
   }
 
+  dimension: context_user_agent {
+    type: string
+    sql: ${TABLE}.context_user_agent ;;
+    hidden: yes
+  }
+
   dimension: page_name {
     type: string
     sql: ${TABLE}.name ;;

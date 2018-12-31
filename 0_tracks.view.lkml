@@ -29,6 +29,12 @@ view: tracks {
     sql: ${TABLE}.context_page_url ;;
   }
 
+  dimension: context_user_agent {
+    type: string
+    sql: ${TABLE}.context_user_agent ;;
+    hidden: yes
+  }
+
   dimension_group: received {
     type: time
     hidden: yes

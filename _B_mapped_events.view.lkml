@@ -16,6 +16,7 @@ view: mapped_events {
           ,NULL as campaign_source
           ,NULL as campaign_medium
           ,NULL as campaign_name
+          ,t.context_user_agent as user_agent
           ,'tracks' as event_source
         from javascript.tracks_view as t
         inner join ${page_aliases_mapping.SQL_TABLE_NAME} as a2v
@@ -33,6 +34,7 @@ view: mapped_events {
           ,t.context_campaign_source as campaign_source
           ,t.context_campaign_medium as campaign_medium
           ,t.context_campaign_name as campaign_name
+          ,t.context_user_agent as user_agent
           ,'pages' as event_source
         from javascript.pages_view as t
         inner join ${page_aliases_mapping.SQL_TABLE_NAME} as a2v
@@ -75,6 +77,10 @@ view: mapped_events {
 
   dimension: event_source {
     sql: ${TABLE}.event_source ;;
+  }
+
+  dimension: user_agent {
+    sql: ${TABLE}.user_agent ;;
   }
 
   dimension: idle_time_minutes {

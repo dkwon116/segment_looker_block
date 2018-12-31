@@ -23,8 +23,7 @@ explore: event_facts {
   join: tracks {
     view_label: "Track Events"
     type: left_outer
-    sql_on: event_facts.event_id = concat(tracks.event_id, '-t')
-      and event_facts.timestamp = tracks.timestamp
+    sql_on: event_facts.timestamp = tracks.timestamp
       and event_facts.anonymous_id = tracks.anonymous_id
        ;;
     relationship: one_to_one
@@ -67,6 +66,33 @@ explore: event_facts {
     type: left_outer
     sql_on: ${event_facts.looker_visitor_id}=${page_aliases_mapping.looker_visitor_id} ;;
     relationship: one_to_many
+  }
+
+  join: users {
+    view_label: "Users"
+    type: left_outer
+    sql_on: ${event_facts.looker_visitor_id}=${users.id} ;;
+    relationship: many_to_one
+  }
+
+  join: concierge_clicked_view {
+    view_label: "Concierge Clicked"
+    type: left_outer
+    sql_on: event_facts.event_id = concat(cast(${concierge_clicked_view.timestamp_raw} AS string), ${concierge_clicked_view.anonymous_id}, '-t')
+      and event_facts.timestamp = concierge_clicked_view.timestamp
+      and event_facts.anonymous_id = concierge_clicked_view.anonymous_id
+       ;;
+    relationship: one_to_one
+  }
+
+  join: outlink_sent {
+    view_label: "Outlinked"
+    type: left_outer
+    sql_on: event_facts.event_id = concat(cast(${outlink_sent.timestamp_raw} AS string), ${outlink_sent.anonymous_id}, '-t')
+      and event_facts.timestamp = outlink_sent.timestamp
+      and event_facts.anonymous_id = outlink_sent.anonymous_id
+       ;;
+    relationship: one_to_one
   }
 }
 

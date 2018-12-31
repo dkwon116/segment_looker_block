@@ -23,6 +23,45 @@ view: users {
     sql: ${TABLE}.loaded_at ;;
   }
 
+  dimension_group: created {
+    type: time
+    timeframes: [
+      raw,
+      time,
+      date,
+      week,
+      month,
+      quarter,
+      year
+    ]
+    sql: ${TABLE}.created_at ;;
+  }
+
+  dimension: email {
+    type: string
+    sql: ${TABLE}.email ;;
+  }
+
+  dimension: joined_from {
+    type: string
+    sql: ${TABLE}.joined_from ;;
+  }
+
+  dimension: mobile {
+    type: string
+    sql: ${TABLE}.mobile ;;
+  }
+
+  dimension: name {
+    type: string
+    sql: ${TABLE}.name ;;
+  }
+
+  dimension: phone {
+    type: string
+    sql: ${TABLE}.phone ;;
+  }
+
   dimension: plan {
     type: string
     sql: ${TABLE}.plan ;;
