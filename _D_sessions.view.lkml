@@ -66,7 +66,7 @@ where (idle_time_minutes > 30 or idle_time_minutes is null)
   measure: count_sessions {
     type: count_distinct
     sql: ${session_id} ;;
-    drill_fields: [detail*]
+    drill_fields: [user_detail*]
   }
 
   measure: percent_of_total_count {
@@ -91,7 +91,11 @@ where (idle_time_minutes > 30 or idle_time_minutes is null)
     value_format_name: decimal_1
   }
 
-  set: detail {
-    fields: [session_id, looker_visitor_id, start_time, session_sequence_number, next_session_start_at]
+  set: session_detail {
+    fields: []
+  }
+
+  set: user_detail {
+    fields: [looker_visitor_id, start_time, users.name, user_facts.first_visited, user_facts.first_source]
   }
 }

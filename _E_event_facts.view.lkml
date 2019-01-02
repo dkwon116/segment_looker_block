@@ -14,6 +14,7 @@ view: event_facts {
         , t.campaign_source as campaign_source
         , t.campaign_medium as campaign_medium
         , t.campaign_name as campaign_name
+        , t.ip as ip
         , row_number() over(partition by s.session_id order by t.timestamp) as track_sequence_number
         , row_number() over(partition by s.session_id, t.event_source order by t.timestamp) as source_sequence_number
         , first_value(t.referrer) over (partition by s.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_referrer
@@ -60,11 +61,21 @@ view: event_facts {
   }
 
   dimension: first_referrer_domain {
-    sql: split_part(${first_referrer},'/',3) ;;
+    sql: NTH_VALUE(split(${first_referrer},'/'),3) ;;
   }
 
   dimension: first_referrer_domain_mapped {
-    sql: CASE WHEN ${first_referrer_domain} like '%facebook%' THEN 'facebook' WHEN ${first_referrer_domain} like '%google%' THEN 'google' ELSE ${first_referrer_domain} END ;;
+    sql: CASE
+    WHEN ${first_referrer} like '%facebook%' THEN 'Facebook'
+    WHEN ${first_referrer} like '%google%' THEN 'Google'
+    WHEN ${first_referrer} like '%naver%' THEN 'Naver'
+    WHEN ${first_referrer} like '%instagram%' THEN 'Instagram'
+    WHEN ${first_referrer} like '%catchfashion%' THEN 'Catch'
+    ELSE ${first_referrer} END ;;
+  }
+
+  dimension: ip {
+    sql: ${TABLE}.ip ;;
   }
 
   dimension: looker_visitor_id {

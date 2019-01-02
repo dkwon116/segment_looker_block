@@ -1,4 +1,4 @@
-view: catch_rakuten_orders {
+view: affiliate_orders {
   sql_table_name: smile_ventures.rakuten_orders ;;
 
   dimension: id {
@@ -63,5 +63,10 @@ view: catch_rakuten_orders {
   measure: count {
     type: count
     drill_fields: [id]
+  }
+
+  measure: unique_users {
+    type: count_distinct
+    sql: ${user_id} ;;
   }
 }

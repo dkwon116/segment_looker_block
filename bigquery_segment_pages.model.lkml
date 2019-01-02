@@ -3,13 +3,14 @@ connection: "segment_bigquery_db"
 # include all views in this project
 # - include: "*.dashboard.lookml"  # include all dashboards in this project
 include: "*.view"
-
+include: "orders.base.lkml"
 # - explore: pages
 
 
 explore: event_facts {
   view_label: "Events"
   label: "Events"
+  extends: [affiliate_orders]
 
   join: pages {
     view_label: "Page Events"
@@ -93,6 +94,13 @@ explore: event_facts {
       and event_facts.anonymous_id = outlink_sent.anonymous_id
        ;;
     relationship: one_to_one
+  }
+
+  join: affiliate_orders {
+    # view_label: "Orders"
+    type: left_outer
+    sql_on: ${event_facts.looker_visitor_id}=${affiliate_orders.user_id} ;;
+    relationship: many_to_one
   }
 }
 

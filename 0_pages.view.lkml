@@ -15,6 +15,11 @@ view: pages {
     hidden: yes
   }
 
+  dimension: context_ip {
+    type: string
+    sql: ${TABLE}.context_ip ;;
+  }
+
   dimension: context_campaign_content {
     type: string
     sql: ${TABLE}.context_campaign_content ;;

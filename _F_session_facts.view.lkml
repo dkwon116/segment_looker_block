@@ -11,6 +11,7 @@ view: session_facts {
         , count(case when t2s.event = 'product_viewed' then event_id else null end) as count_product_viewed
         , count(case when t2s.event = 'product_list_viewed' then event_id else null end) as count_product_list_viewed
         , count(case when t2s.event = 'outlink_sent' then event_id else null end) as count_outlinked
+        , count(case when t2s.event = 'concierge_clicked' then event_id else null end) as count_concierge_clicked
       from ${sessions.SQL_TABLE_NAME} as s
         inner join ${event_facts.SQL_TABLE_NAME} as t2s
           on s.session_id = t2s.session_id
@@ -115,6 +116,11 @@ view: session_facts {
   dimension: outlinked {
     type: number
     sql: ${TABLE}.count_outlinked ;;
+  }
+
+  dimension: concierge_clicked {
+    type: number
+    sql: ${TABLE}.count_concierge_clicked ;;
   }
 
   # dimension: days_since_first_visit {
@@ -241,6 +247,39 @@ view: session_facts {
     sql: ${total_outlinked_users} / ${sessions.count_visitors} ;;
     value_format_name: percent_0
     group_label: "Outlinked"
+  }
+
+#   measures for concierge
+  measure: concierge_clicked_total {
+    type: sum
+    sql: ${concierge_clicked} ;;
+    group_label: "Concierge"
+  }
+
+  measure: concierge_per_session {
+    type: average
+    sql: ${concierge_clicked} ;;
+    value_format_name:decimal_2
+    group_label: "Concierge"
+    drill_fields: [campaign_details*, product_viewed_details*]
+  }
+
+  measure: total_concierge_clicked_users {
+    type: count_distinct
+    sql: ${sessions.looker_visitor_id} ;;
+    group_label: "Concierge"
+
+    filters: {
+      field: concierge_clicked
+      value: ">0"
+    }
+  }
+
+  measure: concierge_conversion_rate {
+    type: number
+    sql: ${total_concierge_clicked_users} / ${sessions.count_visitors} ;;
+    value_format_name: percent_2
+    group_label: "Concierge"
   }
 
   measure: count_bounced_sessions {

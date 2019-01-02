@@ -24,6 +24,11 @@ view: tracks {
     sql: ${TABLE}.event_text ;;
   }
 
+  dimension: context_ip {
+    type: string
+    sql: ${TABLE}.context_ip ;;
+  }
+
   dimension: context_page_url {
     type: string
     sql: ${TABLE}.context_page_url ;;

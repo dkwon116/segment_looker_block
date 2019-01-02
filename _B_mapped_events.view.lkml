@@ -17,6 +17,8 @@ view: mapped_events {
           ,NULL as campaign_medium
           ,NULL as campaign_name
           ,t.context_user_agent as user_agent
+          ,t.context_page_url as page_url
+          ,t.context_ip as ip
           ,'tracks' as event_source
         from javascript.tracks_view as t
         inner join ${page_aliases_mapping.SQL_TABLE_NAME} as a2v
@@ -35,11 +37,16 @@ view: mapped_events {
           ,t.context_campaign_medium as campaign_medium
           ,t.context_campaign_name as campaign_name
           ,t.context_user_agent as user_agent
+          ,t.context_page_url as page_url
+          ,t.context_ip as ip
           ,'pages' as event_source
         from javascript.pages_view as t
         inner join ${page_aliases_mapping.SQL_TABLE_NAME} as a2v
           on a2v.alias = coalesce(t.user_id, t.anonymous_id)
       ) as e
+      WHERE (e.ip NOT IN ('210.123.124.177', '222.106.98.162', '121.134.191.141', '63.118.26.234', '14.39.183.130', '125.140.120.54', '98.113.6.12')
+      AND e.page_url LIKE '%catchfashion%'
+      AND e.looker_visitor_id NOT IN ('fd2a0deb-3458-49cb-9f77-2d19252c64ee', '0e22f8f9-815c-4baf-8b2c-cba9351e7026', '7c22886c-4885-48b3-b9b7-e98c7772b4d9'))
        ;;
   }
 
@@ -81,6 +88,10 @@ view: mapped_events {
 
   dimension: user_agent {
     sql: ${TABLE}.user_agent ;;
+  }
+
+  dimension: ip {
+    sql: ${TABLE}.ip ;;
   }
 
   dimension: idle_time_minutes {
