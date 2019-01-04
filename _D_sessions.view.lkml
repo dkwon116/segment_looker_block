@@ -77,6 +77,7 @@ where (idle_time_minutes > 30 or idle_time_minutes is null)
   measure: count_visitors {
     type: count_distinct
     sql: ${looker_visitor_id} ;;
+    drill_fields: [user_detail*]
   }
 
   measure: avg_sessions_per_user {
