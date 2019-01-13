@@ -8,8 +8,8 @@ view: session_facts {
         , max(t2s.timestamp) as end_at
         , count(case when t2s.event_source = 'tracks' then 1 else null end) as tracks_count
         , count(case when t2s.event_source = 'pages' then 1 else null end) as pages_count
-        , count(case when t2s.event = 'product_viewed' then event_id else null end) as count_product_viewed
-        , count(case when t2s.event = 'product_list_viewed' then event_id else null end) as count_product_list_viewed
+        , count(case when t2s.event = 'Product' then event_id else null end) as count_product_viewed
+        , count(case when t2s.event = 'Product List' then event_id else null end) as count_product_list_viewed
         , count(case when t2s.event = 'outlink_sent' then event_id else null end) as count_outlinked
         , count(case when t2s.event = 'concierge_clicked' then event_id else null end) as count_concierge_clicked
       from ${sessions.SQL_TABLE_NAME} as s
@@ -195,6 +195,17 @@ view: session_facts {
     }
   }
 
+  measure: total_product_viewed_activated_user {
+    type: count_distinct
+    sql: ${sessions.looker_visitor_id} ;;
+    group_label: "Product Viewed"
+
+    filters: {
+      field: products_viewed
+      value: ">4"
+    }
+  }
+
   measure: products_viewed_per_converted_user {
     type: number
     sql: ${products_viewed_total} / NULLIF(${total_product_viewed_users}, 0);;
@@ -205,6 +216,13 @@ view: session_facts {
   measure: product_viewed_conversion_rate {
     type: number
     sql: ${total_product_viewed_users} / ${sessions.count_visitors} ;;
+    value_format_name: percent_0
+    group_label: "Product Viewed"
+  }
+
+  measure: product_viewed_activation_rate {
+    type: number
+    sql: ${total_product_viewed_activated_user} / ${sessions.count_visitors} ;;
     value_format_name: percent_0
     group_label: "Product Viewed"
   }
