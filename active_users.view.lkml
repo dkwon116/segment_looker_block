@@ -21,7 +21,7 @@ view: active_users {
       )
 
       SELECT
-            daily_use.user_id
+            daily_use.user_id as user_id
           , wd.date as date
           , MIN( DATE_DIFF(wd.date, daily_use.activity_date, day) ) as days_since_last_action
       FROM ${dates.SQL_TABLE_NAME} AS wd
@@ -38,7 +38,7 @@ view: active_users {
   }
 
   dimension: user_id {
-    type: number
+    type: string
     sql: ${TABLE}.user_id ;;
   }
 
@@ -58,18 +58,23 @@ view: active_users {
     sql: ${days_since_last_action} < 7 ;;
   }
 
+  dimension: is_last_30_days {
+    type: yesno
+    sql: timestamp_diff(CURRENT_TIMESTAMP, ${date_raw}, day) < 30  ;;
+  }
+
   measure: user_count_active_30_days {
     label: "Monthly Active Users"
     type: count_distinct
     sql: ${user_id} ;;
-    drill_fields: [users.id, users.name]
+    drill_fields: [user_id, users.id, users.name]
   }
 
   measure: user_count_active_this_day {
     label: "Daily Active Users"
     type: count_distinct
     sql: ${user_id} ;;
-    drill_fields: [users.id, users.name]
+    drill_fields: [user_id, users.id, users.name]
 
     filters: {
       field: active_this_day
@@ -81,7 +86,7 @@ view: active_users {
     label: "Weekly Active Users"
     type: count_distinct
     sql: ${user_id} ;;
-    drill_fields: [users.id, users.name]
+    drill_fields: [user_id, users.id, users.name]
 
     filters: {
       field: active_last_7_days
