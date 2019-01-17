@@ -21,8 +21,8 @@ view: weekly_activities {
 
          SELECT
             u.looker_visitor_id as user_id
-          , TIMESTAMP_TRUNC(u.first_date, week) as first_week
-          , TIMESTAMP_TRUNC(week_list.product_view_week, week) as product_view_week
+          , cast(TIMESTAMP_TRUNC(u.first_date, week) as date) as first_week
+          , cast(TIMESTAMP_TRUNC(week_list.product_view_week, week) as date) as product_view_week
           -- , d.weekly_views as weekly_views
           , COALESCE(d.weekly_views, 0) as weekly_views
           , row_number() over() AS key
@@ -36,7 +36,7 @@ view: weekly_activities {
   }
 
   dimension: user_id {
-    type: number
+    type: string
     sql: ${TABLE}.user_id ;;
   }
 
@@ -52,9 +52,14 @@ view: weekly_activities {
     sql: ${TABLE}.product_view_week ;;
   }
 
-  dimension: months_since_first_visit {
+  dimension: days_since_first_visit {
     type: number
-    sql: datediff('month', ${TABLE}.first_week, ${TABLE}.product_view_week) ;;
+    sql: date_diff(${TABLE}.first_week, ${TABLE}.product_view_week, DAY) ;;
+  }
+
+  dimension: weeks_since_first_visit {
+    type: number
+    sql: date_diff(${TABLE}.first_week, ${TABLE}.product_view_week, WEEK) ;;
   }
 
   dimension: weekly_views {
@@ -76,7 +81,7 @@ view: weekly_activities {
   measure: total_active_users {
     type: count_distinct
     sql: ${user_id} ;;
-    drill_fields: [users.id, users.age, users.name, user_order_facts.lifetime_orders]
+    drill_fields: [users.id, users.age, users.name]
 
     filters: {
       field: weekly_views
