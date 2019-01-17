@@ -137,3 +137,10 @@ explore: active_users {
     relationship: many_to_one
   }
 }
+
+explore: weekly_activities {
+  join: users {
+    sql_on: ${weekly_activities.user_id} = ${users.id} ;;
+    relationship: many_to_one
+  }
+}

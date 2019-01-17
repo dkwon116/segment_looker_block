@@ -1,18 +1,18 @@
 view: weekly_activities {
   derived_table: {
     sql_trigger_value: select current_date() ;;
-    sortkeys: ["product_view_week"]
-    distribution: "user_id"
+    # sortkeys: ["product_view_week"]
+    # distribution: "user_id"
     sql:WITH
           week_list as (
             SELECT
-              DISTINCT(cast(TIMESTAMP_TRUNC(e.timestamp, week) as date)) as product_view_week
+              DISTINCT(TIMESTAMP_TRUNC(e.timestamp, week)) as product_view_week
             FROM ${mapped_events.SQL_TABLE_NAME} as e
             WHERE e.event = "Product"
         ), data as (
             SELECT
                   me.looker_visitor_id as user_id
-                , cast(TIMESTAMP_TRUNC(me.timestamp, week) as date) as product_view_week
+                , TIMESTAMP_TRUNC(me.timestamp, week) as product_view_week
                 , COUNT(distinct me.event_id) AS weekly_views
             FROM ${mapped_events.SQL_TABLE_NAME} as me
             WHERE me.event = "Product"
@@ -21,8 +21,8 @@ view: weekly_activities {
 
          SELECT
             u.looker_visitor_id as user_id
-          , cast(TIMESTAMP_TRUNC(u.first_date, week) as date) as first_week
-          , week_list.product_view_week as product_view_week
+          , TIMESTAMP_TRUNC(u.first_date, week) as first_week
+          , TIMESTAMP_TRUNC(week_list.product_view_week, week) as product_view_week
           -- , d.weekly_views as weekly_views
           , COALESCE(d.weekly_views, 0) as weekly_views
           , row_number() over() AS key
@@ -31,7 +31,7 @@ view: weekly_activities {
           CROSS JOIN week_list
           LEFT JOIN data as d ON (d.user_id = u.looker_visitor_id AND d.product_view_week = week_list.product_view_week)
           WHERE cast(TIMESTAMP_TRUNC(u.first_date, week) as date)
-          BETWEEN DATE_ADD(cast(TIMESTAMP_TRUNC(u.first_date, week) as date), INTERVAL -100 WEEK) AND week_list.product_view_week
+          BETWEEN DATE_ADD(cast(TIMESTAMP_TRUNC(u.first_date, week) as date), INTERVAL -100 WEEK) AND cast(TIMESTAMP_TRUNC(week_list.product_view_week, week) as date)
           ;;
   }
 
