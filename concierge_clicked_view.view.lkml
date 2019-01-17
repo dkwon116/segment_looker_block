@@ -62,6 +62,11 @@ view: concierge_clicked_view {
     sql: ${TABLE}.context_user_agent ;;
   }
 
+  dimension: click_url_mapped {
+    type: string
+    sql: CASE WHEN ${context_page_url} like '%promotions%' THEN 'Promotion' WHEN ${context_page_url} like '%view%' THEN 'Product' ELSE ${context_page_url} END ;;
+  }
+
   dimension: currency {
     type: string
     sql: ${TABLE}.currency ;;

@@ -1,41 +1,38 @@
 view: weekly_activities {
   derived_table: {
     sql_trigger_value: select current_date() ;;
-#     sortkeys: ["signup_month"]
+    sortkeys: ["product_view_week"]
     distribution: "user_id"
-    sql: SELECT
-                u.looker_visitor_id as user_id
-              , cast(TIMESTAMP_TRUNC (u.first_visited, week) as date) as first_week
-              , week_list.product_view_week as product_view_week
-              , COALESCE(data.weekly_views, 0) as weekly_views
-              , row_number() over() AS key
-            FROM
-              user_facts as u
+    sql:WITH
+          week_list as (
+            SELECT
+              DISTINCT(cast(TIMESTAMP_TRUNC(e.timestamp, week) as date)) as product_view_week
+            FROM ${mapped_events.SQL_TABLE_NAME} as e
+            WHERE e.event = "Product"
+        ), data as (
+            SELECT
+                  me.looker_visitor_id as user_id
+                , cast(TIMESTAMP_TRUNC(me.timestamp, week) as date) as product_view_week
+                , COUNT(distinct me.event_id) AS weekly_views
+            FROM ${mapped_events.SQL_TABLE_NAME} as me
+            WHERE me.event = "Product"
+            GROUP BY 1,2
+        )
 
-            LEFT JOIN
-
-              (
-                SELECT
-                  DISTINCT(cast(TIMESTAMP_TRUNC (e.timestamp, week) as date) as product_view_week
-                FROM ${mapped_events.SQL_TABLE_NAME} as e
-                WHERE e.event = "Product"
-              ) as week_list
-            ON week_list.product_view_week >= cast(TIMESTAMP_TRUNC (u.first_week, week) as date)
-
-            LEFT JOIN
-
-              (
-                SELECT
-                      me.looker_visitor_id as user_id
-                    , cast(TIMESTAMP_TRUNC (me.timestamp, week) as date) as product_view_week
-                    , COUNT(distinct me.id) AS weekly_views
-                FROM ${mapped_events.SQL_TABLE_NAME} as me
-                WHERE me.event = "Product"
-                GROUP BY 1,2
-              ) as data
-            ON data.product_view_week = week_list.product_view_week
-            AND data.user_id = u.user_id
-             ;;
+         SELECT
+            u.looker_visitor_id as user_id
+          , cast(TIMESTAMP_TRUNC(u.first_date, week) as date) as first_week
+          , week_list.product_view_week as product_view_week
+          -- , d.weekly_views as weekly_views
+          , COALESCE(d.weekly_views, 0) as weekly_views
+          , row_number() over() AS key
+        FROM
+          ${user_facts.SQL_TABLE_NAME} as u
+          CROSS JOIN week_list
+          LEFT JOIN data as d ON (d.user_id = u.looker_visitor_id AND d.product_view_week = week_list.product_view_week)
+          WHERE cast(TIMESTAMP_TRUNC(u.first_date, week) as date)
+          BETWEEN DATE_ADD(cast(TIMESTAMP_TRUNC(u.first_date, week) as date), INTERVAL -100 WEEK) AND week_list.product_view_week
+          ;;
   }
 
   dimension: user_id {
