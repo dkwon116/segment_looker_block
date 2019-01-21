@@ -21,8 +21,8 @@ view: weekly_activities {
 
          SELECT
             u.looker_visitor_id as user_id
-          , cast(TIMESTAMP_TRUNC(u.first_date, week) as date) as first_week
-          , cast(TIMESTAMP_TRUNC(week_list.product_view_week, week) as date) as product_view_week
+          , TIMESTAMP_TRUNC(u.first_date, week) as first_week
+          , week_list.product_view_week as product_view_week
           -- , d.weekly_views as weekly_views
           , COALESCE(d.weekly_views, 0) as weekly_views
           , row_number() over() AS key
@@ -52,14 +52,21 @@ view: weekly_activities {
     sql: ${TABLE}.product_view_week ;;
   }
 
-  dimension: days_since_first_visit {
-    type: number
-    sql: date_diff(${TABLE}.first_week, ${TABLE}.product_view_week, DAY) ;;
-  }
+  # dimension_group: since_first_visit {
+  #   type: duration
+  #   intervals: [day, week]
+  #   sql_start: ${TABLE}.first_week ;;
+  #   sql_end: ${TABLE}.product_view_week ;;
+  # }
+
+  # dimension: days_since_first_visit {
+  #   type: number
+  #   sql: date_diff((cast(${TABLE}.first_week) as date), (cast(${TABLE}.product_view_week) as date), DAY) ;;
+  # }
 
   dimension: weeks_since_first_visit {
     type: number
-    sql: date_diff(${TABLE}.first_week, ${TABLE}.product_view_week, WEEK) ;;
+    sql: cast(TIMESTAMP_DIFF(${TABLE}.product_view_week, ${TABLE}.first_week, HOUR) / 24 / 7 as numeric) ;;
   }
 
   dimension: weekly_views {
@@ -94,6 +101,26 @@ view: weekly_activities {
     value_format_name: percent_1
     sql: 1.0 * ${total_active_users} / nullif(${total_users},0) ;;
     drill_fields: [user_id, weekly_views]
+  }
+
+  measure: 7_days_active_users {
+    type: count_distinct
+    sql: ${user_id} ;;
+
+    filters: {
+      field: weekly_views
+      value: ">0"
+    }
+    filters: {
+      field: weeks_since_first_visit
+      value: ">0"
+    }
+  }
+
+  measure: 7_days_retention_rate {
+    type: number
+    value_format_name: percent_2
+    sql: 1.0 * ${7_days_active_users} / nullif(${total_active_users},0) ;;
   }
 
 #   measure: total_amount_spent {
