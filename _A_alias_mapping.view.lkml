@@ -63,12 +63,12 @@ view: page_aliases_mapping {
     sql: ${TABLE}.looker_visitor_id ;;
   }
 
-  measure: count {
-    type: count
-  }
+#   measure: count {
+#     type: count
+#   }
 
-  measure: count_visitor {
-    type: count_distinct
-    sql: ${looker_visitor_id} ;;
-  }
+#   measure: count_visitor {
+#     type: count_distinct
+#     sql: ${looker_visitor_id} ;;
+#   }
 }

@@ -50,6 +50,12 @@ FROM ${mapped_events.SQL_TABLE_NAME} AS e
     sql: ${TABLE}.timestamp ;;
   }
 
+  measure: avg_pageview_duration_seconds {
+    type: average
+    value_format_name: decimal_0
+    sql: ${duration_page_view_seconds} ;;
+  }
+
   set: detail {
     fields: [event_id]
   }

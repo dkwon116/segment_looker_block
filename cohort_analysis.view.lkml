@@ -70,6 +70,7 @@ view: weekly_activities {
   }
 
   dimension: weekly_views {
+    description: "number of products views each week"
     type: number
     sql: ${TABLE}.weekly_views ;;
   }
@@ -86,6 +87,7 @@ view: weekly_activities {
   }
 
   measure: total_active_users {
+    description: "number of users who viewed one or more products"
     type: count_distinct
     sql: ${user_id} ;;
     drill_fields: [users.id, users.age, users.name]
@@ -104,6 +106,7 @@ view: weekly_activities {
   }
 
   measure: 7_days_active_users {
+    description: "number of users who viewed 1 or more products after first week of visit"
     type: count_distinct
     sql: ${user_id} ;;
 

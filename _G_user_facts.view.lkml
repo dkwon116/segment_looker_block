@@ -1,16 +1,35 @@
 view: user_facts {
   derived_table: {
     sql_trigger_value: select count(*) from ${sessions.SQL_TABLE_NAME} ;;
-    sql: SELECT
-        looker_visitor_id
+    sql:
+      WITH user_sources as (
+        SELECT
+          s.looker_visitor_id
+          , first_value(sf.first_source) over(partition by s.looker_visitor_id order by sf.session_id) as first_source
+          , first_value(sf.first_medium) over(partition by s.looker_visitor_id order by sf.session_id) as first_medium
+          , first_value(sf.first_campaign) over(partition by s.looker_visitor_id order by sf.session_id) as first_campaign
+          , last_value(sf.first_source) over(partition by s.looker_visitor_id order by sf.session_id) as last_source
+          , last_value(sf.first_medium) over(partition by s.looker_visitor_id order by sf.session_id) as last_medium
+          , last_value(sf.first_campaign) over(partition by s.looker_visitor_id order by sf.session_id) as last_campaign
+        FROM ${sessions.SQL_TABLE_NAME} as s
+        LEFT JOIN ${session_facts.SQL_TABLE_NAME} as sf
+        ON s.session_id = sf.session_id
+      )
+      SELECT
+        s.looker_visitor_id
         , MIN(s.session_start_at) as first_date
         , MAX(s.session_start_at) as last_date
         , COUNT(*) as number_of_sessions
         , SUM(sf.count_product_viewed) as products_viewed
+        , us.first_source as first_source
+        , us.first_medium as first_medium
+        , us.first_campaign as first_campaign
       FROM ${sessions.SQL_TABLE_NAME} as s
       LEFT JOIN ${session_facts.SQL_TABLE_NAME} as sf
       ON s.session_id = sf.session_id
-      GROUP BY 1
+      LEFT JOIN user_sources as us
+      ON s.looker_visitor_id = us.looker_visitor_id
+      GROUP BY 1,6,7,8
        ;;
   }
 
@@ -54,6 +73,21 @@ view: user_facts {
   dimension: products_viewed {
     type: number
     sql: ${TABLE}.products_viewed ;;
+  }
+
+  dimension: first_source {
+    type: string
+    sql: ${TABLE}.first_source ;;
+  }
+
+  dimension: first_medium {
+    type: string
+    sql: ${TABLE}.first_medium ;;
+  }
+
+  dimension: first_campaign {
+    type: string
+    sql: ${TABLE}.first_campaign ;;
   }
 
 

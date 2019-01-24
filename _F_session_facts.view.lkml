@@ -3,9 +3,13 @@ view: session_facts {
 #     information about session
     # Rebuilds after track_facts rebuilds
     sql_trigger_value: select COUNT(*) from ${event_facts.SQL_TABLE_NAME} ;;
-    sql: select s.session_id
+    sql: select
+          s.session_id
         , t2s.first_referrer
         , max(t2s.timestamp) as end_at
+        , t2s.first_source as first_source
+        , t2s.first_medium as first_medium
+        , t2s.first_campaign as first_campaign
         , count(case when t2s.event_source = 'tracks' then 1 else null end) as tracks_count
         , count(case when t2s.event_source = 'pages' then 1 else null end) as pages_count
         , count(case when t2s.event = 'Product' then event_id else null end) as count_product_viewed
@@ -16,7 +20,7 @@ view: session_facts {
         inner join ${event_facts.SQL_TABLE_NAME} as t2s
           on s.session_id = t2s.session_id
           --using(session_id)
-      group by 1,2
+      group by 1,2,4,5,6
        ;;
   }
 
@@ -36,7 +40,30 @@ view: session_facts {
   }
 
   dimension: first_referrer_domain_mapped {
-    sql: CASE WHEN ${first_referrer_domain} like '%facebook%' THEN 'facebook' WHEN ${first_referrer_domain} like '%google%' THEN 'google' ELSE ${first_referrer_domain} END ;;
+    sql: CASE
+    WHEN ${first_referrer} like '%facebook%' THEN 'Facebook'
+    WHEN ${first_referrer} like '%google%' THEN 'Google'
+    WHEN ${first_referrer} like '%naver%' THEN 'Naver'
+    WHEN ${first_referrer} like '%instagram%' THEN 'Instagram'
+    WHEN ${first_referrer} like '%catchfashion%' THEN 'Catch'
+    WHEN ${first_referrer} IS NULL THEN 'Direct'
+    ELSE 'Other' END ;;
+  }
+
+  dimension: first_campaign {
+    type:  string
+    sql: ${TABLE}.first_campaign ;;
+  }
+
+  dimension: first_source {
+    type:  string
+    sql: ${TABLE}.first_source ;;
+    drill_fields: [first_campaign, first_medium]
+  }
+
+  dimension: first_medium {
+    type:  string
+    sql: ${TABLE}.first_medium ;;
   }
 
   dimension_group: end {
@@ -87,7 +114,7 @@ view: session_facts {
 
   dimension: session_duration_minutes {
     type: number
-    sql: datediff(minutes, ${sessions.start_raw}, ${end_raw}) ;;
+    sql: timestamp_diff(TIMESTAMP(${end_time}), TIMESTAMP(${sessions.start_time}), minute) ;;
   }
 
   dimension: session_duration_minutes_tiered {
@@ -148,15 +175,22 @@ view: session_facts {
 
   # ----- Measures -----
 
+  measure: pages_per_session {
+    type: average
+    sql: ${pages_count} ;;
+    value_format_name: "decimal_1"
+  }
+
+
   measure: avg_session_duration_minutes {
     type: average
     value_format_name: decimal_1
-    sql: ${session_duration_minutes}::float ;;
+    sql: ${session_duration_minutes};;
 
-    filters: {
-      field: session_duration_minutes
-      value: "> 0"
-    }
+#     filters: {
+#       field: session_duration_minutes
+#       value: "> 0"
+#     }
   }
 
   measure: avg_tracks_per_session {
@@ -218,6 +252,7 @@ view: session_facts {
     sql: ${total_product_viewed_users} / ${sessions.count_visitors} ;;
     value_format_name: percent_0
     group_label: "Product Viewed"
+    drill_fields: [product_viewed_details*]
   }
 
   measure: product_viewed_activation_rate {
@@ -225,6 +260,7 @@ view: session_facts {
     sql: ${total_product_viewed_activated_user} / ${sessions.count_visitors} ;;
     value_format_name: percent_0
     group_label: "Product Viewed"
+    drill_fields: [product_viewed_details*]
   }
 
 #   measures for outlink
@@ -302,7 +338,7 @@ view: session_facts {
 
   measure: count_bounced_sessions {
     type: count_distinct
-    sql: ${is_bounced_session} ;;
+    sql: ${sessions.session_id} ;;
 
     filters: {
       field: is_bounced_session
@@ -313,13 +349,16 @@ view: session_facts {
   measure: bounce_rate {
     type: number
     sql: ${count_bounced_sessions} / ${sessions.count_sessions} ;;
+    value_format_name: percent_2
+
+    drill_fields: [campaign_details*]
   }
 
   set: campaign_details {
-    fields: [event_facts.first_campaign, event_facts.first_source, event_facts.first_medium, sessions.count_sessions]
+    fields: [first_source, sessions.count_sessions, bounce_rate, pages_per_session, avg_session_duration_minutes, product_viewed_conversion_rate]
   }
 
   set: product_viewed_details {
-    fields: [products_viewed_per_session, product_viewed_conversion_rate]
+    fields: [first_source, product_viewed_activation_rate, products_viewed_per_session, product_viewed_conversion_rate]
   }
 }

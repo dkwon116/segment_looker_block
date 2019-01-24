@@ -27,8 +27,25 @@ where (idle_time_minutes > 30 or idle_time_minutes is null)
 
   dimension_group: start {
     type: time
-    timeframes: [time, date, hour_of_day, week, hour, month, raw]
+    timeframes: [time, date, hour_of_day, day_of_week_index, week, hour, month, raw]
     sql: ${TABLE}.session_start_at ;;
+  }
+
+  dimension_group: today {
+    type: time
+    hidden: yes
+    timeframes: [day_of_week_index, hour_of_day]
+    sql: CURRENT_TIMESTAMP() ;;
+  }
+
+  dimension: is_same_day_of_week_as_today {
+    type: yesno
+    sql: ${today_day_of_week_index} = ${start_day_of_week_index} ;;
+  }
+
+  dimension: is_up_to_same_hour_of_day {
+    type: yesno
+    sql: ${today_hour_of_day} >= ${start_hour_of_day};;
   }
 
   dimension: is_last_24hours {
@@ -58,20 +75,25 @@ where (idle_time_minutes > 30 or idle_time_minutes is null)
        ;;
   }
 
-  dimension: session_duration_minutes {
-    type: number
-    sql: timestamp_diff(${session_facts.end_time}, ${start_time}, minute) ;;
-  }
-
   measure: count_sessions {
     type: count_distinct
     sql: ${session_id} ;;
-    drill_fields: [user_detail*]
+    drill_fields: [session_detail*]
   }
 
   measure: percent_of_total_count {
     type: percent_of_total
     sql: ${count_sessions} ;;
+  }
+
+  measure: count_repeat_visitors {
+    type: count_distinct
+    sql: ${looker_visitor_id} ;;
+
+    filters: {
+      field: is_first_session
+      value: "Repeat Session"
+    }
   }
 
   measure: count_visitors {
@@ -86,17 +108,17 @@ where (idle_time_minutes > 30 or idle_time_minutes is null)
     sql: ${count_sessions} / nullif(${count_visitors}, 0) ;;
   }
 
-  measure: avg_session_duration_minutes {
-    type: average
-    sql: ${session_duration_minutes} ;;
-    value_format_name: decimal_1
+  measure: percent_of_repeat_users {
+    type: number
+    sql: ${count_repeat_visitors} / ${count_visitors} ;;
+    value_format_name: percent_0
   }
 
   set: session_detail {
-    fields: []
+    fields: [session_facts.campaign_details*]
   }
 
   set: user_detail {
-    fields: [looker_visitor_id, start_time, users.name, user_facts.first_visited, user_facts.first_source]
+    fields: [start_date, user_facts.first_visited_date, user_facts.first_source]
   }
 }

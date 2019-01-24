@@ -143,4 +143,9 @@ explore: weekly_activities {
     sql_on: ${weekly_activities.user_id} = ${users.id} ;;
     relationship: many_to_one
   }
+
+  join: user_facts {
+    sql_on: ${weekly_activities.user_id} = ${user_facts.looker_visitor_id} ;;
+    relationship: many_to_one
+  }
 }
