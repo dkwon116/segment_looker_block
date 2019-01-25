@@ -189,6 +189,7 @@ view: concierge_clicked_view {
     timeframes: [
       raw,
       time,
+      time_of_day,
       date,
       week,
       month,

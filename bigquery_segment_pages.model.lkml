@@ -131,6 +131,8 @@ explore: event_list {}
 
 explore: concierge_clicked_view {}
 
+explore: product_list_viewed {}
+
 explore: active_users {
   join: users {
     sql_on: ${active_users.user_id}=${users.id} ;;
