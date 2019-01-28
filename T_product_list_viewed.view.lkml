@@ -209,8 +209,8 @@ view: product_list_viewed {
     drill_fields: [id, context_library_name]
   }
 
-#   measure: product_list_viewed_users {
-#     type: count_distinct
-#     sql:  event_facts.looker_visitor_id;;
-#   }
+  measure: product_list_viewed_users {
+    type: count_distinct
+    sql:  event_facts.looker_visitor_id;;
+  }
 }
