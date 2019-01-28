@@ -8,12 +8,12 @@ include: "orders.base.lkml"
 
 
 explore: event_facts {
-  view_label: "Events"
+  view_label: "0_Events"
   label: "Events"
   extends: [affiliate_orders]
 
   join: pages {
-    view_label: "Page Events"
+    view_label: "1_Page Events"
     type: left_outer
     sql_on: event_facts.timestamp = pages.timestamp
       and event_facts.anonymous_id = pages.anonymous_id
@@ -22,7 +22,7 @@ explore: event_facts {
   }
 
   join: tracks {
-    view_label: "Track Events"
+    view_label: "1_Track Events"
     type: left_outer
     sql_on: event_facts.timestamp = tracks.timestamp
       and event_facts.anonymous_id = tracks.anonymous_id
@@ -32,7 +32,7 @@ explore: event_facts {
   }
 
   join: page_facts {
-    view_label: "Events"
+    view_label: "0_Events"
     type: left_outer
     sql_on: event_facts.event_id = page_facts.event_id and
       event_facts.timestamp = page_facts.timestamp and
@@ -42,42 +42,42 @@ explore: event_facts {
   }
 
   join: sessions {
-    view_label: "Sessions"
+    view_label: "0_Sessions"
     type: left_outer
     sql_on: ${event_facts.session_id} = ${sessions.session_id} ;;
     relationship: many_to_one
   }
 
   join: session_facts {
-    view_label: "Sessions"
+    view_label: "0_Sessions"
     type: left_outer
     sql_on: ${event_facts.session_id} = ${session_facts.session_id} ;;
     relationship: many_to_one
   }
 
   join: user_facts {
-    view_label: "Users"
+    view_label: "3_Users"
     type: left_outer
     sql_on: ${event_facts.looker_visitor_id}=${user_facts.looker_visitor_id} ;;
     relationship: many_to_one
   }
 
   join: page_aliases_mapping {
-    view_label: "Users"
+    view_label: "3_Users"
     type: left_outer
     sql_on: ${event_facts.looker_visitor_id}=${page_aliases_mapping.looker_visitor_id} ;;
     relationship: one_to_many
   }
 
   join: users {
-    view_label: "Users"
+    view_label: "3_Users"
     type: left_outer
     sql_on: ${event_facts.looker_visitor_id}=${users.id} ;;
     relationship: many_to_one
   }
 
   join: concierge_clicked_view {
-    view_label: "Concierge Clicked"
+    view_label: "T_Concierge Clicked"
     type: left_outer
     sql_on: event_facts.event_id = concat(cast(${concierge_clicked_view.timestamp_raw} AS string), ${concierge_clicked_view.anonymous_id}, '-t')
       and event_facts.timestamp = concierge_clicked_view.timestamp
@@ -87,11 +87,38 @@ explore: event_facts {
   }
 
   join: outlink_sent {
-    view_label: "Outlinked"
+    view_label: "T_Outlinked"
     type: left_outer
     sql_on: event_facts.event_id = concat(cast(${outlink_sent.timestamp_raw} AS string), ${outlink_sent.anonymous_id}, '-t')
       and event_facts.timestamp = outlink_sent.timestamp
       and event_facts.anonymous_id = outlink_sent.anonymous_id
+       ;;
+    relationship: one_to_one
+  }
+
+  join: product_list_viewed {
+    view_label: "T_Product List Viewed"
+    type: left_outer
+    sql_on: event_facts.event_id = concat(cast(${product_list_viewed.timestamp_raw} AS string), ${product_list_viewed.anonymous_id}, '-t')
+      and event_facts.timestamp = product_list_viewed.timestamp
+      and event_facts.anonymous_id = product_list_viewed.anonymous_id
+       ;;
+    relationship: one_to_one
+  }
+
+  join: products_viewed_in_list {
+    view_label: "T_Product List Viewed"
+    type: left_outer
+    sql_on: ${product_list_viewed.id} = ${products_viewed_in_list.event_id} ;;
+    relationship: one_to_many
+  }
+
+  join: product_viewed {
+    view_label: "T_Product Viewed"
+    type: left_outer
+    sql_on: event_facts.event_id = concat(cast(${product_viewed.timestamp_raw} AS string), ${product_viewed.anonymous_id}, '-t')
+      and event_facts.timestamp = product_viewed.timestamp
+      and event_facts.anonymous_id = product_viewed.anonymous_id
        ;;
     relationship: one_to_one
   }
@@ -131,7 +158,15 @@ explore: event_list {}
 
 explore: concierge_clicked_view {}
 
-explore: product_list_viewed {}
+explore: product_list_viewed {
+  view_label: "Products Viewed in List"
+  label: "Product List"
+  join: products_viewed_in_list {
+    view_label: "Products Viewed in List"
+    sql_on: ${product_list_viewed.id} = ${products_viewed_in_list.event_id} ;;
+    relationship: one_to_many
+  }
+}
 
 explore: active_users {
   join: users {

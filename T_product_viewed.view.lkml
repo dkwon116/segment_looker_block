@@ -1,5 +1,5 @@
-view: product_added_to_wishlist_view {
-  sql_table_name: javascript.product_added_to_wishlist_view ;;
+view: product_viewed {
+  sql_table_name: javascript.product_viewed_view ;;
 
   dimension: id {
     primary_key: yes
@@ -20,6 +20,36 @@ view: product_added_to_wishlist_view {
   dimension: cashback_rate {
     type: number
     sql: ${TABLE}.cashback_rate ;;
+  }
+
+  dimension: context_campaign_content {
+    type: string
+    sql: ${TABLE}.context_campaign_content ;;
+  }
+
+  dimension: context_campaign_contents {
+    type: string
+    sql: ${TABLE}.context_campaign_contents ;;
+  }
+
+  dimension: context_campaign_medium {
+    type: string
+    sql: ${TABLE}.context_campaign_medium ;;
+  }
+
+  dimension: context_campaign_name {
+    type: string
+    sql: ${TABLE}.context_campaign_name ;;
+  }
+
+  dimension: context_campaign_source {
+    type: string
+    sql: ${TABLE}.context_campaign_source ;;
+  }
+
+  dimension: context_campaign_term {
+    type: string
+    sql: ${TABLE}.context_campaign_term ;;
   }
 
   dimension: context_ip {
@@ -45,6 +75,11 @@ view: product_added_to_wishlist_view {
   dimension: context_page_referrer {
     type: string
     sql: ${TABLE}.context_page_referrer ;;
+  }
+
+  dimension: context_page_search {
+    type: string
+    sql: ${TABLE}.context_page_search ;;
   }
 
   dimension: context_page_title {
@@ -154,11 +189,6 @@ view: product_added_to_wishlist_view {
     sql: ${TABLE}.retailer ;;
   }
 
-  dimension: section {
-    type: string
-    sql: ${TABLE}.section ;;
-  }
-
   dimension_group: sent {
     type: time
     timeframes: [
@@ -223,6 +253,6 @@ view: product_added_to_wishlist_view {
 
   measure: count {
     type: count
-    drill_fields: [id, context_library_name, name]
+    drill_fields: [id, context_campaign_name, context_library_name, name]
   }
 }

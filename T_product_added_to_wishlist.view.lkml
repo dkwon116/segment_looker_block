@@ -1,5 +1,5 @@
-view: product_list_viewed {
-  sql_table_name: javascript.product_list_viewed_view ;;
+view: product_added_to_wishlist {
+  sql_table_name: javascript.product_added_to_wishlist_view ;;
 
   dimension: id {
     primary_key: yes
@@ -12,9 +12,14 @@ view: product_list_viewed {
     sql: ${TABLE}.anonymous_id ;;
   }
 
-  dimension: category {
+  dimension: brand {
     type: string
-    sql: ${TABLE}.category ;;
+    sql: ${TABLE}.brand ;;
+  }
+
+  dimension: cashback_rate {
+    type: number
+    sql: ${TABLE}.cashback_rate ;;
   }
 
   dimension: context_ip {
@@ -42,11 +47,6 @@ view: product_list_viewed {
     sql: ${TABLE}.context_page_referrer ;;
   }
 
-  dimension: context_page_search {
-    type: string
-    sql: ${TABLE}.context_page_search ;;
-  }
-
   dimension: context_page_title {
     type: string
     sql: ${TABLE}.context_page_title ;;
@@ -62,6 +62,11 @@ view: product_list_viewed {
     sql: ${TABLE}.context_user_agent ;;
   }
 
+  dimension: currency {
+    type: string
+    sql: ${TABLE}.currency ;;
+  }
+
   dimension: event {
     type: string
     sql: ${TABLE}.event ;;
@@ -72,19 +77,14 @@ view: product_list_viewed {
     sql: ${TABLE}.event_text ;;
   }
 
-  dimension: gender {
+  dimension: image_url {
     type: string
-    sql: ${TABLE}.gender ;;
+    sql: ${TABLE}.image_url ;;
   }
 
-  dimension: list_id {
-    type: string
-    sql: ${TABLE}.list_id ;;
-  }
-
-  dimension: list_page {
+  dimension: list_price {
     type: number
-    sql: ${TABLE}.list_page ;;
+    sql: ${TABLE}.list_price ;;
   }
 
   dimension_group: loaded {
@@ -101,6 +101,11 @@ view: product_list_viewed {
     sql: ${TABLE}.loaded_at ;;
   }
 
+  dimension: name {
+    type: string
+    sql: ${TABLE}.name ;;
+  }
+
   dimension_group: original_timestamp {
     type: time
     timeframes: [
@@ -115,19 +120,19 @@ view: product_list_viewed {
     sql: ${TABLE}.original_timestamp ;;
   }
 
-  dimension: page_number {
+  dimension: price {
     type: number
-    sql: ${TABLE}.page_number ;;
+    sql: ${TABLE}.price ;;
   }
 
-  dimension: product_count {
-    type: number
-    sql: ${TABLE}.product_count ;;
-  }
-
-  dimension: products {
+  dimension: product_id {
     type: string
-    sql: ${TABLE}.products ;;
+    sql: ${TABLE}.product_id ;;
+  }
+
+  dimension: purchase_type {
+    type: string
+    sql: ${TABLE}.purchase_type ;;
   }
 
   dimension_group: received {
@@ -144,6 +149,16 @@ view: product_list_viewed {
     sql: ${TABLE}.received_at ;;
   }
 
+  dimension: retailer {
+    type: string
+    sql: ${TABLE}.retailer ;;
+  }
+
+  dimension: section {
+    type: string
+    sql: ${TABLE}.section ;;
+  }
+
   dimension_group: sent {
     type: time
     timeframes: [
@@ -156,6 +171,11 @@ view: product_list_viewed {
       year
     ]
     sql: ${TABLE}.sent_at ;;
+  }
+
+  dimension: sku {
+    type: string
+    sql: ${TABLE}.sku ;;
   }
 
   dimension_group: timestamp {
@@ -172,9 +192,9 @@ view: product_list_viewed {
     sql: ${TABLE}.timestamp ;;
   }
 
-  dimension: type {
+  dimension: url {
     type: string
-    sql: ${TABLE}.type ;;
+    sql: ${TABLE}.url ;;
   }
 
   dimension: user_id {
@@ -196,8 +216,13 @@ view: product_list_viewed {
     sql: ${TABLE}.uuid_ts ;;
   }
 
+  dimension: value {
+    type: number
+    sql: ${TABLE}.value ;;
+  }
+
   measure: count {
     type: count
-    drill_fields: [id, context_library_name]
+    drill_fields: [id, context_library_name, name]
   }
 }

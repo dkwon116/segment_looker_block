@@ -1,5 +1,5 @@
-view: product_viewed_view {
-  sql_table_name: javascript.product_viewed_view ;;
+view: product_list_viewed {
+  sql_table_name: javascript.product_list_viewed_view ;;
 
   dimension: id {
     primary_key: yes
@@ -7,49 +7,19 @@ view: product_viewed_view {
     sql: ${TABLE}.id ;;
   }
 
+  dimension: event_id {
+    type: string
+    sql: CONCAT(cast(${TABLE}.timestamp AS string), ${TABLE}.anonymous_id, '-t') ;;
+  }
+
   dimension: anonymous_id {
     type: string
     sql: ${TABLE}.anonymous_id ;;
   }
 
-  dimension: brand {
+  dimension: category {
     type: string
-    sql: ${TABLE}.brand ;;
-  }
-
-  dimension: cashback_rate {
-    type: number
-    sql: ${TABLE}.cashback_rate ;;
-  }
-
-  dimension: context_campaign_content {
-    type: string
-    sql: ${TABLE}.context_campaign_content ;;
-  }
-
-  dimension: context_campaign_contents {
-    type: string
-    sql: ${TABLE}.context_campaign_contents ;;
-  }
-
-  dimension: context_campaign_medium {
-    type: string
-    sql: ${TABLE}.context_campaign_medium ;;
-  }
-
-  dimension: context_campaign_name {
-    type: string
-    sql: ${TABLE}.context_campaign_name ;;
-  }
-
-  dimension: context_campaign_source {
-    type: string
-    sql: ${TABLE}.context_campaign_source ;;
-  }
-
-  dimension: context_campaign_term {
-    type: string
-    sql: ${TABLE}.context_campaign_term ;;
+    sql: ${TABLE}.category ;;
   }
 
   dimension: context_ip {
@@ -59,11 +29,13 @@ view: product_viewed_view {
 
   dimension: context_library_name {
     type: string
+    hidden: yes
     sql: ${TABLE}.context_library_name ;;
   }
 
   dimension: context_library_version {
     type: string
+    hidden: yes
     sql: ${TABLE}.context_library_version ;;
   }
 
@@ -74,16 +46,19 @@ view: product_viewed_view {
 
   dimension: context_page_referrer {
     type: string
+    hidden: yes
     sql: ${TABLE}.context_page_referrer ;;
   }
 
   dimension: context_page_search {
     type: string
+    hidden: yes
     sql: ${TABLE}.context_page_search ;;
   }
 
   dimension: context_page_title {
     type: string
+    hidden: yes
     sql: ${TABLE}.context_page_title ;;
   }
 
@@ -94,32 +69,30 @@ view: product_viewed_view {
 
   dimension: context_user_agent {
     type: string
+    hidden: yes
     sql: ${TABLE}.context_user_agent ;;
-  }
-
-  dimension: currency {
-    type: string
-    sql: ${TABLE}.currency ;;
   }
 
   dimension: event {
     type: string
+    hidden: yes
     sql: ${TABLE}.event ;;
   }
 
   dimension: event_text {
     type: string
+    hidden: yes
     sql: ${TABLE}.event_text ;;
   }
 
-  dimension: image_url {
+  dimension: gender {
     type: string
-    sql: ${TABLE}.image_url ;;
+    sql: ${TABLE}.gender ;;
   }
 
-  dimension: list_price {
-    type: number
-    sql: ${TABLE}.list_price ;;
+  dimension: list_id {
+    type: string
+    sql: ${TABLE}.list_id ;;
   }
 
   dimension_group: loaded {
@@ -136,11 +109,6 @@ view: product_viewed_view {
     sql: ${TABLE}.loaded_at ;;
   }
 
-  dimension: name {
-    type: string
-    sql: ${TABLE}.name ;;
-  }
-
   dimension_group: original_timestamp {
     type: time
     timeframes: [
@@ -155,19 +123,19 @@ view: product_viewed_view {
     sql: ${TABLE}.original_timestamp ;;
   }
 
-  dimension: price {
+  dimension: page_number {
     type: number
-    sql: ${TABLE}.price ;;
+    sql: ${TABLE}.page_number ;;
   }
 
-  dimension: product_id {
-    type: string
-    sql: ${TABLE}.product_id ;;
+  dimension: product_count {
+    type: number
+    sql: ${TABLE}.product_count ;;
   }
 
-  dimension: purchase_type {
+  dimension: products {
     type: string
-    sql: ${TABLE}.purchase_type ;;
+    sql: ${TABLE}.products ;;
   }
 
   dimension_group: received {
@@ -184,11 +152,6 @@ view: product_viewed_view {
     sql: ${TABLE}.received_at ;;
   }
 
-  dimension: retailer {
-    type: string
-    sql: ${TABLE}.retailer ;;
-  }
-
   dimension_group: sent {
     type: time
     timeframes: [
@@ -201,11 +164,6 @@ view: product_viewed_view {
       year
     ]
     sql: ${TABLE}.sent_at ;;
-  }
-
-  dimension: sku {
-    type: string
-    sql: ${TABLE}.sku ;;
   }
 
   dimension_group: timestamp {
@@ -222,9 +180,9 @@ view: product_viewed_view {
     sql: ${TABLE}.timestamp ;;
   }
 
-  dimension: url {
+  dimension: type {
     type: string
-    sql: ${TABLE}.url ;;
+    sql: ${TABLE}.type ;;
   }
 
   dimension: user_id {
@@ -246,13 +204,13 @@ view: product_viewed_view {
     sql: ${TABLE}.uuid_ts ;;
   }
 
-  dimension: value {
-    type: number
-    sql: ${TABLE}.value ;;
+  measure: product_list_count {
+    type: count
+    drill_fields: [id, context_library_name]
   }
 
-  measure: count {
-    type: count
-    drill_fields: [id, context_campaign_name, context_library_name, name]
-  }
+#   measure: product_list_viewed_users {
+#     type: count_distinct
+#     sql:  event_facts.looker_visitor_id;;
+#   }
 }
