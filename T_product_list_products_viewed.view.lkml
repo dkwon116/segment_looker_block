@@ -38,26 +38,31 @@ view: products_viewed_in_list {
   }
 
   dimension: product_name {
+    group_label: "Products in List"
     type: string
     sql: ${TABLE}.product_name ;;
   }
 
   dimension: brand {
+    group_label: "Products in List"
     type: string
     sql: ${TABLE}.product_brand ;;
   }
 
   dimension: product_id {
+    group_label: "Products in List"
     type: string
     sql: ${TABLE}.product_id ;;
   }
 
   dimension: url {
+    group_label: "Products in List"
     type: string
     sql: ${TABLE}.product_url ;;
   }
 
   dimension: position_in_list {
+    group_label: "Products in List"
     type: string
     sql: ${TABLE}.position_in_list * (product_list_viewed.page_number + 1) ;;
   }

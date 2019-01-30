@@ -40,6 +40,11 @@ view: tracks {
     hidden: yes
   }
 
+  dimension: context_page_path {
+    type: string
+    sql: ${TABLE}.context_page_path ;;
+  }
+
   dimension_group: received {
     type: time
     hidden: yes

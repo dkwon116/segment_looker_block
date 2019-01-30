@@ -1,10 +1,30 @@
-view: product_viewed {
-  sql_table_name: javascript.product_viewed_view ;;
+view: tracks_sanitized {
+  derived_table: {
+    # combine track and pages event into single table
+    sql_trigger_value: select count(*) from javascript.tracks_view ;;
+    sql:  SELECT *
+          FROM javascript.tracks_view
+          WHERE id NOT IN
 
-  dimension: id {
-    primary_key: yes
-    type: string
-    sql: ${TABLE}.id ;;
+            (SELECT
+              id
+            FROM (
+              SELECT
+                t.id
+                , row_number() over (partition by t.context_page_path order by t.timestamp) as first_url
+                , timestamp_diff(timestamp, lag(timestamp) over (partition by t.context_page_path order by t.timestamp), MILLISECOND) as time_sec
+              from javascript.tracks_view as t
+              inner join ${page_aliases_mapping.SQL_TABLE_NAME} as a2v
+              on a2v.alias = coalesce(t.user_id, t.anonymous_id)
+              WHERE t.event = "product_viewed")
+            WHERE
+              time_sec < 5000)
+    ;;
+  }
+
+  measure: count {
+    type: count
+    drill_fields: [detail*]
   }
 
   dimension: anonymous_id {
@@ -12,24 +32,9 @@ view: product_viewed {
     sql: ${TABLE}.anonymous_id ;;
   }
 
-  dimension: brand {
-    type: string
-    sql: ${TABLE}.brand ;;
-  }
-
-  dimension: cashback_rate {
-    type: number
-    sql: ${TABLE}.cashback_rate ;;
-  }
-
   dimension: context_campaign_content {
     type: string
     sql: ${TABLE}.context_campaign_content ;;
-  }
-
-  dimension: context_campaign_contents {
-    type: string
-    sql: ${TABLE}.context_campaign_contents ;;
   }
 
   dimension: context_campaign_medium {
@@ -97,11 +102,6 @@ view: product_viewed {
     sql: ${TABLE}.context_user_agent ;;
   }
 
-  dimension: currency {
-    type: string
-    sql: ${TABLE}.currency ;;
-  }
-
   dimension: event {
     type: string
     sql: ${TABLE}.event ;;
@@ -112,119 +112,35 @@ view: product_viewed {
     sql: ${TABLE}.event_text ;;
   }
 
-  dimension: image_url {
+  dimension: id {
     type: string
-    sql: ${TABLE}.image_url ;;
+    primary_key: yes
+    sql: ${TABLE}.id ;;
   }
 
-  dimension: list_price {
-    type: number
-    sql: ${TABLE}.list_price ;;
-  }
-
-  dimension_group: loaded {
+  dimension_group: loaded_at {
     type: time
-    timeframes: [
-      raw,
-      time,
-      date,
-      week,
-      month,
-      quarter,
-      year
-    ]
     sql: ${TABLE}.loaded_at ;;
-  }
-
-  dimension: name {
-    type: string
-    sql: ${TABLE}.name ;;
   }
 
   dimension_group: original_timestamp {
     type: time
-    timeframes: [
-      raw,
-      time,
-      date,
-      week,
-      month,
-      quarter,
-      year
-    ]
     sql: ${TABLE}.original_timestamp ;;
   }
 
-  dimension: price {
-    type: number
-    sql: ${TABLE}.price ;;
-  }
-
-  dimension: product_id {
-    type: string
-    sql: ${TABLE}.product_id ;;
-  }
-
-  dimension: purchase_type {
-    type: string
-    sql: ${TABLE}.purchase_type ;;
-  }
-
-  dimension_group: received {
+  dimension_group: received_at {
     type: time
-    timeframes: [
-      raw,
-      time,
-      date,
-      week,
-      month,
-      quarter,
-      year
-    ]
     sql: ${TABLE}.received_at ;;
   }
 
-  dimension: retailer {
-    type: string
-    sql: ${TABLE}.retailer ;;
-  }
-
-  dimension_group: sent {
+  dimension_group: sent_at {
     type: time
-    timeframes: [
-      raw,
-      time,
-      date,
-      week,
-      month,
-      quarter,
-      year
-    ]
     sql: ${TABLE}.sent_at ;;
-  }
-
-  dimension: sku {
-    type: string
-    sql: ${TABLE}.sku ;;
   }
 
   dimension_group: timestamp {
     type: time
-    timeframes: [
-      raw,
-      time,
-      date,
-      week,
-      month,
-      quarter,
-      year
-    ]
     sql: ${TABLE}.timestamp ;;
-  }
-
-  dimension: url {
-    type: string
-    sql: ${TABLE}.url ;;
   }
 
   dimension: user_id {
@@ -234,25 +150,48 @@ view: product_viewed {
 
   dimension_group: uuid_ts {
     type: time
-    timeframes: [
-      raw,
-      time,
-      date,
-      week,
-      month,
-      quarter,
-      year
-    ]
     sql: ${TABLE}.uuid_ts ;;
   }
 
-  dimension: value {
-    type: number
-    sql: ${TABLE}.value ;;
+  dimension: context_google_analytics_client_id {
+    type: string
+    sql: ${TABLE}.context_google_analytics_client_id ;;
   }
 
-  measure: count {
-    type: count
-    drill_fields: [id, context_campaign_name, context_library_name, name, product_id, price, timestamp_raw]
+  dimension: context_campaign_contents {
+    type: string
+    sql: ${TABLE}.context_campaign_contents ;;
+  }
+
+  set: detail {
+    fields: [
+      anonymous_id,
+      context_campaign_content,
+      context_campaign_medium,
+      context_campaign_name,
+      context_campaign_source,
+      context_campaign_term,
+      context_ip,
+      context_library_name,
+      context_library_version,
+      context_page_path,
+      context_page_referrer,
+      context_page_search,
+      context_page_title,
+      context_page_url,
+      context_user_agent,
+      event,
+      event_text,
+      id,
+      loaded_at_time,
+      original_timestamp_time,
+      received_at_time,
+      sent_at_time,
+      timestamp_time,
+      user_id,
+      uuid_ts_time,
+      context_google_analytics_client_id,
+      context_campaign_contents
+    ]
   }
 }

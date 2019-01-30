@@ -15,6 +15,7 @@ view: event_facts {
         , t.campaign_medium as campaign_medium
         , t.campaign_name as campaign_name
         , t.ip as ip
+        , t.page_url as url
         , row_number() over(partition by s.session_id order by t.timestamp) as track_sequence_number
         , row_number() over(partition by s.session_id, t.event_source order by t.timestamp) as source_sequence_number
         , first_value(t.referrer) over (partition by s.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_referrer
@@ -76,6 +77,10 @@ view: event_facts {
 
   dimension: ip {
     sql: ${TABLE}.ip ;;
+  }
+
+  dimension: url {
+    sql: ${TABLE}.url ;;
   }
 
   dimension: looker_visitor_id {

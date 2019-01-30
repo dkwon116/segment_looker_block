@@ -68,6 +68,11 @@ view: pages {
     hidden: yes
   }
 
+  dimension: context_page_path {
+    type: string
+    sql: ${TABLE}.context_page_path ;;
+  }
+
   dimension: page_name {
     type: string
     sql: ${TABLE}.name ;;

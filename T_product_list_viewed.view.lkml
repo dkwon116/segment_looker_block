@@ -136,6 +136,7 @@ view: product_list_viewed {
   dimension: products {
     type: string
     sql: ${TABLE}.products ;;
+    hidden: yes
   }
 
   dimension_group: received {
@@ -183,6 +184,19 @@ view: product_list_viewed {
   dimension: type {
     type: string
     sql: ${TABLE}.type ;;
+  }
+
+  dimension: list_type {
+    type: string
+    sql: CASE
+    WHEN ${type} = 'daily' THEN 'Daily'
+    WHEN ${type} = 'hashtag' THEN 'Hashtag'
+    WHEN ${type} = 'category' THEN 'Category'
+    WHEN ${context_page_path} = '/sale' THEN 'Sale'
+    WHEN ${context_page_path} LIKE '%/new-arrival%' THEN 'New'
+    WHEN ${context_page_path} LIKE '%/brands/view%' THEN 'Brand'
+    ELSE 'NA'
+    END;;
   }
 
   dimension: user_id {
