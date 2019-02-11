@@ -1,5 +1,5 @@
-view: product_viewed {
-  sql_table_name: javascript.product_viewed_view ;;
+view: outlink_sent_view {
+  sql_table_name: javascript.outlink_sent_view ;;
 
   dimension: id {
     primary_key: yes
@@ -25,11 +25,6 @@ view: product_viewed {
   dimension: context_campaign_content {
     type: string
     sql: ${TABLE}.context_campaign_content ;;
-  }
-
-  dimension: context_campaign_contents {
-    type: string
-    sql: ${TABLE}.context_campaign_contents ;;
   }
 
   dimension: context_campaign_medium {
@@ -165,9 +160,9 @@ view: product_viewed {
     sql: ${TABLE}.product_id ;;
   }
 
-  dimension: purchase_type {
+  dimension: promo_code {
     type: string
-    sql: ${TABLE}.purchase_type ;;
+    sql: ${TABLE}.promo_code ;;
   }
 
   dimension_group: received {
@@ -222,6 +217,11 @@ view: product_viewed {
     sql: ${TABLE}.timestamp ;;
   }
 
+  dimension: type {
+    type: string
+    sql: ${TABLE}.type ;;
+  }
+
   dimension: url {
     type: string
     sql: ${TABLE}.url ;;
@@ -253,11 +253,6 @@ view: product_viewed {
 
   measure: count {
     type: count
-    drill_fields: [id, context_campaign_name, context_library_name, name, product_id, price, timestamp_raw]
-  }
-
-  measure: count_visitors {
-    type: count_distinct
-    sql: ${event_facts.looker_visitor_id} ;;
+    drill_fields: [id, context_campaign_name, context_library_name, name]
   }
 }

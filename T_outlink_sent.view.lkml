@@ -183,6 +183,11 @@ view: outlink_sent {
     sql: ${TABLE}.timestamp ;;
   }
 
+  dimension: type {
+    type: string
+    sql: ${TABLE}.type ;;
+  }
+
   dimension: url {
     type: string
     sql: ${TABLE}.url ;;

@@ -12,8 +12,8 @@ view: session_facts {
         , t2s.first_campaign as first_campaign
         , count(case when t2s.event_source = 'tracks' then 1 else null end) as tracks_count
         , count(case when t2s.event_source = 'pages' then 1 else null end) as pages_count
-        , count(case when t2s.event = 'Product' then event_id else null end) as count_product_viewed
-        , count(case when t2s.event = 'Product List' then event_id else null end) as count_product_list_viewed
+        , count(case when t2s.event = 'product_viewed' then event_id else null end) as count_product_viewed
+        , count(case when t2s.event = 'product_list_viewed' then event_id else null end) as count_product_list_viewed
         , count(case when t2s.event = 'outlink_sent' then event_id else null end) as count_outlinked
         , count(case when t2s.event = 'concierge_clicked' then event_id else null end) as count_concierge_clicked
       from ${sessions.SQL_TABLE_NAME} as s
@@ -204,6 +204,54 @@ view: session_facts {
     sql: ${total_events} ;;
   }
 
+
+######################################
+#   Product list measures
+
+  measure: product_list_viewed_total {
+    type: sum
+    sql: ${product_lists_viewed} ;;
+    group_label: "Product List Viewed"
+#     drill_fields: []
+  }
+
+  measure: product_list_viewed_per_session {
+    type: average
+    sql: ${product_lists_viewed} ;;
+    value_format_name:decimal_2
+    group_label: "Product List Viewed"
+    drill_fields: [campaign_details*, product_viewed_details*]
+  }
+
+  measure: total_product_list_viewed_users {
+    type: count_distinct
+    sql: ${sessions.looker_visitor_id} ;;
+    group_label: "Product List Viewed"
+
+    filters: {
+      field: product_lists_viewed
+      value: ">0"
+    }
+  }
+
+  measure: product_list_viewed_per_converted_user {
+    type: number
+    sql: ${product_list_viewed_total} / NULLIF(${total_product_list_viewed_users}, 0);;
+    value_format_name:decimal_2
+    group_label: "Product List Viewed"
+  }
+
+  measure: product_list_viewed_conversion_rate {
+    type: number
+    sql: ${total_product_list_viewed_users} / ${sessions.count_visitors} ;;
+    value_format_name: percent_0
+    group_label: "Product List Viewed"
+    drill_fields: [product_viewed_details*]
+  }
+
+
+######################################
+#   Product viewed measures
   measure: products_viewed_total {
     type: sum
     sql: ${products_viewed} ;;
@@ -263,6 +311,8 @@ view: session_facts {
     drill_fields: [product_viewed_details*]
   }
 
+
+######################################
 #   measures for outlink
   measure: outlinked_total {
     type: sum
