@@ -45,6 +45,10 @@ view: event_facts {
     sql: ${TABLE}.event ;;
   }
 
+  dimension: event_source {
+    sql: ${TABLE}.event_source ;;
+  }
+
   dimension_group: received {
     type: time
     timeframes: [time, date, week, month]
@@ -150,5 +154,11 @@ view: event_facts {
   measure: count_events {
     type: count
     drill_fields: [user_facts.looker_visitor_id, users.name, user_agent]
+  }
+
+  measure: events_per_visitor {
+    type: number
+    sql: ${count_events} / ${count_visitors} ;;
+    value_format_name: decimal_1
   }
 }
