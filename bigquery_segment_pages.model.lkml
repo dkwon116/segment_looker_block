@@ -1,4 +1,4 @@
-connection: "segment_bigquery_db"
+connection: "datawarehouse_db"
 
 # include all views in this project
 # - include: "*.dashboard.lookml"  # include all dashboards in this project
