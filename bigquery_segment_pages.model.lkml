@@ -3,14 +3,12 @@ connection: "segment_bigquery_db"
 # include all views in this project
 # - include: "*.dashboard.lookml"  # include all dashboards in this project
 include: "*.view"
-include: "orders.base.lkml"
 # - explore: pages
 
 
 explore: event_facts {
   view_label: "0_Events"
   label: "Events"
-  extends: [affiliate_orders]
 
   join: pages {
     view_label: "1_Page Events"

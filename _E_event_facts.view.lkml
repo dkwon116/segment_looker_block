@@ -160,5 +160,6 @@ view: event_facts {
     type: number
     sql: ${count_events} / ${count_visitors} ;;
     value_format_name: decimal_1
+    drill_fields: [event, looker_visitor_id, users.name, count_events]
   }
 }
