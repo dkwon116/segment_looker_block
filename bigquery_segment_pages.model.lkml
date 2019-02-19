@@ -197,6 +197,12 @@ explore: affiliate_orders {
     relationship: many_to_many
   }
 
+  join: cashbacks {
+    sql_on: ${affiliate_orders.id} = ${cashbacks.rakuten_order_id} ;;
+    type: left_outer
+    relationship: one_to_one
+  }
+
   join: concierge_clicked_view {
     sql_on: ${affiliate_orders.user_id} = ${concierge_clicked_view.user_id}
       and ${affiliate_orders.transaction_date} = ${concierge_clicked_view.original_timestamp_date};;
