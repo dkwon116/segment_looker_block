@@ -122,4 +122,11 @@ view: affiliate_orders {
     type: count
     drill_fields: [id]
   }
+
+  measure: distinct_orders {
+    type: count_distinct
+    sql_distinct_key: ${order_id} ;;
+    sql: ${order_id} ;;
+    drill_fields: [order_id, vendor, user_id, transaction_date, total]
+  }
 }

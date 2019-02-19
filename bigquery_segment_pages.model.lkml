@@ -124,9 +124,14 @@ explore: event_facts {
   join: affiliate_orders {
     # view_label: "Orders"
     type: left_outer
-    sql_on: ${event_facts.looker_visitor_id}=${affiliate_orders.user_id} ;;
+    sql_on: ${event_facts.looker_visitor_id}=${affiliate_orders.user_id};;
     relationship: many_to_one
   }
+
+#   join: affiliate_events {
+#     type: left_outer
+#     sql_on: ${event_facts.looker_visitor_id} ;;
+#   }
 }
 
 explore: funnel_explorer {
@@ -182,5 +187,19 @@ explore: weekly_activities {
   join: user_facts {
     sql_on: ${weekly_activities.user_id} = ${user_facts.looker_visitor_id} ;;
     relationship: many_to_one
+  }
+}
+
+explore: affiliate_orders {
+  join: event_facts {
+    sql_on: ${affiliate_orders.user_id} = ${event_facts.looker_visitor_id} ;;
+    type: left_outer
+    relationship: many_to_many
+  }
+
+  join: concierge_clicked_view {
+    sql_on: ${affiliate_orders.user_id} = ${concierge_clicked_view.user_id}
+      and ${affiliate_orders.transaction_date} = ${concierge_clicked_view.original_timestamp_date};;
+    relationship: one_to_many
   }
 }
