@@ -107,7 +107,7 @@ explore: event_facts {
   join: products_viewed_in_list {
     view_label: "T_Product List Viewed"
     type: left_outer
-    sql_on: ${product_list_viewed.id} = ${products_viewed_in_list.event_id} ;;
+    sql_on: ${product_list_viewed.id} = ${products_viewed_in_list.id} ;;
     relationship: one_to_many
   }
 
@@ -166,10 +166,12 @@ explore: product_list_viewed {
   label: "Product List"
   join: products_viewed_in_list {
     view_label: "Products Viewed in List"
-    sql_on: ${product_list_viewed.id} = ${products_viewed_in_list.event_id} ;;
+    sql_on: ${product_list_viewed.id} = ${products_viewed_in_list.id} ;;
     relationship: one_to_many
   }
 }
+
+explore: _tracks_products {}
 
 explore: active_users {
   join: users {
