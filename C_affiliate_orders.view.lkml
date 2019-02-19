@@ -129,4 +129,15 @@ view: affiliate_orders {
     sql: ${order_id} ;;
     drill_fields: [order_id, vendor, user_id, transaction_date, total]
   }
+
+  measure: order_amount {
+    type: sum
+    sql: ${total} ;;
+  }
+
+  measure: average_order_value {
+    type: number
+    sql: ${order_amount} / ${distinct_orders} ;;
+    value_format_name: decimal_0
+  }
 }
