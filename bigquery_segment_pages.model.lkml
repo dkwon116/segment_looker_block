@@ -124,8 +124,8 @@ explore: event_facts {
   join: affiliate_orders {
     # view_label: "Orders"
     type: left_outer
-    sql_on: ${event_facts.looker_visitor_id}=${affiliate_orders.user_id};;
-    relationship: many_to_one
+    sql_on: ${event_facts.event_id} = concat(cast(${affiliate_orders.transaction_date} AS string), ${affiliate_orders.user_id}, '-r');;
+    relationship: one_to_one
   }
 
   join: tracks_products {

@@ -135,6 +135,12 @@ view: affiliate_orders {
     drill_fields: [order_id, vendor, user_id, transaction_date, total]
   }
 
+  measure: unique_user {
+    type: count_distinct
+    sql_distinct_key: ${user_id} ;;
+    sql: ${user_id} ;;
+  }
+
   measure: order_amount {
     type: sum
     sql: ${total} ;;
