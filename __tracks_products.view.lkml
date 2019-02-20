@@ -1,4 +1,4 @@
-view: _tracks_products {
+view: tracks_products {
   derived_table: {
     # combine track and pages event into single table
     sql_trigger_value: select count(*) from javascript.tracks_view ;;

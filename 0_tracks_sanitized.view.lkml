@@ -4,6 +4,8 @@ view: tracks_sanitized {
     sql_trigger_value: select count(*) from javascript.tracks_view ;;
     sql:  SELECT *
           FROM javascript.tracks_view
+
+          -- deduplicate multiple product viewed events for same product in short interval
           WHERE id NOT IN
 
             (SELECT

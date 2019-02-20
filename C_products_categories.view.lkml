@@ -10,6 +10,7 @@ view: products_categories {
   dimension: _fivetran_deleted {
     type: yesno
     sql: ${TABLE}._fivetran_deleted ;;
+    hidden: yes
   }
 
   dimension_group: _fivetran_synced {
@@ -24,6 +25,7 @@ view: products_categories {
       year
     ]
     sql: ${TABLE}._fivetran_synced ;;
+    hidden: yes
   }
 
   dimension: category_id {
@@ -77,6 +79,7 @@ view: products_categories {
 
   measure: count {
     type: count
+    hidden: yes
     drill_fields: [id, products.cloned_from_product_id, products.name]
   }
 }

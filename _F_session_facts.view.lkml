@@ -348,7 +348,7 @@ view: session_facts {
 
   measure: outlinked_conversion_rate {
     type: number
-    sql: ${total_outlinked_users} / ${sessions.count_visitors} ;;
+    sql: ${total_outlinked_users} / NULLIF(${sessions.count_visitors}, 0) ;;
     value_format_name: percent_0
     group_label: "Outlinked"
   }

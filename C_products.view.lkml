@@ -5,15 +5,18 @@ view: products {
     primary_key: yes
     type: string
     sql: ${TABLE}.cloned_from_product_id ;;
+    hidden: yes
   }
 
   dimension: _fivetran_deleted {
     type: yesno
+    hidden: yes
     sql: ${TABLE}._fivetran_deleted ;;
   }
 
   dimension_group: _fivetran_synced {
     type: time
+    hidden: yes
     timeframes: [
       raw,
       time,
@@ -26,7 +29,7 @@ view: products {
     sql: ${TABLE}._fivetran_synced ;;
   }
 
-  dimension: active {
+  dimension: product_active {
     type: yesno
     sql: ${TABLE}.active ;;
   }
@@ -48,7 +51,7 @@ view: products {
 
   dimension: brand_id {
     type: string
-    # hidden: yes
+    hidden: yes
     sql: ${TABLE}.brand_id ;;
   }
 
@@ -65,11 +68,13 @@ view: products {
   dimension: country_code {
     type: string
     sql: ${TABLE}.country_code ;;
+    hidden: yes
   }
 
   dimension: coupon_discount_rate {
     type: number
     sql: ${TABLE}.coupon_discount_rate ;;
+    hidden: yes
   }
 
   dimension_group: created {
@@ -94,11 +99,13 @@ view: products {
   dimension: description_en {
     type: string
     sql: ${TABLE}.description_en ;;
+    hidden: yes
   }
 
   dimension: description_kr {
     type: string
     sql: ${TABLE}.description_kr ;;
+    hidden: yes
   }
 
   dimension: gender {
@@ -114,16 +121,19 @@ view: products {
   dimension: is_on_promotion {
     type: yesno
     sql: ${TABLE}.is_on_promotion ;;
+    hidden: yes
   }
 
   dimension: korean_customs_code {
     type: string
     sql: ${TABLE}.korean_customs_code ;;
+    hidden: yes
   }
 
   dimension: manufacturer {
     type: string
     sql: ${TABLE}.manufacturer ;;
+    hidden: yes
   }
 
   dimension: material {
@@ -134,11 +144,13 @@ view: products {
   dimension: md_comment {
     type: string
     sql: ${TABLE}.md_comment ;;
+    hidden: yes
   }
 
   dimension: md_rate {
     type: number
     sql: ${TABLE}.md_rate ;;
+    hidden: yes
   }
 
   dimension: name {
@@ -149,11 +161,13 @@ view: products {
   dimension: name_en {
     type: string
     sql: ${TABLE}.name_en ;;
+    hidden: yes
   }
 
   dimension: name_kr {
     type: string
     sql: ${TABLE}.name_kr ;;
+    hidden: yes
   }
 
   dimension_group: normalized {
@@ -178,11 +192,13 @@ view: products {
   dimension: precautions {
     type: string
     sql: ${TABLE}.precautions ;;
+    hidden: yes
   }
 
   dimension: release_date {
     type: string
     sql: ${TABLE}.release_date ;;
+    hidden: yes
   }
 
   dimension_group: sale_ends {
@@ -197,6 +213,7 @@ view: products {
       year
     ]
     sql: ${TABLE}.sale_ends_at ;;
+    hidden: yes
   }
 
   dimension_group: sale_starts {
@@ -211,16 +228,19 @@ view: products {
       year
     ]
     sql: ${TABLE}.sale_starts_at ;;
+    hidden: yes
   }
 
   dimension: season {
     type: string
     sql: ${TABLE}.season ;;
+    hidden: yes
   }
 
   dimension: service_area {
     type: string
     sql: ${TABLE}.service_area ;;
+    hidden: yes
   }
 
   dimension: size_details {
@@ -246,16 +266,19 @@ view: products {
   dimension: tag_description {
     type: string
     sql: ${TABLE}.tag_description ;;
+    hidden: yes
   }
 
   dimension: tag_keyword {
     type: string
     sql: ${TABLE}.tag_keyword ;;
+    hidden: yes
   }
 
   dimension: tag_title {
     type: string
     sql: ${TABLE}.tag_title ;;
+    hidden: yes
   }
 
   dimension_group: updated {
@@ -275,9 +298,10 @@ view: products {
   dimension: us_tax_code {
     type: string
     sql: ${TABLE}.us_tax_code ;;
+    hidden: yes
   }
 
-  measure: count {
+  measure: product_count {
     type: count
     drill_fields: [cloned_from_product_id, name, brands.name, brands.id, products_categories.count]
   }

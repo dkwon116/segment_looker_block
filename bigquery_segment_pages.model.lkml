@@ -128,6 +128,43 @@ explore: event_facts {
     relationship: many_to_one
   }
 
+  join: tracks_products {
+    type: left_outer
+    sql_on: ${event_facts.event_id} = ${tracks_products.event_id} ;;
+    relationship: one_to_many
+  }
+
+  join: products {
+    view_label: "Product"
+    type: left_outer
+    sql_on: ${tracks_products.product_id} = ${products.id} ;;
+    relationship: many_to_one
+  }
+
+  join: brands {
+    view_label: "Product"
+    type: left_outer
+    sql_on: ${products.brand_id} = ${brands.id} ;;
+    relationship: one_to_one
+  }
+
+  join: products_categories {
+    view_label: "Product"
+    type: left_outer
+    sql_on: ${products.id} = ${products_categories.product_id} ;;
+    relationship: one_to_many
+    fields: []
+  }
+
+  join: categories {
+    view_label: "Product"
+    type: left_outer
+    sql_on: ${products_categories.category_id} = ${categories.id} ;;
+    relationship: many_to_one
+  }
+
+
+
 #   join: affiliate_events {
 #     type: left_outer
 #     sql_on: ${event_facts.looker_visitor_id} ;;
@@ -171,7 +208,7 @@ explore: product_list_viewed {
   }
 }
 
-explore: _tracks_products {}
+explore: tracks_products {}
 
 explore: active_users {
   join: users {
@@ -197,6 +234,13 @@ explore: affiliate_orders {
     sql_on: ${affiliate_orders.user_id} = ${event_facts.looker_visitor_id} ;;
     type: left_outer
     relationship: many_to_many
+  }
+
+  join: affiliate_events {
+    sql_on: ${affiliate_orders.order_id} = ${affiliate_events.order_id}
+      and ${affiliate_orders.sku_number} = ${affiliate_events.sku_number};;
+    type: left_outer
+    relationship: one_to_many
   }
 
   join: cashbacks {

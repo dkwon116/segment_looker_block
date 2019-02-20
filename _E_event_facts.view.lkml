@@ -90,6 +90,11 @@ view: event_facts {
   dimension: looker_visitor_id {
     type: string
     sql: ${TABLE}.looker_visitor_id ;;
+    link: {
+      label: "Go to {{value}} dashboard"
+      url: "https://smileventures.au.looker.com/dashboards/19?UserID= {{value | encode_url}}"
+      icon_url: "https://looker.com/favicon.ico"
+    }
   }
 
   dimension: anonymous_id {

@@ -111,6 +111,11 @@ view: affiliate_orders {
   dimension: user_id {
     type: string
     sql: ${TABLE}.user_id ;;
+    link: {
+      label: "Go to {{value}} dashboard"
+      url: "https://smileventures.au.looker.com/dashboards/19?UserID= {{value | encode_url}}"
+      icon_url: "https://looker.com/favicon.ico"
+    }
   }
 
   dimension: vendor {
@@ -137,7 +142,7 @@ view: affiliate_orders {
 
   measure: average_order_value {
     type: number
-    sql: ${order_amount} / ${distinct_orders} ;;
+    sql: ${order_amount} / NULLIF(${distinct_orders}, 0) ;;
     value_format_name: decimal_0
   }
 }

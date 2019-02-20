@@ -131,6 +131,11 @@ view: affiliate_events {
     sql: ${TABLE}.sku_number ;;
   }
 
+  dimension: order_product_id {
+    type: string
+    sql: concat(${order_id}, "-", ${sku_number} ;;
+  }
+
   dimension_group: transaction {
     type: time
     timeframes: [

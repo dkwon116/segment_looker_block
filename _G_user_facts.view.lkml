@@ -38,6 +38,11 @@ view: user_facts {
     hidden: yes
     primary_key: yes
     sql: ${TABLE}.looker_visitor_id ;;
+    link: {
+      label: "Go to {{value}} dashboard"
+      url: "https://smileventures.au.looker.com/dashboards/19?UserID= {{value | encode_url}}"
+      icon_url: "https://looker.com/favicon.ico"
+    }
   }
 
   dimension: number_of_sessions {
