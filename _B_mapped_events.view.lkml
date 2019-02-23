@@ -48,21 +48,21 @@ view: mapped_events {
 
         union all
 
-        select CONCAT(cast(t.transaction_date as string), t.user_id, '-r') as event_id
-        ,t.user_id as anonymous_id
-        ,t.user_id as looker_visitor_id
-        ,t.transaction_date as timestamp
-        ,'order_completed' as event
-        ,t.created_at as received
-        ,null as referrer
-        ,null as campaign_source
-        ,null as campaign_medium
-        ,null as campaign_name
-        ,null as user_agent
-        ,null as page_url
-        ,null as ip
-        ,'rakuten' as event_source
-        from mysql_smile_ventures.rakuten_orders as t
+        select CONCAT(cast(t.transaction_at as string), t.user_id, '-r') as event_id
+          ,t.user_id as anonymous_id
+          ,t.user_id as looker_visitor_id
+          ,t.transaction_at as timestamp
+          ,'order_completed' as event
+          ,t.created_at as received
+          ,null as referrer
+          ,null as campaign_source
+          ,null as campaign_medium
+          ,null as campaign_name
+          ,null as user_agent
+          ,'http://www.catchfashion.com' as page_url
+          ,'' as ip
+          ,'rakuten' as event_source
+        from ${orders.SQL_TABLE_NAME} as t
       ) as e
       WHERE (e.ip NOT IN ('210.123.124.177', '222.106.98.162', '121.134.191.141', '63.118.26.234', '14.39.183.130', '125.140.120.54', '98.113.6.12')
       AND e.page_url LIKE '%catchfashion%'

@@ -16,6 +16,7 @@ view: session_facts {
         , count(case when t2s.event = 'product_list_viewed' then event_id else null end) as count_product_list_viewed
         , count(case when t2s.event = 'outlink_sent' then event_id else null end) as count_outlinked
         , count(case when t2s.event = 'concierge_clicked' then event_id else null end) as count_concierge_clicked
+        , count(case when t2s.event = 'order_completed' then event_id else null end) as count_order_completed
       from ${sessions.SQL_TABLE_NAME} as s
         inner join ${event_facts.SQL_TABLE_NAME} as t2s
           on s.session_id = t2s.session_id
@@ -148,6 +149,11 @@ view: session_facts {
   dimension: concierge_clicked {
     type: number
     sql: ${TABLE}.count_concierge_clicked ;;
+  }
+
+  dimension: order_completed {
+    type: number
+    sql: ${TABLE}.count_order_completed ;;
   }
 
   # dimension: days_since_first_visit {
@@ -396,13 +402,58 @@ view: session_facts {
     }
   }
 
+
+######################################
+#   measures for outlink
+
+  measure: order_completed_total {
+    type: sum
+    sql: ${order_completed} ;;
+    group_label: "Order Completed"
+  }
+
+  measure: order_completed_per_session {
+    type: average
+    sql: ${order_completed} ;;
+    value_format_name:decimal_2
+    group_label: "Order Completed"
+    drill_fields: [campaign_details*]
+  }
+
+  measure: total_order_completed_users {
+    type: count_distinct
+    sql: ${sessions.looker_visitor_id} ;;
+    group_label: "Order Completed"
+
+    filters: {
+      field: order_completed
+      value: ">0"
+    }
+  }
+
+  measure: order_completed_per_converted_user {
+    type: number
+    sql: ${order_completed_total} / NULLIF(${total_order_completed_users}, 0);;
+    value_format_name:decimal_2
+    group_label: "Order Completed"
+  }
+
+  measure: order_completed_conversion_rate {
+    type: number
+    sql: ${total_order_completed_users} / ${sessions.count_visitors} ;;
+    value_format_name: percent_2
+    group_label: "Order Completed"
+    drill_fields: [order_completed_details*]
+  }
+
+
   measure: bounce_rate {
     type: number
     sql: ${count_bounced_sessions} / ${sessions.count_sessions} ;;
     value_format_name: percent_2
-
     drill_fields: [campaign_details*]
   }
+
 
   set: campaign_details {
     fields: [first_source, sessions.count_sessions, bounce_rate, pages_per_session, avg_session_duration_minutes, product_viewed_conversion_rate]
@@ -410,5 +461,9 @@ view: session_facts {
 
   set: product_viewed_details {
     fields: [first_source, product_viewed_activation_rate, products_viewed_per_session, product_viewed_conversion_rate]
+  }
+
+  set: order_completed_details {
+    fields: []
   }
 }

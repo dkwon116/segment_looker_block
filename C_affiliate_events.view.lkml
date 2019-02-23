@@ -133,7 +133,7 @@ view: affiliate_events {
 
   dimension: order_product_id {
     type: string
-    sql: concat(${order_id}, "-", ${sku_number} ;;
+    sql: concat(${order_id}, "-", ${sku_number}) ;;
   }
 
   dimension_group: transaction {

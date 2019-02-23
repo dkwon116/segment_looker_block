@@ -121,12 +121,21 @@ explore: event_facts {
     relationship: one_to_one
   }
 
-  join: affiliate_orders {
-    # view_label: "Orders"
+  join: orders {
+    view_label: "Orders"
     type: left_outer
-    sql_on: ${event_facts.event_id} = concat(cast(${affiliate_orders.transaction_date} AS string), ${affiliate_orders.user_id}, '-r');;
+    sql_on: ${event_facts.event_id} = concat(cast(${orders.trasanction_at_raw} AS string), ${orders.user_id}, '-r')
+    and ${event_facts.timestamp_time} = ${orders.trasanction_at_time}
+    and ${event_facts.looker_visitor_id} = ${orders.user_id};;
     relationship: one_to_one
   }
+
+  join: affiliate_orders {
+    view_label: "Order_Products"
+    type: left_outer
+    sql_on: ${orders.order_id} = ${affiliate_orders.order_id};;
+    relationship: one_to_many
+    }
 
   join: tracks_products {
     type: left_outer
@@ -234,6 +243,12 @@ explore: affiliate_orders {
     sql_on: ${affiliate_orders.user_id} = ${event_facts.looker_visitor_id} ;;
     type: left_outer
     relationship: many_to_many
+  }
+
+  join: orders {
+    type: left_outer
+    sql_on: ${affiliate_orders.order_id} = ${orders.order_id} ;;
+    relationship: many_to_one
   }
 
   join: affiliate_events {
