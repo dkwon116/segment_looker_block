@@ -58,7 +58,7 @@ view: mapped_events {
           ,null as campaign_source
           ,null as campaign_medium
           ,null as campaign_name
-          ,null as user_agent
+          ,'' as user_agent
           ,'http://www.catchfashion.com' as page_url
           ,'' as ip
           ,'rakuten' as event_source
@@ -66,6 +66,7 @@ view: mapped_events {
       ) as e
       WHERE (e.ip NOT IN ('210.123.124.177', '222.106.98.162', '121.134.191.141', '63.118.26.234', '14.39.183.130', '125.140.120.54', '98.113.6.12')
       AND e.page_url LIKE '%catchfashion%'
+      AND e.user_agent NOT LIKE '%Bot%'
       AND e.looker_visitor_id NOT IN (SELECT user_id FROM google_sheets.filter_user))
        ;;
   }

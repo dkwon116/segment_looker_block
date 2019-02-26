@@ -102,6 +102,11 @@ view: event_facts {
     sql: ${TABLE}.anonymous_id ;;
   }
 
+  dimension: is_user_at_event {
+    type: yesno
+    sql: IF(${anonymous_id}=${looker_visitor_id}, false, true)  ;;
+  }
+
   dimension: sequence_number {
     type: number
     sql: ${TABLE}.track_sequence_number ;;

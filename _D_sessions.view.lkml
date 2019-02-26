@@ -119,6 +119,6 @@ where (idle_time_minutes > 30 or idle_time_minutes is null)
   }
 
   set: user_detail {
-    fields: [start_date, user_facts.first_visited_date, user_facts.first_source]
+    fields: [start_date, users.name, user_facts.first_visited_date, user_facts.first_source]
   }
 }

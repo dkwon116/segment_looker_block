@@ -24,12 +24,15 @@ view: user_facts {
         , us.first_source as first_source
         , us.first_medium as first_medium
         , us.first_campaign as first_campaign
+        , cu.id as is_user
       FROM ${sessions.SQL_TABLE_NAME} as s
       LEFT JOIN ${session_facts.SQL_TABLE_NAME} as sf
       ON s.session_id = sf.session_id
       LEFT JOIN user_sources as us
       ON s.looker_visitor_id = us.looker_visitor_id
-      GROUP BY 1,6,7,8
+      LEFT JOIN mysql_smile_ventures.users as cu
+      on s.looker_visitor_id = cu.id
+      GROUP BY 1,6,7,8,9
        ;;
   }
 
@@ -43,6 +46,16 @@ view: user_facts {
       url: "https://smileventures.au.looker.com/dashboards/19?UserID= {{value | encode_url}}"
       icon_url: "https://looker.com/favicon.ico"
     }
+  }
+
+  dimension: is_user {
+    type: yesno
+    sql: ${TABLE}.is_user IS NOT NULL ;;
+  }
+
+  dimension: is_user_id {
+    type: string
+    sql: ${TABLE}.is_user ;;
   }
 
   dimension: number_of_sessions {
