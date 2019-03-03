@@ -21,6 +21,7 @@ view: user_facts {
         , MAX(s.session_start_at) as last_date
         , COUNT(*) as number_of_sessions
         , SUM(sf.count_product_viewed) as products_viewed
+        , SUM(sf.count_order_completed) as orders_completed
         , us.first_source as first_source
         , us.first_medium as first_medium
         , us.first_campaign as first_campaign
@@ -32,7 +33,7 @@ view: user_facts {
       ON s.looker_visitor_id = us.looker_visitor_id
       LEFT JOIN mysql_smile_ventures.users as cu
       on s.looker_visitor_id = cu.id
-      GROUP BY 1,6,7,8,9
+      GROUP BY 1,7,8,9,10
        ;;
   }
 
@@ -91,6 +92,11 @@ view: user_facts {
   dimension: products_viewed {
     type: number
     sql: ${TABLE}.products_viewed ;;
+  }
+
+  dimension: orders_completed {
+    type: number
+    sql: ${TABLE}.orders_completed ;;
   }
 
   dimension: first_source {
