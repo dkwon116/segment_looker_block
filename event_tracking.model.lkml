@@ -213,41 +213,6 @@ explore: affiliate_orders {
   }
 }
 
-explore: funnel_explorer {
-  join: sessions {
-    view_label: "Sessions"
-    foreign_key: session_id
-  }
-
-  join: session_facts {
-    view_label: "Sessions"
-    relationship: one_to_one
-    foreign_key: session_id
-  }
-
-  join: users {
-    relationship: many_to_one
-    sql_on: coalesce(users.mapped_user_id, users.user_id) = sessions.user_id ;;
-  }
-
-  join: user_facts {
-    view_label: "Users"
-    foreign_key: sessions.looker_visitor_id
-  }
-}
-
-explore: weekly_activities {
-  join: users {
-    sql_on: ${weekly_activities.user_id} = ${users.id} ;;
-    relationship: many_to_one
-  }
-
-  join: user_facts {
-    sql_on: ${weekly_activities.user_id} = ${user_facts.looker_visitor_id} ;;
-    relationship: many_to_one
-  }
-}
-
 explore: product_list_viewed {
   view_label: "Products Viewed in List"
   label: "Product List"
@@ -257,16 +222,5 @@ explore: product_list_viewed {
     relationship: one_to_many
   }
 }
-
-explore: active_users {
-  join: users {
-    sql_on: ${active_users.user_id}=${users.id} ;;
-    relationship: many_to_one
-  }
-}
-
-explore: event_list {}
-
-explore: concierge_clicked_view {}
 
 explore: tracks_products {}
