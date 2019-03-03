@@ -93,7 +93,7 @@ view: pages {
   dimension_group: timestamp {
     type: time
     hidden: yes
-    timeframes: [raw, time, date, week, month]
+    timeframes: [raw, time, hour, date, week, month]
     sql: ${TABLE}.timestamp ;;
   }
 

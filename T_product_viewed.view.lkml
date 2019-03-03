@@ -155,6 +155,38 @@ view: product_viewed {
     sql: ${TABLE}.original_timestamp ;;
   }
 
+  dimension: prev_path {
+    type: string
+    sql: ${TABLE}.prev_path ;;
+  }
+
+  dimension: prev_path_id {
+    type: string
+    sql: CASE
+    WHEN ${prev_path} LIKE '/category%' THEN SUBSTR(${prev_path}, 11)
+    ELSE '' END;;
+  }
+
+  dimension: prev_path_type {
+    type: string
+    sql: CASE
+    WHEN ${prev_path} = '/' THEN 'Daily'
+    WHEN ${prev_path} LIKE '/view/%' THEN 'Product'
+    WHEN ${prev_path} LIKE '/category%' THEN
+      CASE
+        WHEN ${list_facts.type} = 'hashtag' THEN 'Hashtag'
+        WHEN ${list_facts.type} = 'category' THEN 'Category'
+        WHEN ${list_facts.type} = 'collection' THEN 'Daily'
+      END
+    WHEN ${prev_path} LIKE '/sale%' THEN 'Sale'
+    WHEN ${prev_path} LIKE '/new-arrival%' THEN 'New'
+    WHEN ${prev_path} LIKE '/brands/view%' THEN 'Brand'
+    WHEN ${prev_path} LIKE '/search/products%' THEN 'Search'
+    WHEN ${prev_path} LIKE '/user/wishlist%' THEN 'Wishlist'
+    ELSE 'NA'
+    END;;
+  }
+
   dimension: price {
     type: number
     sql: ${TABLE}.price ;;

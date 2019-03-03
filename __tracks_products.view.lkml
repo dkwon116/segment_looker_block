@@ -1,6 +1,6 @@
 view: tracks_products {
   derived_table: {
-    # combine track and pages event into single table
+    # list of product_if for product related events
     sql_trigger_value: select count(*) from javascript.tracks_view ;;
     sql:
     select CONCAT(cast(u.timestamp AS string), u.anonymous_id, '-t') as event_id

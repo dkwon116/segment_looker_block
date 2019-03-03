@@ -64,7 +64,7 @@ explore: event_facts {
     view_label: "3_Users"
     type: left_outer
     sql_on: ${event_facts.looker_visitor_id}=${page_aliases_mapping.looker_visitor_id} ;;
-    relationship: one_to_many
+    relationship: many_to_one
   }
 
   join: users {
@@ -107,7 +107,7 @@ explore: event_facts {
   join: products_viewed_in_list {
     view_label: "T_Product List Viewed"
     type: left_outer
-    sql_on: ${product_list_viewed.id} = ${products_viewed_in_list.id} ;;
+    sql_on: ${product_list_viewed.id} = ${products_viewed_in_list.list_viewed_id} ;;
     relationship: one_to_many
   }
 
@@ -143,98 +143,40 @@ explore: event_facts {
     relationship: one_to_many
   }
 
-  join: products {
-    view_label: "Product"
+  join: product_facts {
     type: left_outer
-    sql_on: ${tracks_products.product_id} = ${products.id} ;;
+    sql_on: ${tracks_products.product_id} = ${product_facts.id} ;;
     relationship: many_to_one
   }
 
-  join: brands {
-    view_label: "Product"
-    type: left_outer
-    sql_on: ${products.brand_id} = ${brands.id} ;;
-    relationship: one_to_one
-  }
+  # join: products {
+  #   view_label: "Product"
+  #   type: left_outer
+  #   sql_on: ${tracks_products.product_id} = ${products.id} ;;
+  #   relationship: many_to_one
+  # }
 
-  join: products_categories {
-    view_label: "Product"
+  # join: brands {
+  #   view_label: "Product"
+  #   type: left_outer
+  #   sql_on: ${products.brand_id} = ${brands.id} ;;
+  #   relationship: one_to_one
+  # }
+
+  # join: products_categories {
+  #   view_label: "Product"
+  #   type: left_outer
+  #   sql_on: ${products.id} = ${products_categories.product_id} ;;
+  #   relationship: one_to_many
+  #   fields: []
+  # }
+
+  join: list_facts {
+    from: categories
     type: left_outer
-    sql_on: ${products.id} = ${products_categories.product_id} ;;
-    relationship: one_to_many
+    sql_on: ${product_viewed.prev_path_id} = ${list_facts.id} ;;
+    relationship: many_to_one
     fields: []
-  }
-
-  join: categories {
-    view_label: "Product"
-    type: left_outer
-    sql_on: ${products_categories.category_id} = ${categories.id} ;;
-    relationship: many_to_one
-  }
-
-
-
-#   join: affiliate_events {
-#     type: left_outer
-#     sql_on: ${event_facts.looker_visitor_id} ;;
-#   }
-}
-
-explore: funnel_explorer {
-  join: sessions {
-    view_label: "Sessions"
-    foreign_key: session_id
-  }
-
-  join: session_facts {
-    view_label: "Sessions"
-    relationship: one_to_one
-    foreign_key: session_id
-  }
-
-  join: users {
-    relationship: many_to_one
-    sql_on: coalesce(users.mapped_user_id, users.user_id) = sessions.user_id ;;
-  }
-
-  join: user_facts {
-    view_label: "Users"
-    foreign_key: sessions.looker_visitor_id
-  }
-}
-
-explore: event_list {}
-
-explore: concierge_clicked_view {}
-
-explore: product_list_viewed {
-  view_label: "Products Viewed in List"
-  label: "Product List"
-  join: products_viewed_in_list {
-    view_label: "Products Viewed in List"
-    sql_on: ${product_list_viewed.id} = ${products_viewed_in_list.id} ;;
-    relationship: one_to_many
-  }
-}
-
-explore: tracks_products {}
-
-explore: active_users {
-  join: users {
-    sql_on: ${active_users.user_id}=${users.id} ;;
-    relationship: many_to_one
-  }
-}
-
-explore: weekly_activities {
-  join: users {
-    sql_on: ${weekly_activities.user_id} = ${users.id} ;;
-    relationship: many_to_one
-  }
-
-  join: user_facts {
-    sql_on: ${weekly_activities.user_id} = ${user_facts.looker_visitor_id} ;;
-    relationship: many_to_one
   }
 }
 
@@ -270,3 +212,61 @@ explore: affiliate_orders {
     relationship: one_to_many
   }
 }
+
+explore: funnel_explorer {
+  join: sessions {
+    view_label: "Sessions"
+    foreign_key: session_id
+  }
+
+  join: session_facts {
+    view_label: "Sessions"
+    relationship: one_to_one
+    foreign_key: session_id
+  }
+
+  join: users {
+    relationship: many_to_one
+    sql_on: coalesce(users.mapped_user_id, users.user_id) = sessions.user_id ;;
+  }
+
+  join: user_facts {
+    view_label: "Users"
+    foreign_key: sessions.looker_visitor_id
+  }
+}
+
+explore: weekly_activities {
+  join: users {
+    sql_on: ${weekly_activities.user_id} = ${users.id} ;;
+    relationship: many_to_one
+  }
+
+  join: user_facts {
+    sql_on: ${weekly_activities.user_id} = ${user_facts.looker_visitor_id} ;;
+    relationship: many_to_one
+  }
+}
+
+explore: product_list_viewed {
+  view_label: "Products Viewed in List"
+  label: "Product List"
+  join: products_viewed_in_list {
+    view_label: "Products Viewed in List"
+    sql_on: ${product_list_viewed.id} = ${products_viewed_in_list.list_viewed_id} ;;
+    relationship: one_to_many
+  }
+}
+
+explore: active_users {
+  join: users {
+    sql_on: ${active_users.user_id}=${users.id} ;;
+    relationship: many_to_one
+  }
+}
+
+explore: event_list {}
+
+explore: concierge_clicked_view {}
+
+explore: tracks_products {}

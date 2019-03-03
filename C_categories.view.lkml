@@ -4,6 +4,7 @@ view: categories {
   dimension: id {
     primary_key: yes
     type: string
+    hidden: yes
     sql: ${TABLE}.id ;;
   }
 
@@ -115,6 +116,7 @@ view: categories {
   dimension: hierarchy_level {
     type: number
     sql: ${TABLE}.hierarchy_level ;;
+    group_label: "Category"
   }
 
   dimension: hs_code {

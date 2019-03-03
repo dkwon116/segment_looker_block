@@ -2,7 +2,7 @@ view: products_viewed_in_list {
   derived_table: {
     sql_trigger_value: select count(*) from javascript.product_list_viewed ;;
     sql: SELECT
-          results.id
+          results.list_viewed_id
           , results.timestamp
           , results.anonymous_id
           , trim(results.name, '"') as product_name
@@ -14,7 +14,7 @@ view: products_viewed_in_list {
           WITH product_data as
             (
               SELECT
-                id as id
+                id as list_viewed_id
                 , timestamp as timestamp
                 , anonymous_id as anonymous_id
                 , SPLIT(trim(products,'[]'), '},' ) as products_array
@@ -22,7 +22,7 @@ view: products_viewed_in_list {
                 javascript.product_list_viewed_view
             )
           SELECT
-            id
+            list_viewed_id
             , timestamp as timestamp
             , anonymous_id as anonymous_id
             , JSON_EXTRACT(CONCAT(product, '}'), "$.brand") as brand
@@ -36,11 +36,11 @@ view: products_viewed_in_list {
     }
 
 
-  dimension: id {
+  dimension: list_viewed_id {
     type: string
     primary_key: yes
     hidden: yes
-    sql: ${TABLE}.id ;;
+    sql: ${TABLE}.list_viewed_id ;;
   }
 
   dimension_group: timestamp {
