@@ -30,6 +30,7 @@ view: orders {
         , sum(e.quantity) as quantity
         , sum(e.sale_amount) as original_amount
         , sum(e.total) as total
+        , row_number() over(partition by e.user_id order by e.transaction_at) as order_sequence_number
     FROM normalized_event as e
     WHERE e.user_id NOT IN (SELECT user_id FROM google_sheets.filter_user)
     GROUP BY 1, 2, 3, 4
@@ -43,6 +44,11 @@ view: orders {
     sql: ${TABLE}.order_id ;;
   }
 
+  dimension: order_sequence_number {
+    type: number
+    sql: ${TABLE}.order_sequence_number ;;
+  }
+
   dimension: user_id {
     type: string
     sql: ${TABLE}.user_id ;;
@@ -53,10 +59,15 @@ view: orders {
     sql: ${TABLE}.vendor ;;
   }
 
-  dimension_group: trasanction_at {
+  dimension_group: transaction_at {
     type: time
     timeframes: [raw, time, date, week, month]
     sql: ${TABLE}.transaction_at ;;
+  }
+
+  dimension: session_id {
+    type: string
+    sql: ${TABLE}.session_id ;;
   }
 
   dimension_group: created_at {
@@ -80,6 +91,11 @@ view: orders {
     description: "in 만원"
     sql: ${TABLE}.total / 10000 ;;
     value_format_name: decimal_0
+  }
+
+  dimension: is_first_order {
+    type: yesno
+    sql: ${TABLE}.order_sequence_number = 1 ;;
   }
 
   measure: count {

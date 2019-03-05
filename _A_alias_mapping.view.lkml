@@ -2,7 +2,6 @@ view: page_aliases_mapping {
   derived_table: {
     sql_trigger_value: select count(*) from javascript.tracks_view ;;
     sql: with
-      -- Establish all child-to-parent edges from tables (tracks_view, pages, aliases)
       all_mappings as (
         select
           anonymous_id
@@ -13,42 +12,20 @@ view: page_aliases_mapping {
         union distinct
 
         select
-          user_id
-          ,null
-          ,timestamp
-        from javascript.tracks_view
-
-        union distinct
-
-        select
           anonymous_id
           ,user_id
           ,timestamp
         from javascript.pages_view
-
-        union distinct
-
+      )
         select
-          user_id
-          ,null
-          ,timestamp
-        from javascript.pages_view
-      )
-      select * from (
-      select
-      -- *
-        distinct anonymous_id as alias,
-        coalesce(first_value(user_id)
-            over(
-              partition by anonymous_id
-              order by COALESCE(user_id, 'ZZZZZZZZZZZZZZZZZ'), timestamp desc
-              rows between unbounded preceding and unbounded following), anonymous_id) as looker_visitor_id
+          distinct anonymous_id as alias,
+          coalesce(first_value(user_id)
+              over(
+                partition by anonymous_id
+                order by timestamp desc
+                rows between unbounded preceding and unbounded following), user_id, anonymous_id) as looker_visitor_id
 
-      from all_mappings
-      where anonymous_id IS NOT NULL
-      order by anonymous_id
-      )
-      where alias is not NULL
+        from all_mappings
        ;;
   }
 

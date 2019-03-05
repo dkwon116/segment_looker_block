@@ -124,8 +124,8 @@ explore: event_facts {
   join: orders {
     view_label: "Orders"
     type: left_outer
-    sql_on: ${event_facts.event_id} = concat(cast(${orders.trasanction_at_raw} AS string), ${orders.user_id}, '-r')
-    and ${event_facts.timestamp_time} = ${orders.trasanction_at_time}
+    sql_on: ${event_facts.event_id} = concat(cast(${orders.transaction_at_raw} AS string), ${orders.user_id}, '-r')
+    and ${event_facts.timestamp_time} = ${orders.transaction_at_time}
     and ${event_facts.looker_visitor_id} = ${orders.user_id};;
     relationship: one_to_one
   }
@@ -208,7 +208,7 @@ explore: affiliate_orders {
 
   join: concierge_clicked_view {
     sql_on: ${affiliate_orders.user_id} = ${concierge_clicked_view.user_id}
-      and ${affiliate_orders.transaction_date} = ${concierge_clicked_view.original_timestamp_date};;
+      and ${affiliate_orders.transaction_date} = ${concierge_clicked_view.timestamp_date};;
     relationship: one_to_many
   }
 }
@@ -224,3 +224,5 @@ explore: product_list_viewed {
 }
 
 explore: tracks_products {}
+
+explore: page_aliases_mapping {}

@@ -24,7 +24,7 @@ view: mapped_events {
         inner join ${tracks_sanitized.SQL_TABLE_NAME} as ts
         on t.id = ts.id
         inner join ${page_aliases_mapping.SQL_TABLE_NAME} as a2v
-        on a2v.alias = coalesce(t.user_id, t.anonymous_id)
+        on a2v.alias = t.anonymous_id
 
         union all
 
@@ -44,7 +44,7 @@ view: mapped_events {
           ,'pages' as event_source
         from javascript.pages_view as t
         inner join ${page_aliases_mapping.SQL_TABLE_NAME} as a2v
-          on a2v.alias = coalesce(t.user_id, t.anonymous_id)
+          on a2v.alias = t.anonymous_id
 
         union all
 
