@@ -23,11 +23,15 @@ view: event_facts {
         , first_value(t.campaign_medium) over (partition by s.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_medium
         , first_value(t.campaign_name) over (partition by s.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_campaign
         , first_value(t.user_agent) over (partition by s.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as user_agent
+        , first_value(o.transaction_at) over (partition by t.looker_visitor_id order by o.order_sequence_number rows between unbounded preceding and unbounded following) as first_purchased
       from ${mapped_events.SQL_TABLE_NAME} as t
       left join ${sessions.SQL_TABLE_NAME} as s
       on t.looker_visitor_id = s.looker_visitor_id
         and t.timestamp >= s.session_start_at
         and (t.timestamp < s.next_session_start_at or s.next_session_start_at is null)
+      left join ${orders.SQL_TABLE_NAME} as o
+      on t.looker_visitor_id = o.user_id
+        and t.event_id = CONCAT(cast(o.transaction_at as string), o.user_id, '-r')
        ;;
   }
 
@@ -39,6 +43,10 @@ view: event_facts {
 
   dimension: session_id {
     sql: ${TABLE}.session_id ;;
+  }
+
+  dimension: order_id {
+    sql: ${TABLE}.order_id ;;
   }
 
   dimension: event {
@@ -59,6 +67,12 @@ view: event_facts {
     type: time
     timeframes: [time, date, week, month]
     sql: ${TABLE}.timestamp ;;
+  }
+
+  dimension_group: first_purchased {
+    type: time
+    timeframes: [time, date, week, month]
+    sql: ${TABLE}.first_purchased ;;
   }
 
   dimension: first_referrer {
@@ -105,6 +119,11 @@ view: event_facts {
   dimension: is_user_at_event {
     type: yesno
     sql: IF(${anonymous_id}=${looker_visitor_id}, false, true)  ;;
+  }
+
+  dimension: is_pre_purchase {
+    type: yesno
+    sql: IF(${timestamp_time} <= ${first_purchased_time}, true, false)  ;;
   }
 
   dimension: sequence_number {

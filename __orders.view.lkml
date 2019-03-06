@@ -65,11 +65,6 @@ view: orders {
     sql: ${TABLE}.transaction_at ;;
   }
 
-  dimension: session_id {
-    type: string
-    sql: ${TABLE}.session_id ;;
-  }
-
   dimension_group: created_at {
     type: time
     timeframes: [raw, time, date, week, month]

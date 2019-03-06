@@ -226,3 +226,7 @@ explore: product_list_viewed {
 explore: tracks_products {}
 
 explore: page_aliases_mapping {}
+
+explore: orders {}
+
+explore: order_facts {}

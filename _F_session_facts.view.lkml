@@ -20,7 +20,6 @@ view: session_facts {
       from ${sessions.SQL_TABLE_NAME} as s
         inner join ${event_facts.SQL_TABLE_NAME} as t2s
           on s.session_id = t2s.session_id
-          --using(session_id)
       group by 1,2,4,5,6
        ;;
   }
