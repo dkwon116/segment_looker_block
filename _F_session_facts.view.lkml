@@ -186,7 +186,6 @@ view: session_facts {
     value_format_name: "decimal_1"
   }
 
-
   measure: avg_session_duration_minutes {
     type: average
     value_format_name: decimal_1
@@ -207,6 +206,16 @@ view: session_facts {
   measure: average_events_per_session {
     type: average
     sql: ${total_events} ;;
+  }
+
+  measure: cumulative_session_duration {
+    type: sum
+    sql: ${session_duration_minutes} ;;
+  }
+
+  measure: average_session_duration_per_user {
+    type: number
+    sql: ${cumulative_session_duration} / ${sessions.count_visitors} ;;
   }
 
 

@@ -23,7 +23,7 @@ view: event_facts {
         , first_value(t.campaign_medium) over (partition by s.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_medium
         , first_value(t.campaign_name) over (partition by s.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_campaign
         , first_value(t.user_agent) over (partition by s.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as user_agent
-        , first_value(o.transaction_at) over (partition by t.looker_visitor_id order by o.order_sequence_number rows between unbounded preceding and unbounded following) as first_purchased
+        , first_value(o.transaction_at IGNORE NULLS) over (partition by t.looker_visitor_id order by o.order_sequence_number rows between unbounded preceding and unbounded following) as first_purchased
       from ${mapped_events.SQL_TABLE_NAME} as t
       left join ${sessions.SQL_TABLE_NAME} as s
       on t.looker_visitor_id = s.looker_visitor_id

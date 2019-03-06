@@ -88,6 +88,25 @@ view: orders {
     value_format_name: decimal_0
   }
 
+  dimension: price_per_unit {
+    type: number
+    sql: ${total} / ${quantity} ;;
+  }
+
+  dimension: total_tier {
+    type: tier
+    tiers: [0, 10, 20, 50, 100, 200]
+    sql: ${total} ;;
+    style: integer
+  }
+
+  dimension: per_unit_tier {
+    type: tier
+    tiers: [0, 10, 20, 50, 100, 200]
+    sql: ${price_per_unit} ;;
+    style: integer
+  }
+
   dimension: is_first_order {
     type: yesno
     sql: ${TABLE}.order_sequence_number = 1 ;;

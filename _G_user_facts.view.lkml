@@ -30,6 +30,7 @@ view: user_facts {
         , COUNT(*) as number_of_sessions
         , SUM(sf.count_product_viewed) as products_viewed
         , SUM(sf.count_order_completed) as orders_completed
+        , SUM(sf.session_duration_minutes) as cumulative_session_duration
 
       FROM ${sessions.SQL_TABLE_NAME} as s
       LEFT JOIN ${session_facts.SQL_TABLE_NAME} as sf
@@ -82,6 +83,11 @@ view: user_facts {
       5,
       10
     ]
+  }
+
+  dimension: cumulative_session_duration {
+    type: number
+    sql: ${TABLE}.cumulative_session_duration ;;
   }
 
   dimension_group: first_visited {
