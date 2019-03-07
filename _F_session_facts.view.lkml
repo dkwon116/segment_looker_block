@@ -206,16 +206,19 @@ view: session_facts {
   measure: average_events_per_session {
     type: average
     sql: ${total_events} ;;
+    value_format_name: decimal_1
   }
 
   measure: cumulative_session_duration {
     type: sum
     sql: ${session_duration_minutes} ;;
+    value_format_name: decimal_2
   }
 
   measure: average_session_duration_per_user {
     type: number
     sql: ${cumulative_session_duration} / ${sessions.count_visitors} ;;
+    value_format_name: decimal_2
   }
 
 
@@ -278,6 +281,13 @@ view: session_facts {
     value_format_name:decimal_2
     group_label: "Product Viewed"
     drill_fields: [campaign_details*, product_viewed_details*]
+  }
+
+  measure: products_viewed_per_user {
+    type: number
+    sql: ${products_viewed_total} / ${sessions.count_visitors} ;;
+    value_format_name: decimal_2
+    group_label: "Product Viewed"
   }
 
   measure: total_product_viewed_users {

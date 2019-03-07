@@ -19,18 +19,18 @@ view: user_facts {
       )
       SELECT
         s.looker_visitor_id
+        , cu.first_name as name
         , us.first_source as first_source
         , us.first_medium as first_medium
         , us.first_campaign as first_campaign
         , cu.id as is_user
+        , cu.created_at as signed_up_date
         , MIN(s.session_start_at) as first_date
         , MAX(s.session_start_at) as last_date
---        , MIN(o.transaction_at) as first_purchased
---        , SUM(o.total ) as total_purchased
-        , COUNT(*) as number_of_sessions
+        , MIN(o.transaction_at) as first_purchased
         , SUM(sf.count_product_viewed) as products_viewed
-        , SUM(sf.count_order_completed) as orders_completed
-        , SUM(sf.session_duration_minutes) as cumulative_session_duration
+        , COUNT(o.order_id) as orders_completed
+        , SUM(o.total) as lifetime_order_value
 
       FROM ${sessions.SQL_TABLE_NAME} as s
       LEFT JOIN ${session_facts.SQL_TABLE_NAME} as sf
@@ -39,9 +39,10 @@ view: user_facts {
         ON s.looker_visitor_id = us.looker_visitor_id
       LEFT JOIN mysql_smile_ventures.users as cu
         ON s.looker_visitor_id = cu.id
---      LEFT JOIN ${orders.SQL_TABLE_NAME} as o
---        ON s.looker_visitor_id = o.user_id
-      GROUP BY 1,2,3,4,5
+      LEFT JOIN ${order_facts.SQL_TABLE_NAME} as o
+        ON s.session_id = o.session_id
+      GROUP BY 1,2,3,4,5,6,7
+
        ;;
   }
 
@@ -55,6 +56,11 @@ view: user_facts {
       url: "https://smileventures.au.looker.com/dashboards/19?UserID= {{value | encode_url}}"
       icon_url: "https://looker.com/favicon.ico"
     }
+  }
+
+  dimension: name {
+    type: string
+    sql: ${TABLE}.name ;;
   }
 
   dimension: is_user {
@@ -85,21 +91,22 @@ view: user_facts {
     ]
   }
 
-  dimension: cumulative_session_duration {
-    type: number
-    sql: ${TABLE}.cumulative_session_duration ;;
-  }
-
   dimension_group: first_visited {
     type: time
-    timeframes: [date, week, month]
+    timeframes: [time, date, week, month, raw]
     sql: ${TABLE}.first_date ;;
   }
 
   dimension_group: last_visited {
     type: time
-    timeframes: [date, week, month]
+    timeframes: [time, date, week, month]
     sql: ${TABLE}.last_date ;;
+  }
+
+  dimension_group: signed_up {
+    type: time
+    timeframes: [time, date, week, month, raw]
+    sql: ${TABLE}.signed_up_date ;;
   }
 
   dimension: products_viewed {
@@ -114,17 +121,28 @@ view: user_facts {
 
   dimension_group: first_purchased {
     type: time
-    timeframes: [time, date, week, month]
+    timeframes: [time, date, week, month, raw]
     sql: ${TABLE}.first_purchased ;;
   }
 
-  dimension: time_to_purchased {
-#     type:
+  dimension: time_to_signup {
+    type: number
+    sql:  timestamp_diff(${signed_up_raw}, ${first_visited_raw}, day) ;;
   }
 
-  dimension: total_purchased {
+  dimension: time_to_purchased {
     type: number
-    sql: ${TABLE}.total_purchased ;;
+    sql:  timestamp_diff(${first_purchased_raw}, ${first_visited_raw}, day) ;;
+  }
+
+  dimension: lifetime_order_value {
+    type: number
+    sql: ${TABLE}.lifetime_order_value ;;
+  }
+
+  dimension: is_purchased {
+    type: yesno
+    sql: IF(${orders_completed} > 0, true, false) ;;
   }
 
   dimension: first_source {
@@ -147,34 +165,28 @@ view: user_facts {
     type: count_distinct
     sql: ${looker_visitor_id} ;;
   }
-  # # You can specify the table name if it's different from the view name:
-  # sql_table_name: my_schema_name.tester ;;
-  #
-  # # Define your dimensions and measures here, like this:
-  # dimension: user_id {
-  #   description: "Unique ID for each user that has ordered"
-  #   type: number
-  #   sql: ${TABLE}.user_id ;;
-  # }
-  #
-  # dimension: lifetime_orders {
-  #   description: "The total number of orders for each user"
-  #   type: number
-  #   sql: ${TABLE}.lifetime_orders ;;
-  # }
-  #
-  # dimension_group: most_recent_purchase {
-  #   description: "The date when each user last ordered"
-  #   type: time
-  #   timeframes: [date, week, month, year]
-  #   sql: ${TABLE}.most_recent_purchase_at ;;
-  # }
-  #
-  # measure: total_lifetime_orders {
-  #   description: "Use this for counting lifetime orders across many users"
-  #   type: sum
-  #   sql: ${lifetime_orders} ;;
-  # }
+
+  measure: average_time_to_signup {
+    type: average
+    sql: ${time_to_signup} ;;
+    value_format_name: decimal_2
+    drill_fields: [user_details*]
+    filters: {
+      field: time_to_signup
+      value: ">=0"
+    }
+  }
+
+  measure: average_time_to_purchase {
+    type: average
+    sql: ${time_to_purchased} ;;
+    value_format_name: decimal_2
+    drill_fields: [user_details*]
+  }
+
+  set: user_details {
+    fields: [looker_visitor_id, name, number_of_sessions, time_to_signup, time_to_purchased]
+  }
 }
 
 # view: _g_user_facts {
