@@ -27,6 +27,7 @@ view: user_facts {
         , cu.created_at as signed_up_date
         , MIN(s.session_start_at) as first_date
         , MAX(s.session_start_at) as last_date
+        , COUNT(s.session_id) as number_of_sessions
         , MIN(o.transaction_at) as first_purchased
         , SUM(sf.count_product_viewed) as products_viewed
         , COUNT(o.order_id) as orders_completed

@@ -123,7 +123,8 @@ view: event_facts {
 
   dimension: is_pre_purchase {
     type: yesno
-    sql: IF(${timestamp_time} <= ${first_purchased_time}, true, false)  ;;
+    sql: IF(${first_purchased_time} IS NULL, true,
+    IF(${timestamp_time} <= ${first_purchased_time}, true, false))  ;;
   }
 
   dimension: sequence_number {

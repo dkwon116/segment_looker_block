@@ -12,7 +12,7 @@ view: session_facts {
         , t2s.first_campaign as first_campaign
         , count(case when t2s.event_source = 'tracks' then 1 else null end) as tracks_count
         , count(case when t2s.event_source = 'pages' then 1 else null end) as pages_count
-        , count(case when t2s.event = 'product_viewed' then event_id else null end) as count_product_viewed
+        , count(case when t2s.event = 'Product' then event_id else null end) as count_product_viewed
         , count(case when t2s.event = 'product_list_viewed' then event_id else null end) as count_product_list_viewed
         , count(case when t2s.event = 'outlink_sent' then event_id else null end) as count_outlinked
         , count(case when t2s.event = 'concierge_clicked' then event_id else null end) as count_concierge_clicked
