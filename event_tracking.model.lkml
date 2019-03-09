@@ -53,13 +53,6 @@ explore: event_facts {
     relationship: many_to_one
   }
 
-  join: user_facts {
-    view_label: "3_Users"
-    type: left_outer
-    sql_on: ${event_facts.looker_visitor_id}=${user_facts.looker_visitor_id} ;;
-    relationship: many_to_one
-  }
-
   join: page_aliases_mapping {
     view_label: "3_Users"
     type: left_outer
@@ -67,10 +60,17 @@ explore: event_facts {
     relationship: many_to_one
   }
 
-  join: users {
+  join: catch_users {
     view_label: "3_Users"
     type: left_outer
-    sql_on: ${event_facts.looker_visitor_id}=${users.id} ;;
+    sql_on: ${event_facts.looker_visitor_id}=${catch_users.id} ;;
+    relationship: many_to_one
+  }
+
+  join: user_facts {
+    view_label: "3_Users"
+    type: left_outer
+    sql_on: ${event_facts.looker_visitor_id}=${user_facts.looker_visitor_id} ;;
     relationship: many_to_one
   }
 

@@ -136,6 +136,11 @@ view: user_facts {
     sql:  timestamp_diff(${first_purchased_raw}, ${first_visited_raw}, day) ;;
   }
 
+  dimension: days_to_signup_to_purchased {
+    type: number
+    sql:  timestamp_diff(${first_purchased_raw}, ${signed_up_raw}, day) ;;
+  }
+
   dimension: lifetime_order_value {
     type: number
     sql: ${TABLE}.lifetime_order_value ;;
@@ -183,6 +188,17 @@ view: user_facts {
     sql: ${time_to_purchased} ;;
     value_format_name: decimal_2
     drill_fields: [user_details*]
+  }
+
+  measure: average_days_signup_to_purchase {
+    type: average
+    sql: ${days_to_signup_to_purchased} ;;
+    value_format_name: decimal_2
+    drill_fields: [user_details*]
+    filters: {
+      field: time_to_signup
+      value: ">=0"
+    }
   }
 
   set: user_details {

@@ -112,6 +112,11 @@ view: orders {
     sql: ${TABLE}.order_sequence_number = 1 ;;
   }
 
+  dimension: is_refund {
+    type: yesno
+    sql: ${total} <= 0 ;;
+  }
+
   measure: count {
     type: count
   }
