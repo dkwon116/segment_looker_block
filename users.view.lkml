@@ -69,6 +69,14 @@ view: catch_users {
     sql: ${TABLE}.email ;;
   }
 
+  dimension: email_source {
+    type: string
+    sql: CASE
+      WHEN ${email} LIKE "%naver%" THEN "Naver"
+      WHEN ${email} LIKE "%gmail%" THEN "Gmail"
+      ELSE "Other" END;;
+  }
+
   dimension: entity_name {
     type: string
     sql: ${TABLE}.entity_name ;;

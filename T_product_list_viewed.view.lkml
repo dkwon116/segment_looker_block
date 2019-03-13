@@ -195,8 +195,15 @@ view: product_list_viewed {
     WHEN ${context_page_path} = '/sale' THEN 'Sale'
     WHEN ${context_page_path} LIKE '%/new-arrival%' THEN 'New'
     WHEN ${context_page_path} LIKE '%/brands/view%' THEN 'Brand'
+    WHEN ${context_page_path} LIKE '%/wishlist%' THEN 'Wishlist'
+    WHEN ${context_page_path} LIKE '%/search%' THEN 'Search'
     ELSE 'NA'
     END;;
+  }
+
+  dimension: is_curated {
+    type: yesno
+    sql: IF(${list_type} IN ('Daily', 'Hashtag'), true, false) ;;
   }
 
   dimension: user_id {

@@ -12,6 +12,7 @@ view: session_facts {
         , t2s.first_campaign as first_campaign
         , count(case when t2s.event_source = 'tracks' then 1 else null end) as tracks_count
         , count(case when t2s.event_source = 'pages' then 1 else null end) as pages_count
+        , count(case when t2s.event = "signed_up" then event_id else null end) as count_signed_up
         , count(case when t2s.event = 'Product' then event_id else null end) as count_product_viewed
         , count(case when t2s.event = 'product_list_viewed' then event_id else null end) as count_product_list_viewed
         , count(case when t2s.event = 'outlink_sent' then event_id else null end) as count_outlinked
@@ -130,6 +131,11 @@ view: session_facts {
     ]
   }
 
+  dimension: signed_up {
+    type:  number
+    sql: ${TABLE}.count_signed_up ;;
+  }
+
   dimension: products_viewed {
     type: number
     sql: ${TABLE}.count_product_viewed ;;
@@ -219,6 +225,17 @@ view: session_facts {
     type: number
     sql: ${cumulative_session_duration} / ${sessions.count_visitors} ;;
     value_format_name: decimal_2
+  }
+
+  measure: total_signed_up {
+    type: sum
+    sql: ${signed_up} ;;
+  }
+
+  measure: signup_conversion {
+    type: number
+    sql: ${total_signed_up} / ${sessions.count_visitors};;
+    value_format_name: percent_2
   }
 
 
