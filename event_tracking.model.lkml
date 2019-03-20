@@ -230,3 +230,7 @@ explore: page_aliases_mapping {}
 explore: orders {}
 
 explore: order_facts {}
+
+explore: event_list {
+  hidden: yes
+}

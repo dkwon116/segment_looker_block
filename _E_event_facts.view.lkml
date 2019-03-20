@@ -166,6 +166,14 @@ view: event_facts {
           END;;
   }
 
+  dimension: is_mobile {
+    type: yesno
+    sql: CASE
+          WHEN ${device} IN ("iPhone", "Android") THEN true
+          ELSE false
+        END;;
+  }
+
   dimension: in_app {
     type: string
     sql:  CASE
@@ -191,5 +199,79 @@ view: event_facts {
     sql: ${count_events} / ${count_visitors} ;;
     value_format_name: decimal_1
     drill_fields: [event, looker_visitor_id, users.name, count_events]
+  }
+
+
+################################################
+##   SIMPLE FUNNEL
+
+  filter: event1 {
+    suggest_explore: event_list
+    suggest_dimension: event_list.event_types
+    group_label: "Session Funnel"
+  }
+
+
+  filter: event2 {
+    suggest_explore: event_list
+    suggest_dimension: event_list.event_types
+    group_label: "Session Funnel"
+  }
+
+
+  filter: event3 {
+    suggest_explore: event_list
+    suggest_dimension: event_list.event_types
+    group_label: "Session Funnel"
+  }
+
+  filter: event4 {
+    suggest_explore: event_list
+    suggest_dimension: event_list.event_types
+    group_label: "Session Funnel"
+  }
+
+  measure: event1_session_count {
+    type: number
+    group_label: "Session Funnel"
+    sql: COUNT(
+            DISTINCT CASE WHEN
+            {% condition event1 %} ${event} {% endcondition %}
+              THEN ${session_id}
+            ELSE NULL END
+        ) ;;
+  }
+
+  measure: event2_session_count {
+    type: number
+    group_label: "Session Funnel"
+    sql: COUNT(
+            DISTINCT CASE WHEN
+            {% condition event2 %} ${event} {% endcondition %}
+              THEN ${session_id}
+            ELSE NULL END
+        ) ;;
+  }
+
+  measure: event3_session_count {
+    type: number
+    group_label: "Session Funnel"
+    sql: COUNT(
+            DISTINCT CASE WHEN
+            {% condition event3 %} ${event} {% endcondition %}
+              THEN ${session_id}
+            ELSE NULL END
+        ) ;;
+  }
+
+  measure: event4_session_count {
+    type: number
+    group_label: "Session Funnel"
+    sql: COUNT(
+            DISTINCT CASE WHEN
+            {% condition event4 %} ${event} {% endcondition %}
+              THEN ${session_id}
+            ELSE NULL END
+        ) ;;
   }
 }

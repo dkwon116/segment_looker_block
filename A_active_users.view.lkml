@@ -16,7 +16,6 @@ view: active_users {
           e.looker_visitor_id as user_id
           , cast(TIMESTAMP_TRUNC(e.timestamp, day) as date) as activity_date
         FROM ${mapped_events.SQL_TABLE_NAME} as e
-        WHERE e.event = "Product"
         GROUP BY 1, 2
       )
 

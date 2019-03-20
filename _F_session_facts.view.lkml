@@ -17,6 +17,7 @@ view: session_facts {
         , count(case when t2s.event = 'product_list_viewed' then event_id else null end) as count_product_list_viewed
         , count(case when t2s.event = 'outlink_sent' then event_id else null end) as count_outlinked
         , count(case when t2s.event = 'concierge_clicked' then event_id else null end) as count_concierge_clicked
+        , count(case when t2s.event = 'product_added_to_wishlist' then event_id else null end) as count_added_to_wishlist
         , count(case when t2s.event = 'order_completed' then event_id else null end) as count_order_completed
       from ${sessions.SQL_TABLE_NAME} as s
         inner join ${event_facts.SQL_TABLE_NAME} as t2s
@@ -154,6 +155,11 @@ view: session_facts {
   dimension: concierge_clicked {
     type: number
     sql: ${TABLE}.count_concierge_clicked ;;
+  }
+
+  dimension: added_to_wishlist {
+    type: number
+    sql: ${TABLE}.count_added_to_wishlist ;;
   }
 
   dimension: order_completed {
@@ -394,6 +400,8 @@ view: session_facts {
     group_label: "Outlinked"
   }
 
+
+######################################
 #   measures for concierge
   measure: concierge_clicked_total {
     type: sum
@@ -435,6 +443,40 @@ view: session_facts {
       field: is_bounced_session
       value: "Bounced Session"
     }
+  }
+
+######################################
+#   measures for wishlist
+  measure: added_to_wishlist_total {
+    type: sum
+    sql: ${added_to_wishlist} ;;
+    group_label: "Wishlist"
+  }
+
+  measure: added_to_wishlist_per_session {
+    type: average
+    sql: ${added_to_wishlist} ;;
+    value_format_name:decimal_2
+    group_label: "Wishlist"
+    drill_fields: [campaign_details*, product_viewed_details*]
+  }
+
+  measure: total_added_to_wishlist_users {
+    type: count_distinct
+    sql: ${sessions.looker_visitor_id} ;;
+    group_label: "Wishlist"
+
+    filters: {
+      field: added_to_wishlist
+      value: ">0"
+    }
+  }
+
+  measure: added_to_wishlist_conversion_rate {
+    type: number
+    sql: ${total_added_to_wishlist_users} / ${sessions.count_visitors} ;;
+    value_format_name: percent_2
+    group_label: "Wishlist"
   }
 
 

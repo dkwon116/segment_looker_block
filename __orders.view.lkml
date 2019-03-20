@@ -131,11 +131,19 @@ view: orders {
     type: sum
     sql: ${total} ;;
     value_format_name: decimal_0
+    filters: {
+      field: total
+      value: ">0"
+    }
   }
 
   measure: average_order_value {
     type: average
     sql: ${total} ;;
     value_format_name: decimal_0
+    filters: {
+      field: total
+      value: ">0"
+    }
   }
 }
