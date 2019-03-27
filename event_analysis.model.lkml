@@ -43,4 +43,9 @@ explore: active_users {
     sql_on: ${active_users.user_id}=${users.id} ;;
     relationship: many_to_one
   }
+
+  join: user_facts {
+    sql_on: ${active_users.user_id} = ${user_facts.looker_visitor_id} ;;
+    relationship: many_to_one
+  }
 }

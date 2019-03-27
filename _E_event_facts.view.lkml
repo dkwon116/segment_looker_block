@@ -65,7 +65,7 @@ view: event_facts {
 
   dimension_group: timestamp {
     type: time
-    timeframes: [time, date, week, month]
+    timeframes: [time, hour, date, week, month]
     sql: ${TABLE}.timestamp ;;
   }
 
@@ -162,6 +162,8 @@ view: event_facts {
     sql:  CASE
             WHEN ${user_agent} LIKE '%iPhone%' THEN "iPhone"
             WHEN ${user_agent} LIKE '%Android%' THEN "Android"
+            WHEN ${user_agent} LIKE '%Macintosh%' THEN "Mac"
+            WHEN ${user_agent} LIKE '%Windows%' THEN "Windows"
             ELSE "Other"
           END;;
   }

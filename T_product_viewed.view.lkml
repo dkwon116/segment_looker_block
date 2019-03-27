@@ -283,6 +283,11 @@ view: product_viewed {
     sql: ${TABLE}.value ;;
   }
 
+  dimension: is_sale {
+    type: yesno
+    sql: if(${TABLE}.list_price > ${TABLE}.price, true, false) ;;
+  }
+
   measure: count {
     type: count
     drill_fields: [id, context_campaign_name, context_library_name, name, product_id, price, timestamp_raw]

@@ -234,3 +234,7 @@ explore: order_facts {}
 explore: event_list {
   hidden: yes
 }
+
+# explore: tracks {}
+
+# explore: pages {}

@@ -32,7 +32,7 @@ view: active_users {
 
   dimension_group: date {
     type: time
-    timeframes: [date, month, quarter, quarter_of_year, year, raw]
+    timeframes: [date, week, month, quarter, quarter_of_year, year, raw]
     sql: CAST( ${TABLE}.date AS TIMESTAMP);;
   }
 

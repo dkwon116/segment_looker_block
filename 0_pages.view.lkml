@@ -86,7 +86,7 @@ view: pages {
   dimension_group: received {
     type: time
     hidden: yes
-    timeframes: [raw, time, date, week, month]
+    timeframes: [raw, time, hour, date, week, month]
     sql: ${TABLE}.received_at ;;
   }
 
