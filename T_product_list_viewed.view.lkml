@@ -229,4 +229,9 @@ view: product_list_viewed {
     type: count
     drill_fields: [category, list_id, list_type, product_list_viewed_count]
   }
+
+#   measure: count_visitors {
+#     type: count_distinct
+#     sql: ${event_facts.looker_visitor_id} ;;
+#   }
 }

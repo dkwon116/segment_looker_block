@@ -54,6 +54,7 @@ view: products_viewed_in_list {
       quarter,
       year
     ]
+    hidden: yes
     sql: ${TABLE}.timestamp ;;
   }
 

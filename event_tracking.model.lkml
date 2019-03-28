@@ -235,6 +235,8 @@ explore: event_list {
   hidden: yes
 }
 
+explore: product_events {}
+
 # explore: tracks {}
 
 # explore: pages {}
