@@ -137,17 +137,17 @@ explore: event_facts {
     relationship: one_to_many
     }
 
-  join: tracks_products {
-    type: left_outer
-    sql_on: ${event_facts.event_id} = ${tracks_products.event_id} ;;
-    relationship: one_to_many
-  }
-
-  join: product_facts {
-    type: left_outer
-    sql_on: ${tracks_products.product_id} = ${product_facts.id} ;;
-    relationship: many_to_one
-  }
+#   join: tracks_products {
+#     type: left_outer
+#     sql_on: ${event_facts.event_id} = ${tracks_products.event_id} ;;
+#     relationship: one_to_many
+#   }
+#
+#   join: product_facts {
+#     type: left_outer
+#     sql_on: ${tracks_products.product_id} = ${product_facts.id} ;;
+#     relationship: many_to_one
+#   }
 
   # join: products {
   #   view_label: "Product"
@@ -223,8 +223,6 @@ explore: product_list_viewed {
   }
 }
 
-explore: tracks_products {}
-
 explore: page_aliases_mapping {}
 
 explore: orders {}
@@ -235,8 +233,50 @@ explore: event_list {
   hidden: yes
 }
 
-explore: product_events {}
+explore: product_events {
+  join: product_viewed {
+    sql_on: ${product_events.event_id} = concat(cast(${product_viewed.timestamp_raw} AS string), ${product_viewed.anonymous_id}, '-t') ;;
+    relationship: one_to_one
+  }
 
-# explore: tracks {}
+  join: products_viewed_in_list {
+    sql_on: ${product_events.event_id} = concat(cast(${products_viewed_in_list.timestamp_raw} AS string), ${products_viewed_in_list.anonymous_id}, '-t') ;;
+    relationship: one_to_one
+  }
+
+  join: event_facts {
+    sql_on: ${product_events.event_id} = ${event_facts.event_id} ;;
+    type: left_outer
+    relationship: many_to_one
+  }
+
+  join: session_facts {
+    type: left_outer
+    sql_on: ${event_facts.session_id} = ${session_facts.session_id} ;;
+    relationship: many_to_one
+  }
+
+  join: sessions {
+    type: left_outer
+    sql_on: ${event_facts.session_id} = ${sessions.session_id} ;;
+    relationship: many_to_one
+  }
+
+  join: product_facts {
+    type: left_outer
+    sql_on: ${product_events.product_id} = ${product_facts.id} ;;
+    relationship: many_to_one
+  }
+
+  join: list_facts {
+    from: categories
+    type: left_outer
+    sql_on: ${product_viewed.prev_path_id} = ${list_facts.id} ;;
+    relationship: many_to_one
+    fields: []
+  }
+}
+
+explore: affiliate_events {}
 
 # explore: pages {}

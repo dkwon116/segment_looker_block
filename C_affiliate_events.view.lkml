@@ -174,6 +174,19 @@ view: affiliate_events {
     sql: ${TABLE}.updated_at ;;
   }
 
+  dimension: decoded_u1 {
+    type: string
+    sql: CASE
+      WHEN EXTRACT(MONTH FROM transaction_date) = 4
+      THEN SAFE_CONVERT_BYTES_TO_STRING(FROM_BASE64(${u1}))
+      END;;
+  }
+
+  dimension: norm_user_id {
+    type: string
+    sql:IF(STARTS_WITH(${decoded_u1}, "seg_"), SUBSTR(${decoded_u1}, 5, 36), SUBSTR(${decoded_u1}, 1, 36));;
+  }
+
   measure: count {
     type: count
     drill_fields: [id, product_name]
