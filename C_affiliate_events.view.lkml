@@ -177,7 +177,10 @@ view: affiliate_events {
   dimension: decoded_u1 {
     type: string
     sql: CASE
-      WHEN EXTRACT(MONTH FROM transaction_date) = 4
+      WHEN
+        EXTRACT(MONTH FROM ${transaction_date}) = 4
+        OR
+        (EXTRACT(MONTH FROM ${transaction_date}) = 3 AND EXTRACT(DAY FROM ${transaction_date}) > 28)
       THEN SAFE_CONVERT_BYTES_TO_STRING(FROM_BASE64(${u1}))
       END;;
   }
