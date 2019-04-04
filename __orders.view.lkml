@@ -6,14 +6,14 @@ view: orders {
         , e.user_id
         , e.vendor
         , e.transaction_at
-        , e.process_at as created_at
+        , max(e.process_at) as created_at
         , sum(e.quantity) as quantity
         , sum(e.sale_amount) as original_total
-        , sum(e.krw_amount) as krw_total
+        , sum(e.krw_amount) as total
         , row_number() over(partition by e.user_id order by e.transaction_at) as order_sequence_number
     FROM ${order_items.SQL_TABLE_NAME} as e
     WHERE e.user_id NOT IN (SELECT user_id FROM google_sheets.filter_user)
-    GROUP BY 1, 2, 3, 4, 5
+    GROUP BY 1, 2, 3, 4
 
     ;;
   }
@@ -69,7 +69,7 @@ view: orders {
   dimension: total {
     type: number
     description: "in 만원"
-    sql: ${TABLE}.krw_total ;;
+    sql: ${TABLE}.total ;;
     value_format_name: decimal_0
   }
 
@@ -82,7 +82,7 @@ view: orders {
 
   dimension: price_per_unit {
     type: number
-    sql: ${total_m} / ${quantity} ;;
+    sql: ${total} / ${quantity} ;;
   }
 
   dimension: total_tier {
@@ -122,17 +122,17 @@ view: orders {
   measure: total_order_amount {
     type: sum
     description: "only purchases, no returns"
-    sql: ${total_m} ;;
+    sql: ${total} ;;
     value_format_name: decimal_0
-    filters: {
-      field: total_m
-      value: ">0"
-    }
+#     filters: {
+#       field: total_m
+#       value: ">0"
+#     }
   }
 
   measure: average_order_value {
     type: average
-    sql: ${total_m} ;;
+    sql: ${total} ;;
     value_format_name: decimal_0
     filters: {
       field: total_m
@@ -156,6 +156,6 @@ view: orders {
   measure: order_amount {
     type: sum
     description: "all inclusive (order/return)"
-    sql: ${total_m} ;;
+    sql: ${total} ;;
   }
 }

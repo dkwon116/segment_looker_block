@@ -17,6 +17,7 @@ view: order_items {
           ,re.process_date as process_at
           ,re.u1 as encoded_user_id
           ,re.quantity as quantity
+          ,re.is_event
           ,r.name as vendor
           ,CASE
             WHEN re.sale_amount >= 0 THEN "purchase"
@@ -49,27 +50,30 @@ view: order_items {
             WHEN e.vendor_id = 37938 THEN IF(STARTS_WITH(e.sku_id, "R"), substr(e.sku_id, 3, 8), substr(e.sku_id, 1, 8))
             ELSE e.sku_id END
           as vendor_product_id
+          ,IF(e.is_event = "N", true, false) as is_confirmed
         FROM (
           SELECT
             e.order_id
             ,e.sku_id
-            ,e.transaction_at
             ,e.vendor
             ,e.vendor_id
             ,e.order_type
             ,e.quantity
             ,e.currency
             ,IF(STARTS_WITH(e.decoded_user_id, "seg_"), SUBSTR(e.decoded_user_id, 5, 36), SUBSTR(e.decoded_user_id, 1, 36)) as user_id
-            ,last_value(e.product_name) over (partition by e.order_id, e.sku_id, e.order_type order by e.process_at rows between unbounded preceding and unbounded following) as product_name
-            ,last_value(e.sale_amount) over (partition by e.order_id, e.sku_id, e.order_type order by e.process_at rows between unbounded preceding and unbounded following) as sale_amount
-            ,last_value(e.process_at) over (partition by e.order_id, e.sku_id, e.order_type order by e.process_at rows between unbounded preceding and unbounded following) as process_at
+            ,first_value(e.is_event) over (partition by e.order_id, e.sku_id, e.order_type order by e.is_event, e.process_at rows between unbounded preceding and unbounded following) as is_event
+            ,first_value(e.transaction_at) over (partition by e.order_id, e.sku_id, e.order_type order by e.is_event, e.process_at rows between unbounded preceding and unbounded following) as transaction_at
+            ,first_value(e.product_name) over (partition by e.order_id, e.sku_id, e.order_type order by e.is_event, e.process_at rows between unbounded preceding and unbounded following) as product_name
+            ,first_value(e.sale_amount) over (partition by e.order_id, e.sku_id, e.order_type order by e.is_event, e.process_at rows between unbounded preceding and unbounded following) as sale_amount
+            ,first_value(e.process_at) over (partition by e.order_id, e.sku_id, e.order_type order by e.is_event, e.process_at rows between unbounded preceding and unbounded following) as process_at
           FROM normalized_event as e) as e
           LEFT JOIN ${currencies.SQL_TABLE_NAME} as c
             -- if on sat (7) - mon (2), then get previous friday / otherwise get previous day
             ON DATE_SUB(DATE(e.transaction_at), INTERVAL 1 DAY) = c.date
               AND e.currency = c.unit
           WHERE e.user_id NOT IN (SELECT user_id FROM google_sheets.filter_user)
-          GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12
+          GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
+
 
     ;;
   }
@@ -129,6 +133,11 @@ view: order_items {
   dimension: krw_amount {
     type: number
     sql: ${TABLE}.krw_amount ;;
+  }
+
+  dimension: is_confirmed {
+    type: yesno
+    sql: ${TABLE}.is_confirmed ;;
   }
 
 }
