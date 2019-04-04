@@ -99,9 +99,9 @@ view: order_items {
     sql: ${TABLE}.user_id ;;
   }
 
-  dimension_group: created_at {
+  dimension_group: process_at {
     type: time
-    sql: ${TABLE}.created_at ;;
+    sql: ${TABLE}.process_at ;;
     timeframes: [time, date, month, year]
   }
 

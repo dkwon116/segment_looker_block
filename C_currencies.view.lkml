@@ -23,7 +23,7 @@ view: currencies {
         LEFT JOIN mysql_smile_ventures.currencies as c4
           ON d.date = DATE_ADD(DATE(c4.date), INTERVAL 3 DAY) AND d.unit = c4.cur_unit
         LEFT JOIN mysql_smile_ventures.currencies as c5
-          ON d.date = DATE_ADD(DATE(c4.date), INTERVAL 4 DAY) AND d.unit = c5.cur_unit
+          ON d.date = DATE_ADD(DATE(c5.date), INTERVAL 4 DAY) AND d.unit = c5.cur_unit
         WHERE coalesce(c.bkpr, c2.bkpr, c3.bkpr, c4.bkpr, c5.bkpr) IS NOT NULL
       ;;
   }
