@@ -78,6 +78,7 @@ view: affiliate_orders {
   dimension: total {
     type: number
     sql: ${TABLE}.total ;;
+    value_format_name: decimal_0
   }
 
   dimension_group: transaction {

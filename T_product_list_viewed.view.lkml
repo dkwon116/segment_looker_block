@@ -184,6 +184,7 @@ view: product_list_viewed {
   dimension: type {
     type: string
     sql: ${TABLE}.type ;;
+    hidden: yes
   }
 
   dimension: list_type {

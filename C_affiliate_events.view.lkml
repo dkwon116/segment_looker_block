@@ -124,6 +124,7 @@ view: affiliate_events {
   dimension: sale_amount {
     type: number
     sql: ${TABLE}.sale_amount ;;
+    value_format_name: decimal_0
   }
 
   dimension: sku_number {
@@ -193,5 +194,10 @@ view: affiliate_events {
   measure: count {
     type: count
     drill_fields: [id, product_name]
+  }
+
+  measure: total {
+    type: sum
+    sql: ${sale_amount} ;;
   }
 }

@@ -78,6 +78,24 @@ view: product_events {
           on CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') = me.event_id
         left join ${track_facts.SQL_TABLE_NAME} as tf
           on me.event_id = tf.event_id
+
+        union all
+
+        select CONCAT(t.product_id, me.event_id) as product_event_id
+          , me.event_id as event_id
+          , t.product_id as product_id
+          , tf.current_path as source_path
+          , CASE
+            WHEN tf.current_path LIKE '/category%' THEN SUBSTR(tf.current_path, 11)
+            WHEN tf.current_path LIKE '/brands/view%' THEN SUBSTR(tf.current_path, 14)
+            WHEN tf.current_path LIKE '/view%' THEN SUBSTR(tf.current_path, 7)
+            ELSE '' END as source_id
+          , 'added_to_wishlist' as event
+        from javascript.product_added_to_wishlist_view as t
+        inner join ${mapped_events.SQL_TABLE_NAME} as me
+        on CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') = me.event_id
+        left join ${track_facts.SQL_TABLE_NAME} as tf
+          on me.event_id = tf.event_id
       ) as e
       left join list_facts as lf
         on e.source_id = lf.id

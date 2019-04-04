@@ -279,4 +279,5 @@ explore: product_events {
 
 explore: affiliate_events {}
 
+explore: order_items {}
 # explore: pages {}
