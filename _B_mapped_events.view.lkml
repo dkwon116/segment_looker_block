@@ -53,7 +53,7 @@ view: mapped_events {
           ,t.user_id as looker_visitor_id
           ,t.transaction_at as timestamp
           ,'order_completed' as event
-          ,t.created_at as received
+          ,t.process_at as received
           ,null as referrer
           ,null as campaign_source
           ,null as campaign_medium

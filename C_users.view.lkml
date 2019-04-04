@@ -99,6 +99,11 @@ view: catch_users {
     hidden: yes
   }
 
+  dimension: name {
+    type: string
+    sql: CONCAT(${last_name}, ${first_name}) ;;
+  }
+
   dimension: first_name {
     type: string
     sql: ${TABLE}.first_name ;;
