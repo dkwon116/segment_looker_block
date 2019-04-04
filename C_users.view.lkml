@@ -10,6 +10,7 @@ view: catch_users {
   dimension: _fivetran_deleted {
     type: yesno
     sql: ${TABLE}._fivetran_deleted ;;
+    hidden: yes
   }
 
   dimension_group: _fivetran_synced {
@@ -24,6 +25,7 @@ view: catch_users {
       year
     ]
     sql: ${TABLE}._fivetran_synced ;;
+    hidden: yes
   }
 
   dimension: account_number {
@@ -43,6 +45,7 @@ view: catch_users {
       year
     ]
     sql: ${TABLE}.birthday ;;
+    hidden: yes
   }
 
   dimension_group: created {
@@ -62,6 +65,7 @@ view: catch_users {
   dimension: customs_code {
     type: string
     sql: ${TABLE}.customs_code ;;
+    hidden: yes
   }
 
   dimension: email {
@@ -80,16 +84,19 @@ view: catch_users {
   dimension: entity_name {
     type: string
     sql: ${TABLE}.entity_name ;;
+    hidden: yes
   }
 
   dimension: facebook_id {
     type: string
     sql: ${TABLE}.facebook_id ;;
+    hidden: yes
   }
 
   dimension: favourite_brands {
     type: string
     sql: ${TABLE}.favourite_brands ;;
+    hidden: yes
   }
 
   dimension: first_name {
@@ -115,16 +122,19 @@ view: catch_users {
   dimension: is_temporary_password {
     type: yesno
     sql: ${TABLE}.is_temporary_password ;;
+    hidden: yes
   }
 
   dimension: kakaotalk_id {
     type: string
     sql: ${TABLE}.kakaotalk_id ;;
+    hidden: yes
   }
 
   dimension: last_name {
     type: string
     sql: ${TABLE}.last_name ;;
+    hidden: yes
   }
 
   dimension_group: last_sign_in {
@@ -144,11 +154,13 @@ view: catch_users {
   dimension: level {
     type: string
     sql: ${TABLE}.level ;;
+    hidden: yes
   }
 
   dimension: password {
     type: string
     sql: ${TABLE}.password ;;
+    hidden: yes
   }
 
   dimension: phone {
@@ -159,16 +171,19 @@ view: catch_users {
   dimension: referred_by {
     type: string
     sql: ${TABLE}.referred_by ;;
+    hidden: yes
   }
 
   dimension: role {
     type: string
     sql: ${TABLE}.role ;;
+    hidden: yes
   }
 
   dimension: terms_accepted {
     type: yesno
     sql: ${TABLE}.terms_accepted ;;
+    hidden: yes
   }
 
   dimension_group: updated {
