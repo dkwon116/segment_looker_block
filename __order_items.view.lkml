@@ -7,6 +7,7 @@ view: order_items {
           , CASE
             -- remove duplicate for Mr Porter
             WHEN re.advertiser_id = 36586 THEN IF(STARTS_WITH(re.sku_number, "M") OR STARTS_WITH(re.sku_number, "R"), substr(re.sku_number, STRPOS(re.sku_number, "_") + 1), re.sku_number)
+            WHEN re.advertiser_id = 41610 THEN substr(re.sku_number, 13)
             ELSE re.sku_number END as sku_id
           ,re.product_name as product_name
           ,re.transaction_date as transaction_at

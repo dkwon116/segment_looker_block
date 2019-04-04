@@ -8,7 +8,7 @@ view: order_facts {
         , ef.event_id
         , o.transaction_at
         , o.order_sequence_number
-        , o.total
+        , o.krw_total
       from ${orders.SQL_TABLE_NAME} as o
       LEFT JOIN ${event_facts.SQL_TABLE_NAME} as ef
       ON CONCAT(cast(o.transaction_at as string), o.user_id, '-r') = ef.event_id
@@ -48,6 +48,6 @@ view: order_facts {
 
   dimension: total {
     type: number
-    sql: ${TABLE}.total ;;
+    sql: ${TABLE}.krw_total ;;
   }
 }

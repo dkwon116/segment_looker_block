@@ -180,6 +180,27 @@ explore: event_facts {
   }
 }
 
+explore: order_items {
+  join: orders {
+    type: left_outer
+    sql_on: ${order_items.order_id} = ${orders.order_id} ;;
+    relationship: many_to_one
+  }
+
+  join: event_facts {
+    sql_on: ${orders.user_id} = ${event_facts.looker_visitor_id}
+    and CONCAT(${orders.transaction_at_raw}, ${orders.user_id}, "-r") = ${event_facts.event_id};;
+    type: left_outer
+    relationship: one_to_one
+  }
+
+  join: catch_users {
+    sql_on: ${order_items.user_id} = ${catch_users.id} ;;
+    type: left_outer
+    relationship: many_to_one
+  }
+}
+
 explore: affiliate_orders {
   join: event_facts {
     sql_on: ${affiliate_orders.user_id} = ${event_facts.looker_visitor_id} ;;
@@ -222,12 +243,6 @@ explore: product_list_viewed {
     relationship: one_to_many
   }
 }
-
-explore: page_aliases_mapping {}
-
-explore: orders {}
-
-explore: order_facts {}
 
 explore: event_list {
   hidden: yes
@@ -276,8 +291,3 @@ explore: product_events {
     fields: []
   }
 }
-
-explore: affiliate_events {}
-
-explore: order_items {}
-# explore: pages {}
