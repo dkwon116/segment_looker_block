@@ -77,7 +77,7 @@ view: affiliate_orders {
 
   dimension: total {
     type: number
-    sql: ${TABLE}.total ;;
+    sql: ${TABLE}.total / 10000;;
     value_format_name: decimal_0
   }
 

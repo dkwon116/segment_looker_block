@@ -5,6 +5,11 @@ view: catch_users {
     primary_key: yes
     type: string
     sql: ${TABLE}.id ;;
+    link: {
+      label: "Go to {{value}} dashboard"
+      url: "https://smileventures.au.looker.com/dashboards/19?UserID= {{value | encode_url}}"
+      icon_url: "https://looker.com/favicon.ico"
+    }
   }
 
   dimension: _fivetran_deleted {

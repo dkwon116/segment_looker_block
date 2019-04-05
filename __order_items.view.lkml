@@ -7,7 +7,7 @@ view: order_items {
           , CASE
             -- remove duplicate for Mr Porter
             WHEN re.advertiser_id = 36586 THEN IF(STARTS_WITH(re.sku_number, "M") OR STARTS_WITH(re.sku_number, "R"), substr(re.sku_number, STRPOS(re.sku_number, "_") + 1), re.sku_number)
-            WHEN re.advertiser_id = 41610 THEN substr(re.sku_number, 13)
+            WHEN re.advertiser_id = 41610 THEN substr(re.sku_number, 1, 13)
             ELSE re.sku_number END as sku_id
           ,re.product_name as product_name
           ,re.transaction_date as transaction_at
@@ -32,7 +32,8 @@ view: order_items {
         )
 
         SELECT
-          e.order_id
+          CONCAT(e.order_id, "-", e.sku_id) as id
+          ,e.order_id
           ,e.sku_id
           ,e.transaction_at
           ,e.vendor
@@ -62,7 +63,7 @@ view: order_items {
             ,e.currency
             ,IF(STARTS_WITH(e.decoded_user_id, "seg_"), SUBSTR(e.decoded_user_id, 5, 36), SUBSTR(e.decoded_user_id, 1, 36)) as user_id
             ,first_value(e.is_event) over (partition by e.order_id, e.sku_id, e.order_type order by e.is_event, e.process_at rows between unbounded preceding and unbounded following) as is_event
-            ,first_value(e.transaction_at) over (partition by e.order_id, e.sku_id, e.order_type order by e.is_event, e.process_at rows between unbounded preceding and unbounded following) as transaction_at
+            ,first_value(e.transaction_at) over (partition by e.order_id, e.sku_id order by e.is_event, e.process_at rows between unbounded preceding and unbounded following) as transaction_at
             ,first_value(e.product_name) over (partition by e.order_id, e.sku_id, e.order_type order by e.is_event, e.process_at rows between unbounded preceding and unbounded following) as product_name
             ,first_value(e.sale_amount) over (partition by e.order_id, e.sku_id, e.order_type order by e.is_event, e.process_at rows between unbounded preceding and unbounded following) as sale_amount
             ,first_value(e.process_at) over (partition by e.order_id, e.sku_id, e.order_type order by e.is_event, e.process_at rows between unbounded preceding and unbounded following) as process_at
@@ -72,10 +73,16 @@ view: order_items {
             ON DATE_SUB(DATE(e.transaction_at), INTERVAL 1 DAY) = c.date
               AND e.currency = c.unit
           WHERE e.user_id NOT IN (SELECT user_id FROM google_sheets.filter_user)
-          GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
+          GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14
 
 
     ;;
+  }
+
+  dimension: id {
+    type: string
+    sql: ${TABLE}.id ;;
+    primary_key: yes
   }
 
   dimension: order_id {
@@ -140,4 +147,13 @@ view: order_items {
     sql: ${TABLE}.is_confirmed ;;
   }
 
+  measure: total_sales {
+    type: sum
+    sql: ${krw_amount} ;;
+  }
+
+#   measure: count {
+#     type: count
+#     sql: ${id} ;;
+#   }
 }

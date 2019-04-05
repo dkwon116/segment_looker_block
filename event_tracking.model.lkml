@@ -291,3 +291,5 @@ explore: product_events {
     fields: []
   }
 }
+
+explore: cashbacks {}
