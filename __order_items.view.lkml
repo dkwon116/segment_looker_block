@@ -5,14 +5,15 @@ view: order_items {
         SELECT
           re.order_id
           , CASE
-            -- remove duplicate for Mr Porter
+            -- remove duplicate for Mr Porter. Between events MR Porter prepends M / R / MR
             WHEN re.advertiser_id = 36586 THEN IF(STARTS_WITH(re.sku_number, "M") OR STARTS_WITH(re.sku_number, "R"), substr(re.sku_number, STRPOS(re.sku_number, "_") + 1), re.sku_number)
+            -- ssense sometimes add extra at the end of sku_id
             WHEN re.advertiser_id = 41610 THEN substr(re.sku_number, 1, 13)
             ELSE re.sku_number END as sku_id
           ,re.product_name as product_name
           ,re.transaction_date as transaction_at
           ,re.advertiser_id as vendor_id
-          ,ROUND(re.sale_amount) as sale_amount
+          ,ROUND(re.sale_amount, 2) as sale_amount
           ,re.currency as currency
           ,re.process_date as process_at
           ,re.u1 as encoded_user_id
@@ -30,7 +31,7 @@ view: order_items {
 
         WHERE re.sale_amount IS NOT NULL
         )
-
+        -- group by single order item. order_id and sku_id should be unique
         SELECT
           CONCAT(e.order_id, "-", e.sku_id) as id
           ,e.order_id
@@ -42,7 +43,7 @@ view: order_items {
           ,e.user_id
           ,e.product_name
           ,e.sale_amount
-          ,(e.sale_amount * c.rate) as krw_amount
+          ,ROUND(e.sale_amount * c.rate) as krw_amount
           ,e.process_at
           , CASE
             -- Matches Fashion
@@ -53,13 +54,14 @@ view: order_items {
           as vendor_product_id
           ,IF(e.is_event = "N", true, false) as is_confirmed
         FROM (
+        -- normalize to single record by selecting is_event = n record, if exists
           SELECT
             e.order_id
             ,e.sku_id
             ,e.vendor
             ,e.vendor_id
             ,e.order_type
-            ,e.quantity
+            ,first_value(e.quantity) over (partition by e.order_id, e.sku_id, e.order_type order by e.is_event, e.process_at rows between unbounded preceding and unbounded following) as quantity
             ,e.currency
             ,IF(STARTS_WITH(e.decoded_user_id, "seg_"), SUBSTR(e.decoded_user_id, 5, 36), SUBSTR(e.decoded_user_id, 1, 36)) as user_id
             ,first_value(e.is_event) over (partition by e.order_id, e.sku_id, e.order_type order by e.is_event, e.process_at rows between unbounded preceding and unbounded following) as is_event
@@ -72,7 +74,6 @@ view: order_items {
             -- if on sat (7) - mon (2), then get previous friday / otherwise get previous day
             ON DATE_SUB(DATE(e.transaction_at), INTERVAL 1 DAY) = c.date
               AND e.currency = c.unit
-          WHERE e.user_id NOT IN (SELECT user_id FROM google_sheets.filter_user)
           GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14
 
 
@@ -156,4 +157,9 @@ view: order_items {
 #     type: count
 #     sql: ${id} ;;
 #   }
+
+  measure: count_users {
+    type: count_distinct
+    sql: ${user_id} ;;
+  }
 }

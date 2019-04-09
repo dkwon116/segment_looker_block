@@ -1,5 +1,29 @@
 view: cashbacks {
-  sql_table_name: mysql_smile_ventures.cashbacks ;;
+  derived_table: {
+    sql_trigger_value: select count(*) from mysql_smile_ventures.cashbacks ;;
+    sql:
+    SELECT
+      c.id
+      , c.created_at
+      , c.amount
+      , c.order_id
+      , c.account_number
+      , c.entity_name
+      , c.paid_date
+      , c.rate
+      , c.status
+      , c.updated_at
+      , c.user_id
+      , c.withdrawal_date
+      , c.rakuten_order_id
+      , o.transaction_date
+      , o.sku_number
+    FROM mysql_smile_ventures.cashbacks as c
+    LEFT JOIN mysql_smile_ventures.rakuten_orders as o
+      ON c.rakuten_order_id = o.id
+    where c._fivetran_deleted = false
+    ;;
+  }
 
   dimension: id {
     primary_key: yes
@@ -7,28 +31,10 @@ view: cashbacks {
     sql: ${TABLE}.id ;;
   }
 
-  dimension: _fivetran_deleted {
-    type: yesno
-    sql: ${TABLE}._fivetran_deleted ;;
-  }
-
-  dimension_group: _fivetran_synced {
-    type: time
-    timeframes: [
-      raw,
-      time,
-      date,
-      week,
-      month,
-      quarter,
-      year
-    ]
-    sql: ${TABLE}._fivetran_synced ;;
-  }
-
   dimension: account_number {
     type: string
     sql: ${TABLE}.account_number ;;
+    group_label: "Cashout Info"
   }
 
   dimension: amount {
@@ -53,6 +59,7 @@ view: cashbacks {
   dimension: entity_name {
     type: string
     sql: ${TABLE}.entity_name ;;
+    group_label: "Cashout Info"
   }
 
   dimension: order_id {
@@ -76,7 +83,7 @@ view: cashbacks {
 
   dimension: product_id {
     type: string
-    sql: ${TABLE}.product_id ;;
+    sql: ${TABLE}.sku_number ;;
   }
 
   dimension: rakuten_order_id {
@@ -130,6 +137,20 @@ view: cashbacks {
       year
     ]
     sql: ${TABLE}.withdrawal_date ;;
+  }
+
+  dimension_group: transaction {
+    type: time
+    timeframes: [
+      raw,
+      time,
+      date,
+      week,
+      month,
+      quarter,
+      year
+    ]
+    sql: ${TABLE}.transaction_date ;;
   }
 
   measure: count {

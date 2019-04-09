@@ -12,7 +12,7 @@ view: orders {
         , sum(e.krw_amount) as total
         , row_number() over(partition by e.user_id order by e.transaction_at) as order_sequence_number
     FROM ${order_items.SQL_TABLE_NAME} as e
-    WHERE e.user_id NOT IN (SELECT user_id FROM google_sheets.filter_user)
+    -- WHERE e.user_id NOT IN (SELECT user_id FROM google_sheets.filter_user)
     GROUP BY 1, 2, 3, 4
 
     ;;
@@ -68,8 +68,7 @@ view: orders {
 
   dimension: total {
     type: number
-    description: "in 만원"
-    sql: ${TABLE}.total ;;
+    sql: ${TABLE}.total / 10000 ;;
     value_format_name: decimal_0
   }
 
@@ -77,7 +76,7 @@ view: orders {
     type: number
     description: "in 만원"
     sql: ${total} / 10000 ;;
-    value_format_name: decimal_0
+    value_format_name: decimal_2
   }
 
   dimension: price_per_unit {

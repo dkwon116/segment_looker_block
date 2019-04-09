@@ -199,6 +199,18 @@ explore: order_items {
     type: left_outer
     relationship: many_to_one
   }
+
+  join: cashbacks {
+    sql_on: ${order_items.order_id} = ${cashbacks.order_id} and ${order_items.sku_id} = ${cashbacks.product_id} ;;
+    type: left_outer
+    relationship: one_to_many
+  }
+
+  join: order_facts {
+    sql_on: ${orders.order_id} = ${order_facts.order_id} ;;
+    type: left_outer
+    relationship: one_to_one
+  }
 }
 
 explore: affiliate_orders {
@@ -293,3 +305,5 @@ explore: product_events {
 }
 
 explore: cashbacks {}
+
+explore: orders {}
