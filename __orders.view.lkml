@@ -46,13 +46,13 @@ view: orders {
 
   dimension_group: transaction_at {
     type: time
-    timeframes: [raw, time, date, week, month]
+    timeframes: [raw, time, date, week, month, quarter]
     sql: ${TABLE}.transaction_at ;;
   }
 
   dimension_group: created_at {
     type: time
-    timeframes: [raw, time, date, week, month]
+    timeframes: [raw, time, date, week, month, quarter]
     sql: ${TABLE}.created_at ;;
   }
 
@@ -68,7 +68,8 @@ view: orders {
 
   dimension: total {
     type: number
-    sql: ${TABLE}.total / 10000 ;;
+    sql: ${TABLE}.total / 1000 ;;
+    description: "in 천원"
     value_format_name: decimal_0
   }
 

@@ -143,6 +143,11 @@ view: order_items {
     sql: ${TABLE}.krw_amount ;;
   }
 
+  dimension: order_type {
+    type: string
+    sql: ${TABLE}.order_type ;;
+  }
+
   dimension: is_confirmed {
     type: yesno
     sql: ${TABLE}.is_confirmed ;;
@@ -161,5 +166,19 @@ view: order_items {
   measure: count_users {
     type: count_distinct
     sql: ${user_id} ;;
+  }
+
+  measure: gross_sales {
+    type: sum
+    sql: ${krw_amount} ;;
+    filters: {
+      field: order_type
+      value: "purchase"
+    }
+  }
+
+  measure: sales_net_of_returns {
+    type: sum
+    sql: ${krw_amount} ;;
   }
 }
