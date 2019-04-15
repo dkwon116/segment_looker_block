@@ -158,10 +158,9 @@ view: order_items {
     sql: ${krw_amount} ;;
   }
 
-#   measure: count {
-#     type: count
-#     sql: ${id} ;;
-#   }
+  measure: count {
+    type: count
+  }
 
   measure: count_users {
     type: count_distinct

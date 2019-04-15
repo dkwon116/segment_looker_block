@@ -11,7 +11,7 @@ view: currencies {
         select
           d.date
           ,d.unit
-          ,coalesce(c.bkpr, c2.bkpr, c3.bkpr, c4.bkpr, c5.bkpr) as rate
+          ,coalesce(c.tts, c2.tts, c3.tts, c4.tts, c5.tts) as rate
 
         FROM daily_exc as d
         LEFT JOIN mysql_smile_ventures.currencies as c
@@ -24,7 +24,7 @@ view: currencies {
           ON d.date = DATE_ADD(DATE(c4.date), INTERVAL 3 DAY) AND d.unit = c4.cur_unit
         LEFT JOIN mysql_smile_ventures.currencies as c5
           ON d.date = DATE_ADD(DATE(c5.date), INTERVAL 4 DAY) AND d.unit = c5.cur_unit
-        WHERE coalesce(c.bkpr, c2.bkpr, c3.bkpr, c4.bkpr, c5.bkpr) IS NOT NULL
+        WHERE coalesce(c.tts, c2.tts, c3.tts, c4.tts, c5.tts) IS NOT NULL
       ;;
   }
 
