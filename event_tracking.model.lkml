@@ -130,10 +130,10 @@ explore: event_facts {
     relationship: one_to_one
   }
 
-  join: affiliate_orders {
+  join: order_items {
     view_label: "Order_Products"
     type: left_outer
-    sql_on: ${orders.order_id} = ${affiliate_orders.order_id};;
+    sql_on: ${orders.order_id} = ${order_items.order_id};;
     relationship: one_to_many
     }
 
@@ -181,6 +181,7 @@ explore: event_facts {
 }
 
 explore: order_items {
+  label: "Orders"
   join: orders {
     type: left_outer
     sql_on: ${order_items.order_id} = ${orders.order_id} ;;
@@ -210,39 +211,6 @@ explore: order_items {
     sql_on: ${orders.order_id} = ${order_facts.order_id} ;;
     type: left_outer
     relationship: one_to_one
-  }
-}
-
-explore: affiliate_orders {
-  join: event_facts {
-    sql_on: ${affiliate_orders.user_id} = ${event_facts.looker_visitor_id} ;;
-    type: left_outer
-    relationship: many_to_many
-  }
-
-  join: orders {
-    type: left_outer
-    sql_on: ${affiliate_orders.order_id} = ${orders.order_id} ;;
-    relationship: many_to_one
-  }
-
-  join: affiliate_events {
-    sql_on: ${affiliate_orders.order_id} = ${affiliate_events.order_id}
-      and ${affiliate_orders.sku_number} = ${affiliate_events.sku_number};;
-    type: left_outer
-    relationship: one_to_many
-  }
-
-  join: cashbacks {
-    sql_on: ${affiliate_orders.id} = ${cashbacks.rakuten_order_id} ;;
-    type: left_outer
-    relationship: one_to_one
-  }
-
-  join: concierge_clicked_view {
-    sql_on: ${affiliate_orders.user_id} = ${concierge_clicked_view.user_id}
-      and ${affiliate_orders.transaction_date} = ${concierge_clicked_view.timestamp_date};;
-    relationship: one_to_many
   }
 }
 
@@ -303,7 +271,7 @@ explore: product_events {
     fields: []
   }
 }
-
-explore: cashbacks {}
-
-explore: orders {}
+#
+# explore: cashbacks {}
+#
+# explore: orders {}

@@ -1,26 +1,27 @@
 view: cashbacks {
   derived_table: {
-    sql_trigger_value: select count(*) from mysql_smile_ventures.cashbacks ;;
+    sql_trigger_value: select count(*) from data_data_api_db.cashbacks ;;
     sql:
     SELECT
       c.id
       , c.created_at
       , c.amount
       , c.order_id
+      , c.sku_number
       , c.account_number
       , c.entity_name
       , c.paid_date
       , c.rate
       , c.status
-      , c.updated_at
+      , c.confirmed_date
       , c.user_id
-      , c.withdrawal_date
-      , c.rakuten_order_id
-      , o.transaction_date
-      , o.sku_number
-    FROM mysql_smile_ventures.cashbacks as c
-    LEFT JOIN mysql_smile_ventures.rakuten_orders as o
-      ON c.rakuten_order_id = o.id
+      , c.available_date
+      , coalesce(c.acknowledged_date, c.confirmed_date) as transaction_date
+      , r.name as vendor
+
+    FROM data_data_api_db.cashbacks as c
+    LEFT JOIN ${retailers.SQL_TABLE_NAME} as r
+      ON c.advertiser_id = r.vendor_id
     where c._fivetran_deleted = false
     ;;
   }
@@ -86,10 +87,10 @@ view: cashbacks {
     sql: ${TABLE}.sku_number ;;
   }
 
-  dimension: rakuten_order_id {
-    type: string
-    sql: ${TABLE}.rakuten_order_id ;;
-  }
+  # dimension: rakuten_order_id {
+  #   type: string
+  #   sql: ${TABLE}.rakuten_order_id ;;
+  # }
 
   dimension: rate {
     type: number
@@ -101,7 +102,7 @@ view: cashbacks {
     sql: ${TABLE}.status ;;
   }
 
-  dimension_group: updated {
+  dimension_group: confirmed {
     type: time
     timeframes: [
       raw,
@@ -112,7 +113,7 @@ view: cashbacks {
       quarter,
       year
     ]
-    sql: ${TABLE}.updated_at ;;
+    sql: ${TABLE}.confirmed_date ;;
   }
 
   dimension: user_id {
@@ -125,7 +126,7 @@ view: cashbacks {
     sql: ${TABLE}.vendor ;;
   }
 
-  dimension_group: withdrawal {
+  dimension_group: available {
     type: time
     timeframes: [
       raw,
@@ -136,7 +137,7 @@ view: cashbacks {
       quarter,
       year
     ]
-    sql: ${TABLE}.withdrawal_date ;;
+    sql: ${TABLE}.available_date ;;
   }
 
   dimension_group: transaction {
@@ -165,6 +166,6 @@ view: cashbacks {
   }
 
   set: cashback_info {
-    fields: [rakuten_order_id, user_id, status, amount, affiliate_orders.order_id, affiliate_orders.total]
+    fields: [user_id, status, amount, affiliate_orders.order_id, affiliate_orders.total]
   }
 }
