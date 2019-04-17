@@ -131,7 +131,7 @@ view: order_items {
     sql: ${krw_amount} ;;
     filters: {
       field: order_type
-      value: "purchase"
+      value: "P"
     }
   }
 

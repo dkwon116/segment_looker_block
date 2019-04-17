@@ -3,7 +3,7 @@ view: cashbacks {
     sql_trigger_value: select count(*) from data_data_api_db.cashbacks ;;
     sql:
     SELECT
-      c.id
+      CONCAT(c.order_id, "-", c.sku_number) as id
       , c.created_at
       , c.amount
       , c.order_id

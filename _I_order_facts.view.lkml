@@ -71,7 +71,7 @@ view: order_facts {
 
   dimension: cashback_error_rate {
     type: number
-    sql: ${total_cashback} / NULLIF((${total} * 0.98 * ${cashback_rate}), 0) - 1;;
+    sql: ${total_cashback} / NULLIF((${total} * (${cashback_rate}) - 0.5), 0) - 1;;
   }
 
   dimension: is_cashback_correct {
@@ -83,6 +83,11 @@ view: order_facts {
     hidden: yes
     type: time
     sql: ${TABLE}.next_ordered ;;
+  }
+
+  dimension: is_sameday_repurcahse {
+    type: yesno
+    sql: IF(${repurchase_gap} < 1, true, false) ;;
   }
 
   dimension: repurchase_gap {
