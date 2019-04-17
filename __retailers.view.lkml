@@ -1,6 +1,6 @@
 view: retailers {
   derived_table: {
-      sql_trigger_value: SELECT EXTRACT(DATE FROM CURRENT_TIMESTAMP() AT TIME ZONE 'US/Pacific') ;;
+      sql_trigger_value: SELECT count(*) from google_sheets.retailers ;;
       sql:
         SELECT r.mid as vendor_id
           , r.retailer_list as name
