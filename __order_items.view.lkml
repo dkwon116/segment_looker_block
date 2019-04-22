@@ -115,7 +115,8 @@ view: order_items {
 
   measure: total_sales {
     type: sum
-    sql: ${krw_amount} ;;
+    sql: ${krw_amount} / 1000 ;;
+    value_format_name: decimal_0
   }
 
   measure: count {
