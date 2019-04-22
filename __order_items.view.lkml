@@ -29,6 +29,7 @@ view: order_items {
         FROM data_data_api_db.affiliate_order_item as e
         LEFT JOIN ${retailers.SQL_TABLE_NAME} as r
           ON e.advertiser_id = r.vendor_id
+        WHERE e._fivetran_deleted = false
 
 
     ;;

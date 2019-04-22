@@ -13,15 +13,13 @@ view: cashbacks {
       , c.paid_date
       , c.rate
       , c.status
-      , c.confirmed_date
+      , c.process_date as confirmed_date
       , c.user_id
-      , c.available_date
-      , coalesce(c.acknowledged_date, c.confirmed_date) as transaction_date
-      , r.name as vendor
+      , c.withdrawal_date as available_date
+      , c.transaction_date
+      , c.vendor
 
-    FROM data_data_api_db.cashbacks as c
-    LEFT JOIN ${retailers.SQL_TABLE_NAME} as r
-      ON c.advertiser_id = r.vendor_id
+    FROM mysql_smile_ventures.cashbacks as c
     where c._fivetran_deleted = false
     ;;
   }

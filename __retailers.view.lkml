@@ -5,6 +5,7 @@ view: retailers {
         SELECT r.mid as vendor_id
           , r.retailer_list as name
         FROM google_sheets.retailers as r
+        WHERE r._fivetran_deleted = false
       ;;
   }
 
