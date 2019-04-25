@@ -141,4 +141,9 @@ view: order_items {
     type: sum
     sql: ${krw_amount} ;;
   }
+
+  measure: distinct_orders {
+    type: count_distinct
+    sql: ${order_id} ;;
+  }
 }

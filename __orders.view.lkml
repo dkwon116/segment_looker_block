@@ -9,7 +9,8 @@ view: orders {
         , max(e.process_at) as created_at
         , sum(e.quantity) as quantity
         , sum(e.sale_amount) as original_total
-        , sum(e.krw_amount) as total
+        , sum(IF(e.order_type = "P", e.krw_amount, 0)) as total
+        , sum(IF(e.order_type = "R", e.krw_amount, 0)) as total_return
         , row_number() over(partition by e.user_id order by e.transaction_at) as order_sequence_number
     FROM ${order_items.SQL_TABLE_NAME} as e
     -- WHERE e.user_id NOT IN (SELECT user_id FROM google_sheets.filter_user)
@@ -80,6 +81,17 @@ view: orders {
     value_format_name: decimal_2
   }
 
+  dimension: total_return {
+    type: number
+    sql: ${TABLE}.total_return ;;
+    value_format_name: decimal_0
+  }
+
+  dimension: net_sales {
+    type: number
+    sql: ${total} - ${total_return} ;;
+  }
+
   dimension: price_per_unit {
     type: number
     sql: ${total} / ${quantity} ;;
@@ -121,13 +133,15 @@ view: orders {
 
   measure: total_order_amount {
     type: sum
-    description: "only purchases, no returns"
+    description: "Product GMV"
     sql: ${total} ;;
     value_format_name: decimal_0
-#     filters: {
-#       field: total_m
-#       value: ">0"
-#     }
+  }
+
+  measure: net_order_amount {
+    type: sum
+    description: "Net of returns & cancellation"
+    sql: ${net_sales} ;;
   }
 
   measure: average_order_value {
@@ -151,11 +165,5 @@ view: orders {
     type: count_distinct
     sql_distinct_key: ${user_id} ;;
     sql: ${user_id} ;;
-  }
-
-  measure: order_amount {
-    type: sum
-    description: "all inclusive (order/return)"
-    sql: ${total} ;;
   }
 }
