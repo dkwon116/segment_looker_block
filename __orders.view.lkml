@@ -13,7 +13,7 @@ view: orders {
         , sum(IF(e.order_type = "R", e.krw_amount, 0)) as total_return
         , row_number() over(partition by e.user_id order by e.transaction_at) as order_sequence_number
     FROM ${order_items.SQL_TABLE_NAME} as e
-    -- WHERE e.user_id NOT IN (SELECT user_id FROM google_sheets.filter_user)
+    WHERE e.order_id NOT IN (SELECT order_id FROM google_sheets.test_orders)
     GROUP BY 1, 2, 3, 4
 
     ;;
@@ -83,7 +83,7 @@ view: orders {
 
   dimension: total_return {
     type: number
-    sql: ${TABLE}.total_return ;;
+    sql: ${TABLE}.total_return / 1000;;
     value_format_name: decimal_0
   }
 
@@ -142,6 +142,18 @@ view: orders {
     type: sum
     description: "Net of returns & cancellation"
     sql: ${net_sales} ;;
+  }
+
+  measure: total_return_amount {
+    type: sum
+    sql: ${total_return} ;;
+    value_format_name: decimal_0
+  }
+
+  measure: return_rate {
+    type: number
+    sql: - ${total_return_amount} / ${total_order_amount} ;;
+    value_format_name: percent_1
   }
 
   measure: average_order_value {

@@ -25,6 +25,7 @@ view: user_facts {
         , us.first_campaign as first_campaign
         , cu.id as is_user
         , cu.created_at as signed_up_date
+        , COALESCE(ut.type,"Customer") as user_type
         , MIN(s.session_start_at) as first_date
         , MAX(s.session_start_at) as last_date
         , COUNT(s.session_id) as number_of_sessions
@@ -33,16 +34,18 @@ view: user_facts {
         , COUNT(o.order_id) as orders_completed
         , SUM(o.total) as lifetime_order_value
 
-      FROM ${sessions.SQL_TABLE_NAME} as s
+      FROM mysql_smile_ventures.users as cu
+      LEFT JOIN ${sessions.SQL_TABLE_NAME} as s
+        ON cu.id = s.looker_visitor_id
       LEFT JOIN ${session_facts.SQL_TABLE_NAME} as sf
         ON s.session_id = sf.session_id
       LEFT JOIN user_sources as us
-        ON s.looker_visitor_id = us.looker_visitor_id
-      LEFT JOIN mysql_smile_ventures.users as cu
-        ON s.looker_visitor_id = cu.id
+        ON cu.id = us.looker_visitor_id
       LEFT JOIN ${order_facts.SQL_TABLE_NAME} as o
         ON s.session_id = o.session_id
-      GROUP BY 1,2,3,4,5,6,7
+      LEFT JOIN google_sheets.user_type as ut
+        ON cu.id = ut.user_id
+      GROUP BY 1,2,3,4,5,6,7,8
 
        ;;
   }
@@ -72,6 +75,11 @@ view: user_facts {
   dimension: is_user_id {
     type: string
     sql: ${TABLE}.is_user ;;
+  }
+
+  dimension: user_type {
+    type: string
+    sql: ${TABLE}.user_type ;;
   }
 
   dimension: number_of_sessions {

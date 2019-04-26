@@ -201,6 +201,12 @@ explore: order_items {
     relationship: many_to_one
   }
 
+  join: user_facts {
+    sql_on: ${catch_users.id} = ${user_facts.looker_visitor_id} ;;
+    type: left_outer
+    relationship: one_to_one
+  }
+
   join: cashbacks {
     sql_on: ${order_items.order_id} = ${cashbacks.order_id} and ${order_items.sku_id} = ${cashbacks.product_id} ;;
     type: left_outer
