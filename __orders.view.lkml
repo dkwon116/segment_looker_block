@@ -150,9 +150,25 @@ view: orders {
     value_format_name: decimal_0
   }
 
+  measure: total_reseller_amount {
+    type: sum
+    sql: ${total} ;;
+    value_format_name: decimal_0
+    filters: {
+      field: user_facts.user_type
+      value: "Reseller"
+    }
+  }
+
   measure: return_rate {
     type: number
-    sql: - ${total_return_amount} / ${total_order_amount} ;;
+    sql: - ${total_return_amount} / NULLIF(${total_order_amount}, 0) ;;
+    value_format_name: percent_1
+  }
+
+  measure: percent_of_reseller {
+    type: number
+    sql: ${total_reseller_amount} / NULLIF(${total_order_amount}, 0) ;;
     value_format_name: percent_1
   }
 

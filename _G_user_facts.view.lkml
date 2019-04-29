@@ -65,6 +65,7 @@ view: user_facts {
   dimension: name {
     type: string
     sql: ${TABLE}.name ;;
+    hidden: yes
   }
 
   dimension: is_user {

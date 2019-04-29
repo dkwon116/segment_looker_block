@@ -112,6 +112,7 @@ view: catch_users {
   dimension: first_name {
     type: string
     sql: ${TABLE}.first_name ;;
+    hidden: yes
   }
 
   dimension: gender {
