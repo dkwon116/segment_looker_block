@@ -99,8 +99,8 @@ view: orders {
 
   dimension: total_tier {
     type: tier
-    tiers: [0, 10, 20, 50, 100, 200]
-    sql: ${total_m} ;;
+    tiers: [0, 100, 300, 500, 1000, 2000]
+    sql: ${total} ;;
     style: integer
   }
 

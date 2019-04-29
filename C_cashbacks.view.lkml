@@ -17,6 +17,7 @@ view: cashbacks {
       , c.user_id
       , c.withdrawal_date as available_date
       , c.transaction_date
+      , c.requested_date
       , c.vendor
       , DATE_DIFF(CAST(c.transaction_date as DATE), CAST(c.paid_date as DATE), DAY) as time_to_pay
 
@@ -151,6 +152,20 @@ view: cashbacks {
       year
     ]
     sql: ${TABLE}.transaction_date ;;
+  }
+
+  dimension_group: requested {
+    type: time
+    timeframes: [
+      raw,
+      time,
+      date,
+      week,
+      month,
+      quarter,
+      year
+    ]
+    sql: ${TABLE}.requested_date ;;
   }
 
   measure: count {

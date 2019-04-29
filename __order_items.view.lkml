@@ -8,7 +8,7 @@ view: order_items {
           ,e.order_id
           ,e.sku_number as sku_id
           -- ,e.transaction_date as transaction_at
-          ,first_value(e.transaction_date) over (partition by e.order_id, e.sku_number order by e.transaction_date rows between unbounded preceding and unbounded following) as transaction_at
+          ,first_value(e.transaction_date) over (partition by e.order_id order by e.transaction_date rows between unbounded preceding and unbounded following) as transaction_at
           ,r.name as vendor
           ,e.order_type
           ,IF(e.order_type = "P", e.quantity, 0 - e.quantity) as quantity
