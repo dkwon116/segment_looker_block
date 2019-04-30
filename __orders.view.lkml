@@ -90,6 +90,7 @@ view: orders {
   dimension: net_sales {
     type: number
     sql: ${total} - ${total_return} ;;
+    value_format_name: decimal_0
   }
 
   dimension: price_per_unit {
@@ -142,6 +143,7 @@ view: orders {
     type: sum
     description: "Net of returns & cancellation"
     sql: ${net_sales} ;;
+    value_format_name: decimal_0
   }
 
   measure: total_return_amount {

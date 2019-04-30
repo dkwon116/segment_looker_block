@@ -102,7 +102,7 @@ view: order_facts {
     sql: ${repurchase_gap} ;;
   }
 
-  dimension:  repurchase_made{
+  dimension:  is_repurchase{
     type: yesno
     hidden: yes
     sql: ${repurchase_gap} IS NOT NULL ;;
@@ -113,7 +113,7 @@ view: order_facts {
     type: count_distinct
     sql: ${user_id} ;;
     filters: {
-      field: repurchase_made
+      field: is_repurchase
       value: "yes"
     }
   }
