@@ -7,9 +7,8 @@ view: order_items {
           CONCAT(e.order_id, "-", e.sku_number, "-", e.order_type) as id
           ,e.order_id
           ,e.sku_number as sku_id
-          -- ,e.transaction_date as transaction_at
           ,first_value(e.transaction_date) over (partition by e.order_id order by e.transaction_date rows between unbounded preceding and unbounded following) as transaction_at
-          ,r.name as vendor
+          ,coalesce(r.name, r2.name) as vendor
           ,e.order_type
           ,IF(e.order_type = "P", e.quantity, 0 - e.quantity) as quantity
           ,e.user_id
@@ -29,6 +28,8 @@ view: order_items {
         FROM data_data_api_db.affiliate_order_item as e
         LEFT JOIN ${retailers.SQL_TABLE_NAME} as r
           ON e.advertiser_id = r.vendor_id
+        LEFT JOIN ${retailers.SQL_TABLE_NAME} as r2
+          ON e.advertiser_id = r2.partnerize_id
         WHERE e._fivetran_deleted = false
 
 
