@@ -47,7 +47,7 @@ view: orders {
 
   dimension_group: transaction_at {
     type: time
-    timeframes: [raw, time, date, week, month, quarter]
+    timeframes: [raw, time, hour, date, week, month, quarter]
     sql: ${TABLE}.transaction_at ;;
   }
 
