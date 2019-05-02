@@ -137,40 +137,6 @@ explore: event_facts {
     relationship: one_to_many
     }
 
-#   join: tracks_products {
-#     type: left_outer
-#     sql_on: ${event_facts.event_id} = ${tracks_products.event_id} ;;
-#     relationship: one_to_many
-#   }
-#
-#   join: product_facts {
-#     type: left_outer
-#     sql_on: ${tracks_products.product_id} = ${product_facts.id} ;;
-#     relationship: many_to_one
-#   }
-
-  # join: products {
-  #   view_label: "Product"
-  #   type: left_outer
-  #   sql_on: ${tracks_products.product_id} = ${products.id} ;;
-  #   relationship: many_to_one
-  # }
-
-  # join: brands {
-  #   view_label: "Product"
-  #   type: left_outer
-  #   sql_on: ${products.brand_id} = ${brands.id} ;;
-  #   relationship: one_to_one
-  # }
-
-  # join: products_categories {
-  #   view_label: "Product"
-  #   type: left_outer
-  #   sql_on: ${products.id} = ${products_categories.product_id} ;;
-  #   relationship: one_to_many
-  #   fields: []
-  # }
-
   join: list_facts {
     from: categories
     type: left_outer

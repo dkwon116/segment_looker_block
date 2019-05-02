@@ -19,7 +19,7 @@ view: order_items {
           ,e.advertiser_id
           , CASE
             -- Matches Fashion
-            WHEN e.advertiser_id = "39265" THEN substr(e.sku_number, 1, 8)
+            WHEN e.advertiser_id = "39265" THEN substr(e.sku_number, 1, 7)
             -- Farfetch
             WHEN e.advertiser_id = "37938" THEN IF(STARTS_WITH(e.sku_number, "R"), substr(e.sku_number, 3, 8), substr(e.sku_number, 1, 8))
             ELSE e.sku_number END

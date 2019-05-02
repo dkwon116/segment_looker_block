@@ -523,6 +523,13 @@ view: session_facts {
     drill_fields: [order_completed_details*]
   }
 
+  measure: outlink_to_order_completed_conversion_rate {
+    type: number
+    sql: ${total_order_completed_users} / NULLIF(${total_outlinked_users}, 0) ;;
+    value_format_name: percent_0
+    group_label: "Order Completed"
+  }
+
 
   measure: bounce_rate {
     type: number
