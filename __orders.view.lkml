@@ -9,8 +9,8 @@ view: orders {
         , max(e.process_at) as created_at
         , sum(e.quantity) as quantity
         , sum(e.sale_amount) as original_total
-        , sum(IF(e.order_type = "P", e.krw_amount, 0)) as total
-        , sum(IF(e.order_type = "R", e.krw_amount, 0)) as total_return
+        , sum(IF(e.order_type = "P", e.krw_amount, 0)) / 1000 as total
+        , sum(IF(e.order_type = "R", e.krw_amount, 0)) / 1000 as total_return
         , row_number() over(partition by e.user_id order by e.transaction_at) as order_sequence_number
     FROM ${order_items.SQL_TABLE_NAME} as e
     WHERE e.order_id NOT IN (SELECT order_id FROM google_sheets.test_orders)
@@ -69,27 +69,20 @@ view: orders {
 
   dimension: total {
     type: number
-    sql: ${TABLE}.total / 1000 ;;
+    sql: ${TABLE}.total ;;
     description: "in 천원"
     value_format_name: decimal_0
   }
 
-  dimension: total_m {
-    type: number
-    description: "in 만원"
-    sql: ${total} / 10000 ;;
-    value_format_name: decimal_2
-  }
-
   dimension: total_return {
     type: number
-    sql: ${TABLE}.total_return / 1000;;
+    sql: ${TABLE}.total_return;;
     value_format_name: decimal_0
   }
 
   dimension: net_sales {
     type: number
-    sql: ${total} - ${total_return} ;;
+    sql: ${total} + ${total_return} ;;
     value_format_name: decimal_0
   }
 
@@ -179,7 +172,7 @@ view: orders {
     sql: ${total} ;;
     value_format_name: decimal_0
     filters: {
-      field: total_m
+      field: total
       value: ">0"
     }
   }

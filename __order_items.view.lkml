@@ -76,7 +76,7 @@ view: order_items {
   dimension_group: transaction_at {
     type: time
     sql: ${TABLE}.transaction_at ;;
-    timeframes: [time, date, month, year]
+    timeframes: [time, hour, date, month, year]
   }
 
   dimension: vendor {
@@ -146,5 +146,10 @@ view: order_items {
   measure: distinct_orders {
     type: count_distinct
     sql: ${order_id} ;;
+  }
+
+  measure: total_units {
+    type: sum
+    sql: ${quantity} ;;
   }
 }

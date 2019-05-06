@@ -16,6 +16,8 @@ view: event_facts {
         , t.campaign_name as campaign_name
         , t.ip as ip
         , t.page_url as url
+        , coalesce(o.vendor, os.retailer) as vendor
+        , o.total as order_value
         , row_number() over(partition by s.session_id order by t.timestamp) as track_sequence_number
         , row_number() over(partition by s.session_id, t.event_source order by t.timestamp) as source_sequence_number
         , first_value(t.referrer) over (partition by s.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_referrer
@@ -32,6 +34,9 @@ view: event_facts {
       left join ${orders.SQL_TABLE_NAME} as o
       on t.looker_visitor_id = o.user_id
         and t.event_id = CONCAT(cast(o.transaction_at as string), o.user_id, '-r')
+      left join javascript.outlink_sent_view as os
+      on t.looker_visitor_id = os.user_id
+        and t.event_id = CONCAT(cast(os.timestamp AS string), os.anonymous_id, '-t')
        ;;
   }
 
@@ -45,9 +50,9 @@ view: event_facts {
     sql: ${TABLE}.session_id ;;
   }
 
-  dimension: order_id {
-    sql: ${TABLE}.order_id ;;
-  }
+#   dimension: order_id {
+#     sql: ${TABLE}.order_id ;;
+#   }
 
   dimension: event {
     sql: ${TABLE}.event ;;
@@ -157,6 +162,17 @@ view: event_facts {
     sql: ${TABLE}.user_agent ;;
   }
 
+  dimension: vendor {
+    type: string
+    sql: ${TABLE}.vendor ;;
+  }
+
+  dimension: order_value {
+    type: number
+    sql: ${TABLE}.order_value ;;
+    value_format_name: decimal_0
+  }
+
   dimension: device {
     type: string
     sql:  CASE
@@ -189,6 +205,26 @@ view: event_facts {
   measure: count_visitors {
     type: count_distinct
     sql: ${looker_visitor_id} ;;
+  }
+
+  measure: unique_outlinked_user {
+    group_label: "Unique Users"
+    type: count_distinct
+    sql: ${looker_visitor_id} ;;
+    filters: {
+      field: event
+      value: "outlink_sent"
+    }
+  }
+
+  measure: unique_ordered_user {
+    group_label: "Unique Users"
+    type: count_distinct
+    sql: ${looker_visitor_id} ;;
+    filters: {
+      field: event
+      value: "order_completed"
+    }
   }
 
   measure: count_events {

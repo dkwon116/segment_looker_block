@@ -10,6 +10,7 @@ view: session_facts {
         , t2s.first_source as first_source
         , t2s.first_medium as first_medium
         , t2s.first_campaign as first_campaign
+        , sum(case when t2s.event = 'order_completed' then t2s.order_value else 0 end) as order_value
         , count(case when t2s.event_source = 'tracks' then 1 else null end) as tracks_count
         , count(case when t2s.event_source = 'pages' then 1 else null end) as pages_count
         , count(case when t2s.event = "signed_up" then event_id else null end) as count_signed_up
@@ -165,6 +166,12 @@ view: session_facts {
   dimension: order_completed {
     type: number
     sql: ${TABLE}.count_order_completed ;;
+  }
+
+  dimension: order_value {
+    type: number
+    sql: ${TABLE}.order_value ;;
+    value_format_name: decimal_0
   }
 
   # dimension: days_since_first_visit {
@@ -400,6 +407,13 @@ view: session_facts {
     group_label: "Outlinked"
   }
 
+  measure: outlinked_user_value {
+    type: number
+    sql: ${total_order_value} / nullif(${total_outlinked_users}, 0) ;;
+    value_format_name: decimal_0
+    group_label: "Outlinked"
+  }
+
 
 ######################################
 #   measures for concierge
@@ -486,6 +500,12 @@ view: session_facts {
   measure: order_completed_total {
     type: sum
     sql: ${order_completed} ;;
+    group_label: "Order Completed"
+  }
+
+  measure: total_order_value {
+    type: sum
+    sql: ${order_value} ;;
     group_label: "Order Completed"
   }
 
