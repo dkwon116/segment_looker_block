@@ -116,6 +116,25 @@ view: products {
   dimension: id {
     type: string
     sql: ${TABLE}.id ;;
+    link: {
+      label: "캐치에서 보기"
+      url: "https://www.catchfashion.com/view/{{value | encode_url}}"
+      icon_url: "https://www.catchfashion.com/favicon.ico"
+    }
+    link: {
+      label: "{{products.supplier._value}}에서 보기"
+      url: "{{ products.vendor_base_url._value}}{{ product_facts.vendor_product_id._value | encode_uri }}"
+    }
+  }
+
+  dimension: vendor_base_url {
+    type: string
+    hidden: yes
+    sql: CASE
+            WHEN ${TABLE}.supplier = 'MatchesFashion' THEN 'https://www.matchesfashion.com/en-kr/products/'
+            WHEN ${TABLE}.supplier = 'Farfetch' THEN 'https://www.farfetch.com/kr/shopping/--item-'
+            WHEN ${TABLE}.supplier = 'SSENSE' THEN 'https://www.ssense.com/en-kr/men/product/*/*/'
+          END;;
   }
 
   dimension: is_on_promotion {

@@ -44,6 +44,7 @@ view: product_events {
             END as source
         , e.source_id as source_id
         , lf.name as source_name
+        , e.timestamp
       from (
         select CONCAT(t.product_id, me.event_id) as product_event_id
           , me.event_id as event_id
@@ -55,6 +56,7 @@ view: product_events {
             WHEN coalesce(t.prev_path, tf.prev_path) LIKE '/view%' THEN SUBSTR(coalesce(t.prev_path, tf.prev_path), 7)
             ELSE '' END as source_id
           , 'product_viewed' as event
+          , me.timestamp
         from javascript.product_viewed_view as t
         inner join ${mapped_events.SQL_TABLE_NAME} as me
         on CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') = me.event_id
@@ -73,6 +75,7 @@ view: product_events {
               WHEN tf.current_path LIKE '/view%' THEN SUBSTR(tf.current_path, 7)
             END as source_id
           , 'product_list_viewed' as event
+          , me.timestamp
         from ${products_viewed_in_list.SQL_TABLE_NAME} as t
         inner join ${mapped_events.SQL_TABLE_NAME} as me
           on CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') = me.event_id
@@ -91,11 +94,29 @@ view: product_events {
             WHEN tf.current_path LIKE '/view%' THEN SUBSTR(tf.current_path, 7)
             ELSE '' END as source_id
           , 'added_to_wishlist' as event
+          , me.timestamp
         from javascript.product_added_to_wishlist_view as t
         inner join ${mapped_events.SQL_TABLE_NAME} as me
-        on CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') = me.event_id
+          on CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') = me.event_id
         left join ${track_facts.SQL_TABLE_NAME} as tf
           on me.event_id = tf.event_id
+
+        union all
+
+        select CONCAT(pm.id, me.event_id) as product_event_id
+          , me.event_id as event_id
+          , pm.id as product_id
+          , t.vendor as source_path
+          , '' as source_id
+          , 'order_completed' as event
+          , me.timestamp
+        from ${order_items.SQL_TABLE_NAME} as t
+        inner join ${mapped_events.SQL_TABLE_NAME} as me
+          on CONCAT(cast(t.transaction_at as string), t.user_id, '-r') = me.event_id
+        left join ${product_maps.SQL_TABLE_NAME} as pm
+          ON t.vendor_product_id = pm.affiliate_product_id
+        where t.order_type = "P" and pm.id is not null
+
       ) as e
       left join list_facts as lf
         on e.source_id = lf.id
@@ -144,6 +165,12 @@ view: product_events {
     sql: ${TABLE}.source_name ;;
   }
 
+  dimension_group: timestamp {
+    type: time
+    timeframes: [time, hour, date, week, month, raw]
+    sql: ${TABLE}.timestamp ;;
+  }
+
   measure: count {
     type: count
   }
@@ -168,6 +195,15 @@ view: product_events {
     filters: {
       field: event
       value: "product_list_viewed"
+    }
+  }
+
+  measure: count_purchased_user {
+    type: count_distinct
+    sql: ${event_facts.looker_visitor_id} ;;
+    filters: {
+      field: event
+      value: "order_completed"
     }
   }
 

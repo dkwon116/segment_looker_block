@@ -184,6 +184,21 @@ explore: order_items {
     type: left_outer
     relationship: one_to_one
   }
+
+  join: product_maps {
+    view_label: "Product"
+    type: left_outer
+    sql_on: ${order_items.vendor_product_id} = ${product_maps.affiliate_product_id} ;;
+    relationship: many_to_one
+#     fields: []
+  }
+
+  join: product_facts {
+    view_label: "Product"
+    type: left_outer
+    sql_on: ${product_maps.product_id} = ${product_facts.id} ;;
+    relationship: many_to_one
+  }
 }
 
 explore: product_list_viewed {
@@ -201,13 +216,33 @@ explore: event_list {
 }
 
 explore: product_events {
+  join: product_facts {
+    type: left_outer
+    sql_on: ${product_events.product_id} = ${product_facts.id} ;;
+    relationship: many_to_one
+  }
+
+  join: product_maps {
+    type: left_outer
+    sql_on: ${product_facts.id} = ${product_maps.product_id} ;;
+    relationship: one_to_many
+    fields: []
+  }
+
   join: product_viewed {
     sql_on: ${product_events.event_id} = concat(cast(${product_viewed.timestamp_raw} AS string), ${product_viewed.anonymous_id}, '-t') ;;
     relationship: one_to_one
   }
 
   join: products_viewed_in_list {
-    sql_on: ${product_events.event_id} = concat(cast(${products_viewed_in_list.timestamp_raw} AS string), ${products_viewed_in_list.anonymous_id}, '-t') ;;
+    sql_on: ${product_events.event_id} = concat(cast(${products_viewed_in_list.timestamp_raw} AS string), ${products_viewed_in_list.anonymous_id}, '-t')
+      and ${product_events.product_id} = ${products_viewed_in_list.product_id};;
+    relationship: one_to_one
+  }
+
+  join: order_items {
+    sql_on: ${product_events.event_id} = CONCAT(cast(${order_items.transaction_at_raw} as string), ${order_items.user_id}, '-r')
+      and ${product_maps.affiliate_product_id} = ${order_items.vendor_product_id};;
     relationship: one_to_one
   }
 
@@ -226,12 +261,6 @@ explore: product_events {
   join: sessions {
     type: left_outer
     sql_on: ${event_facts.session_id} = ${sessions.session_id} ;;
-    relationship: many_to_one
-  }
-
-  join: product_facts {
-    type: left_outer
-    sql_on: ${product_events.product_id} = ${product_facts.id} ;;
     relationship: many_to_one
   }
 

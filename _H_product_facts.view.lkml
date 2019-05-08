@@ -3,31 +3,21 @@ view: product_facts {
     # Rebuilds after sessions rebuilds
     sql_trigger_value: select count(*) from ${products.SQL_TABLE_NAME} ;;
     sql: SELECT
-      p.id
-      , p.active as active
-      , p.channel as channel
-      , p.created_at as created_at
-      , p.gender as gender
-      , p.name as name
-      , p.normalized_at as normalized_at
-      , p.origin as origin
-      , p.supplier as supplier
-      , p.updated_at as updated_at
-      , b.active as brand_active
-      , b.name as brand_name
-      , c.gender as category_gender
-      , c.hierarchy_level as category_hierarchy
-      , c.name as category_name
-      , c.parent_id as category_parent
-      , c.type as category_type
+          p.id
+          , p.active as active
+          , p.created_at as created_at
+          , p.gender as gender
+          , p.name as name
+          , p.normalized_at as normalized_at
+          , p.origin as origin
+          , p.updated_at as updated_at
+          , b.active as brand_active
+          , b.name as brand_name
 
-      FROM mysql_smile_ventures.products as p
-      LEFT JOIN mysql_smile_ventures.brands as b
-        ON p.brand_id = b.id
-      LEFT JOIN mysql_smile_ventures.products_categories as pc
-        ON p.id = pc.product_id
-      LEFT JOIN mysql_smile_ventures.categories as c
-        ON pc.category_id = c.id
+          FROM mysql_smile_ventures.products as p
+          LEFT JOIN mysql_smile_ventures.brands as b
+            ON p.brand_id = b.id
+          WHERE p._fivetran_deleted = false
     ;;
   }
 
@@ -35,16 +25,16 @@ view: product_facts {
     type: string
     primary_key: yes
     sql: ${TABLE}.id ;;
+    link: {
+      label: "캐치에서 보기"
+      url: "https://www.catchfashion.com/view/{{value | encode_url}}"
+      icon_url: "https://www.catchfashion.com/favicon.ico"
+    }
   }
 
   dimension: active {
     type: yesno
     sql: ${TABLE}.active ;;
-  }
-
-  dimension: channel {
-    type: string
-    sql: ${TABLE}.channel ;;
   }
 
   dimension_group: created_at {
@@ -74,11 +64,6 @@ view: product_facts {
     sql: ${TABLE}.origin ;;
   }
 
-  dimension: supplier {
-    type: string
-    sql: ${TABLE}.supplier ;;
-  }
-
   dimension_group: updated_at {
     type: time
     sql: ${TABLE}.updated_at ;;
@@ -94,29 +79,4 @@ view: product_facts {
     type: string
     sql: ${TABLE}.brand_name ;;
   }
-
-#   dimension: category_gender {
-#     type: string
-#     sql: ${TABLE}.category_gender ;;
-#   }
-#
-#   dimension: category_hierarchy {
-#     type: number
-#     sql: ${TABLE}.category_hierarchy ;;
-#   }
-#
-#   dimension: category_name {
-#     type: string
-#     sql: ${TABLE}.category_name ;;
-#   }
-#
-#   dimension: category_parent_id {
-#     type: string
-#     sql: ${TABLE}.category_parent_id ;;
-#   }
-#
-#   dimension: category_type {
-#     type: string
-#     sql: ${TABLE}.category_type ;;
-#   }
 }
