@@ -109,6 +109,11 @@ view: order_items {
     sql: ${TABLE}.is_confirmed ;;
   }
 
+  dimension: catch_product_id {
+    type: string
+    sql: ${product_maps.product_id} ;;
+  }
+
   dimension: advertiser_id {
     type: number
     sql: ${TABLE}.advertiser_id ;;
@@ -165,5 +170,21 @@ view: order_items {
       field: order_type
       value: "P"
     }
+  }
+
+  measure: count_products {
+    type: count_distinct
+    sql: ${vendor_product_id} ;;
+  }
+
+  measure: count_products_in_catch {
+    type: count_distinct
+    sql: ${catch_product_id} ;;
+  }
+
+  measure: catch_match_rate {
+    type: number
+    sql: ${count_products_in_catch} / ${count_products} ;;
+    value_format_name: percent_0
   }
 }
