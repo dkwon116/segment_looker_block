@@ -118,6 +118,16 @@ view: order_items {
     type: sum
     sql: ${krw_amount} / 1000 ;;
     value_format_name: decimal_0
+    filters: {
+      field: order_type
+      value: "P"
+    }
+  }
+
+  measure: average_item_value {
+    type: number
+    sql:  ${total_sales} / NULLIF(${total_units}, 0);;
+    value_format_name: decimal_0
   }
 
   measure: count {
@@ -129,14 +139,14 @@ view: order_items {
     sql: ${user_id} ;;
   }
 
-  measure: gross_sales {
-    type: sum
-    sql: ${krw_amount} ;;
-    filters: {
-      field: order_type
-      value: "P"
-    }
-  }
+#   measure: gross_sales {
+#     type: sum
+#     sql: ${krw_amount} ;;
+#     filters: {
+#       field: order_type
+#       value: "P"
+#     }
+#   }
 
   measure: sales_net_of_returns {
     type: sum
@@ -151,5 +161,9 @@ view: order_items {
   measure: total_units {
     type: sum
     sql: ${quantity} ;;
+    filters: {
+      field: order_type
+      value: "P"
+    }
   }
 }

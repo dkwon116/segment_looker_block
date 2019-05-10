@@ -2,7 +2,15 @@ view: product_facts {
   derived_table: {
     # Rebuilds after sessions rebuilds
     sql_trigger_value: select count(*) from ${products.SQL_TABLE_NAME} ;;
-    sql: SELECT
+    sql: WITH product_images as (
+            SELECT product_id, first_image
+            FROM (
+              SELECT
+                product_id
+                , first_value(url) over (partition by product_id order by width desc, position rows between unbounded preceding and unbounded following) as first_image
+              FROM  mysql_smile_ventures.product_images)
+            GROUP BY 1, 2)
+        SELECT
           p.id
           , p.active as active
           , p.created_at as created_at
@@ -13,10 +21,13 @@ view: product_facts {
           , p.updated_at as updated_at
           , b.active as brand_active
           , b.name as brand_name
+          , pi.first_image as product_image
 
           FROM mysql_smile_ventures.products as p
           LEFT JOIN mysql_smile_ventures.brands as b
             ON p.brand_id = b.id
+          LEFT JOIN product_images as pi
+            ON p.id = pi.product_id
           WHERE p._fivetran_deleted = false
     ;;
   }
@@ -45,7 +56,7 @@ view: product_facts {
 
   dimension: gender {
     type: string
-    sql: ${TABLE}.gender ;;
+    sql: UPPER(${TABLE}.gender) ;;
   }
 
   dimension: name {
@@ -78,5 +89,15 @@ view: product_facts {
   dimension: brand_name {
     type: string
     sql: ${TABLE}.brand_name ;;
+  }
+
+  dimension: product_image {
+    type: string
+    sql: ${TABLE}.product_image ;;
+  }
+
+  dimension: image_url {
+    sql: ${TABLE}.product_image ;;
+    html: <img src="https://{{ value }}" width=300 /> ;;
   }
 }

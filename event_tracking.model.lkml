@@ -198,6 +198,20 @@ explore: order_items {
     type: left_outer
     sql_on: ${product_maps.product_id} = ${product_facts.id} ;;
     relationship: many_to_one
+    fields: [active, brand_name, gender, product_image, image_url, created_at_time]
+  }
+
+  join: products_categories {
+    type: left_outer
+    sql_on: ${product_maps.product_id} = ${products_categories.product_id} and ${products_categories._fivetran_deleted} = false ;;
+    relationship: many_to_many
+    fields: []
+  }
+
+  join: category_normalized {
+    type: inner
+    sql_on: ${products_categories.category_id} = ${category_normalized.id} ;;
+    relationship: many_to_one
   }
 }
 

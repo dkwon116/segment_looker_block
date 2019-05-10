@@ -4,6 +4,7 @@ view: product_maps {
     sql_trigger_value: select count(*) from ${products.SQL_TABLE_NAME} ;;
     sql: SELECT
           p.id
+          , p.name
           , pm.internal_vendor_product_id as vendor_product_id
           , CASE WHEN pm.vendor = "ssense" THEN sp.sku
               ELSE pm.internal_vendor_product_id END as affiliate_product_id
@@ -21,14 +22,19 @@ view: product_maps {
   dimension: product_id {
     type: string
     sql: ${TABLE}.id ;;
+  }
+
+  dimension: name {
+    type: string
+    sql: ${TABLE}.name ;;
     link: {
       label: "캐치에서 보기"
-      url: "https://www.catchfashion.com/view/{{value | encode_url}}"
+      url: "https://www.catchfashion.com/view/{{product_maps.product_id._value | encode_url}}"
       icon_url: "https://www.catchfashion.com/favicon.ico"
     }
     link: {
       label: "캐치관리자에서 보기"
-      url: "https://admin.catchfashion.com/products-view/{{value | encode_url}}"
+      url: "https://admin.catchfashion.com/products-view/{{product_maps.product_id._value | encode_url}}"
       icon_url: "https://www.catchfashion.com/favicon.ico"
     }
     link: {
@@ -36,6 +42,7 @@ view: product_maps {
       url: "{% if product_maps.vendor._value == 'farfetch' %}{{ product_maps.vendor_url._value}}{{ product_maps.vendor_product_id._value | encode_uri }}.aspx
       {% elsif product_maps.vendor._value == 'mytheresa' %}{{ product_maps.vendor_url._value}}{{ product_maps.vendor_product_id._value | encode_uri }}.html
       {% else %}{{ product_maps.vendor_url._value}}{{ product_maps.vendor_product_id._value | encode_uri }}{% endif %}"
+      icon_url: "{{product_maps.favicon_url._value}}"
     }
   }
 
@@ -65,6 +72,17 @@ view: product_maps {
             WHEN ${TABLE}.vendor = 'farfetch' THEN 'https://www.farfetch.com/kr/shopping/--item-'
             WHEN ${TABLE}.vendor = 'ssense' THEN 'https://www.ssense.com/en-kr/men/product/*/*/'
             WHEN ${TABLE}.vendor = 'mytheresa' THEN 'https://www.mytheresa.com/en-kr/'
+          END;;
+  }
+
+  dimension: favicon_url {
+    type: string
+    hidden: yes
+    sql: CASE
+            WHEN ${TABLE}.vendor = 'matchesfashion' THEN 'https://www.matchesfashion.com//_ui/rwd/common/images/favicon.ico'
+            WHEN ${TABLE}.vendor = 'farfetch' THEN 'https://cdn-static.farfetch-contents.com/static/images/favicon/Generated/apple-touch-icon-152x152.png'
+            WHEN ${TABLE}.vendor = 'ssense' THEN 'https://res.cloudinary.com/ssenseweb/image/upload/v1472005257/web/favicon.ico'
+            WHEN ${TABLE}.vendor = 'mytheresa' THEN 'https://www.mytheresa.com/skin/frontend/mytheresa/default/favicon.ico'
           END;;
   }
 }
