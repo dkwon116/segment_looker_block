@@ -290,6 +290,28 @@ explore: product_events {
     fields: []
   }
 }
+
+explore: product_facts {
+  join: product_maps {
+    type: left_outer
+    sql_on: ${product_facts.id} = ${product_maps.product_id} ;;
+    relationship: one_to_many
+  }
+
+  join: products_categories {
+    type: left_outer
+    sql_on: ${product_facts.id} = ${products_categories.product_id} and ${products_categories._fivetran_deleted} = false ;;
+    relationship: many_to_many
+#     fields: []
+  }
+
+  join: category_normalized {
+    type: left_outer
+    sql_on: ${products_categories.category_id} = ${category_normalized.id} ;;
+    relationship: many_to_one
+
+  }
+}
 #
 # explore: cashbacks {}
 #

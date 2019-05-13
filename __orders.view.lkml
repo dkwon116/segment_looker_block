@@ -45,6 +45,16 @@ view: orders {
     sql: ${TABLE}.vendor ;;
   }
 
+  dimension: transaction_date {
+    type: date
+    sql: ${TABLE}.transaction_at ;;
+    link: {
+      label: "View {{value}} Products"
+      url: "https://smileventures.au.looker.com/dashboards/41?date= {{value | encode_url}}"
+      icon_url: "https://looker.com/favicon.ico"
+    }
+  }
+
   dimension_group: transaction_at {
     type: time
     timeframes: [raw, time, hour, date, week, month, quarter]
