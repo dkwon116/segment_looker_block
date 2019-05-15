@@ -10,6 +10,7 @@ view: session_facts {
         , t2s.first_source as first_source
         , t2s.first_medium as first_medium
         , t2s.first_campaign as first_campaign
+        , t2s.first_purchased as first_ordered
         , sum(case when t2s.event = 'order_completed' then t2s.order_value else 0 end) as order_value
         , count(case when t2s.event_source = 'tracks' then 1 else null end) as tracks_count
         , count(case when t2s.event_source = 'pages' then 1 else null end) as pages_count
@@ -23,7 +24,7 @@ view: session_facts {
       from ${sessions.SQL_TABLE_NAME} as s
         inner join ${event_facts.SQL_TABLE_NAME} as t2s
           on s.session_id = t2s.session_id
-      group by 1,2,4,5,6
+      group by 1,2,4,5,6,7
        ;;
   }
 
@@ -67,6 +68,12 @@ view: session_facts {
   dimension: first_medium {
     type:  string
     sql: ${TABLE}.first_medium ;;
+  }
+
+  dimension: is_pre_purchase {
+    type: yesno
+    sql: IF(${TABLE}.first_ordered IS NULL, true,
+      IF(${sessions.start_raw} <= ${TABLE}.first_ordered, true, false))  ;;
   }
 
   dimension_group: end {
@@ -249,6 +256,15 @@ view: session_facts {
     type: number
     sql: ${total_signed_up} / ${sessions.count_visitors};;
     value_format_name: percent_2
+  }
+
+  measure: pre_purchase_users {
+    type: count_distinct
+    sql: ${sessions.looker_visitor_id} ;;
+    filters: {
+      field: is_pre_purchase
+      value: "yes"
+    }
   }
 
 
