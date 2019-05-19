@@ -6,7 +6,7 @@ include: "*.view"
 # - explore: pages
 
 datagroup: orders_datagroup {
-  sql_trigger: SELECT count(*) FROM order_items ;;
+  sql_trigger: SELECT count(*) FROM ${order_items.SQL_TABLE_NAME} ;;
   max_cache_age: "30 minutes"
 }
 
