@@ -5,6 +5,10 @@ connection: "datawarehouse_db"
 include: "*.view"
 # - explore: pages
 
+datagroup: orders_datagroup {
+  sql_trigger: SELECT count(*) FROM order_items ;;
+  max_cache_age: "30 minutes"
+}
 
 explore: event_facts {
   view_label: "0_Events"
@@ -152,6 +156,7 @@ explore: event_facts {
 
 explore: order_items {
   label: "Orders"
+  persist_with: orders_datagroup
   join: orders {
     type: left_outer
     sql_on: ${order_items.order_id} = ${orders.order_id} ;;

@@ -261,4 +261,43 @@ view: order_facts {
     type: count_distinct
     sql: ${order_id} ;;
   }
+
+## Used for Cohort Analysis
+
+  dimension_group: since_first_visit {
+#     hidden: yes
+    type: duration
+    intervals: [day, week, month]
+    sql_start: ${user_facts.first_visited_raw} ;;
+    sql_end: ${transaction_at_raw} ;;
+  }
+
+#   dimension: days_since_signup {
+#     hidden: yes
+#     type: number
+#     sql: DATEDIFF(${transaction_at_raw}, ${user_facts.signed_up});;
+#   }
+#
+#   dimension: days_since_first_purchase {
+#     hidden: yes
+#     type: number
+#     sql: DATEDIFF(${transaction_at_raw}, ${user_facts.first_purchased});;
+#   }
+
+  # dimension: weeks_since_first_visit {
+  #   type: number
+  #   sql: FLOOR(${days_since_first_visit}/(7)) ;;
+  # }
+
+  # dimension: months_since_first_visit {
+  #   type: number
+  #   sql: FLOOR(${days_since_first_visit}/(30)) ;;
+  # }
+
+  # dimension: months_since_first_visit_tier {
+  #   type: tier
+  #   tiers: [1,3,6,12,24]
+  #   style: integer
+  #   sql: ${months_since_first_visit} ;;
+  # }
 }
