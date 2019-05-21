@@ -9,13 +9,14 @@ view: user_facts {
             , first_value(sf.first_source) over(partition by s.looker_visitor_id order by sf.session_id rows between unbounded preceding and unbounded following) as first_source
             , first_value(sf.first_medium) over(partition by s.looker_visitor_id order by sf.session_id rows between unbounded preceding and unbounded following) as first_medium
             , first_value(sf.first_campaign) over(partition by s.looker_visitor_id order by sf.session_id rows between unbounded preceding and unbounded following) as first_campaign
+            , first_value(sf.first_referrer) over(partition by s.looker_visitor_id order by sf.session_id rows between unbounded preceding and unbounded following) as first_referrer
             , last_value(sf.first_source) over(partition by s.looker_visitor_id order by sf.session_id rows between unbounded preceding and unbounded following) as last_source
             , last_value(sf.first_medium) over(partition by s.looker_visitor_id order by sf.session_id rows between unbounded preceding and unbounded following) as last_medium
             , last_value(sf.first_campaign) over(partition by s.looker_visitor_id order by sf.session_id rows between unbounded preceding and unbounded following) as last_campaign
           FROM ${sessions.SQL_TABLE_NAME} as s
           LEFT JOIN ${session_facts.SQL_TABLE_NAME} as sf
           ON s.session_id = sf.session_id) as source
-        group by 1, 2, 3, 4, 5, 6, 7
+        group by 1, 2, 3, 4, 5, 6, 7, 8
       )
       SELECT
         s.looker_visitor_id
@@ -23,6 +24,7 @@ view: user_facts {
         , us.first_source as first_source
         , us.first_medium as first_medium
         , us.first_campaign as first_campaign
+        , us.first_referrer as first_referrer
         , cu.id as is_user
         , cu.created_at as signed_up_date
         , COALESCE(ut.type,"Customer") as user_type
@@ -45,7 +47,7 @@ view: user_facts {
         ON s.session_id = o.session_id
       LEFT JOIN google_sheets.user_type as ut
         ON cu.id = ut.user_id
-      GROUP BY 1,2,3,4,5,6,7,8
+      GROUP BY 1,2,3,4,5,6,7,8,9
 
        ;;
   }
@@ -173,6 +175,11 @@ view: user_facts {
   dimension: first_campaign {
     type: string
     sql: ${TABLE}.first_campaign ;;
+  }
+
+  dimension: first_referrer {
+    type: string
+    sql: ${TABLE}.first_referrer ;;
   }
 
 

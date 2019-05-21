@@ -272,6 +272,22 @@ view: order_facts {
     sql_end: ${transaction_at_raw} ;;
   }
 
+  dimension_group: since_signup {
+#     hidden: yes
+    type: duration
+    intervals: [day, week, month]
+    sql_start: ${user_facts.signed_up_raw} ;;
+    sql_end: ${transaction_at_raw} ;;
+  }
+
+  dimension_group: since_first_purchase {
+#     hidden: yes
+    type: duration
+    intervals: [day, week, month]
+    sql_start: ${user_facts.first_purchased_raw} ;;
+    sql_end: ${transaction_at_raw} ;;
+  }
+
 #   dimension: days_since_signup {
 #     hidden: yes
 #     type: number
