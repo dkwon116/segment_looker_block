@@ -294,6 +294,12 @@ explore: product_events {
     relationship: many_to_one
     fields: []
   }
+
+  join: user_facts {
+    type: left_outer
+    sql_on: ${event_facts.looker_visitor_id} = ${user_facts.looker_visitor_id} ;;
+    relationship: many_to_one
+  }
 }
 
 explore: product_facts {

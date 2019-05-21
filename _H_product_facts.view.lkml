@@ -36,11 +36,6 @@ view: product_facts {
     type: string
     primary_key: yes
     sql: ${TABLE}.id ;;
-    link: {
-      label: "캐치에서 보기"
-      url: "https://www.catchfashion.com/view/{{value | encode_url}}"
-      icon_url: "https://www.catchfashion.com/favicon.ico"
-    }
   }
 
   dimension: active {
@@ -62,6 +57,16 @@ view: product_facts {
   dimension: name {
     type: string
     sql: ${TABLE}.name ;;
+    link: {
+      label: "캐치에서 보기"
+      url: "https://www.catchfashion.com/view/{{product_facts.id._value | encode_url}}"
+      icon_url: "https://www.catchfashion.com/favicon.ico"
+    }
+    link: {
+      label: "캐치관리자에서 보기"
+      url: "https://admin.catchfashion.com/products-view/{{product_facts.id._value | encode_url}}"
+      icon_url: "https://www.catchfashion.com/favicon.ico"
+    }
   }
 
   dimension_group: normalized_at {
