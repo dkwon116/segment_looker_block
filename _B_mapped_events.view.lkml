@@ -12,10 +12,12 @@ view: mapped_events {
           ,t.timestamp
           ,t.event as event
           ,t.received_at as received
-          ,NULL as referrer
-          ,NULL as campaign_source
-          ,NULL as campaign_medium
-          ,NULL as campaign_name
+          ,t.context_page_referrer as referrer
+          ,t.context_campaign_source as campaign_source
+          ,t.context_campaign_medium as campaign_medium
+          ,t.context_campaign_name as campaign_name
+          ,t.context_campaign_content as campaign_content
+          ,t.context_campaign_term as campaign_term
           ,t.context_user_agent as user_agent
           ,t.context_page_url as page_url
           ,t.context_ip as ip
@@ -38,6 +40,8 @@ view: mapped_events {
           ,t.context_campaign_source as campaign_source
           ,t.context_campaign_medium as campaign_medium
           ,t.context_campaign_name as campaign_name
+          ,t.context_campaign_content as campaign_content
+          ,t.context_campaign_term as campaign_term
           ,t.context_user_agent as user_agent
           ,t.context_page_url as page_url
           ,t.context_ip as ip
@@ -58,6 +62,8 @@ view: mapped_events {
           ,null as campaign_source
           ,null as campaign_medium
           ,null as campaign_name
+          ,null as campaign_content
+          ,null as campaign_term
           ,'' as user_agent
           ,'http://www.catchfashion.com' as page_url
           ,'' as ip

@@ -6,11 +6,13 @@ view: session_facts {
     sql: select
           s.session_id
         , t2s.first_referrer
-        , max(t2s.timestamp) as end_at
         , t2s.first_source as first_source
         , t2s.first_medium as first_medium
         , t2s.first_campaign as first_campaign
+        , t2s.first_content as first_content
+        , t2s.first_term as first_term
         , t2s.first_purchased as first_ordered
+        , max(t2s.timestamp) as end_at
         , sum(case when t2s.event = 'order_completed' then t2s.order_value else 0 end) as order_value
         , count(case when t2s.event_source = 'tracks' then 1 else null end) as tracks_count
         , count(case when t2s.event_source = 'pages' then 1 else null end) as pages_count
@@ -24,7 +26,7 @@ view: session_facts {
       from ${sessions.SQL_TABLE_NAME} as s
         inner join ${event_facts.SQL_TABLE_NAME} as t2s
           on s.session_id = t2s.session_id
-      group by 1,2,4,5,6,7
+      group by 1,2,3,4,5,6,7,8
        ;;
   }
 
@@ -68,6 +70,16 @@ view: session_facts {
   dimension: first_medium {
     type:  string
     sql: ${TABLE}.first_medium ;;
+  }
+
+  dimension: first_content {
+    type:  string
+    sql: ${TABLE}.first_content ;;
+  }
+
+  dimension: first_term {
+    type:  string
+    sql: ${TABLE}.first_term ;;
   }
 
   dimension: is_pre_purchase {

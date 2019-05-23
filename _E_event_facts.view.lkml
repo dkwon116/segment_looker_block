@@ -14,6 +14,8 @@ view: event_facts {
         , t.campaign_source as campaign_source
         , t.campaign_medium as campaign_medium
         , t.campaign_name as campaign_name
+        , t.campaign_content as campaign_content
+        , t.campaign_term as campaign_term
         , t.ip as ip
         , t.page_url as url
         , coalesce(o.vendor, os.retailer) as vendor
@@ -24,6 +26,8 @@ view: event_facts {
         , first_value(t.campaign_source) over (partition by s.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_source
         , first_value(t.campaign_medium) over (partition by s.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_medium
         , first_value(t.campaign_name) over (partition by s.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_campaign
+        , first_value(t.campaign_content) over (partition by s.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_content
+        , first_value(t.campaign_term) over (partition by s.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_term
         , first_value(t.user_agent) over (partition by s.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as user_agent
         , first_value(o.transaction_at IGNORE NULLS) over (partition by t.looker_visitor_id order by o.order_sequence_number rows between unbounded preceding and unbounded following) as first_purchased
       from ${mapped_events.SQL_TABLE_NAME} as t
@@ -157,6 +161,16 @@ view: event_facts {
     sql: ${TABLE}.first_medium ;;
   }
 
+  dimension: first_content {
+    type:  string
+    sql: ${TABLE}.first_content ;;
+  }
+
+  dimension: first_term {
+    type:  string
+    sql: ${TABLE}.first_term ;;
+  }
+
   dimension: user_agent {
     type: string
     sql: ${TABLE}.user_agent ;;
@@ -215,6 +229,35 @@ view: event_facts {
       field: event
       value: "outlink_sent"
     }
+  }
+
+  measure: outlinked_user_by_vendor {
+    group_label: "Unique Users"
+    type: count_distinct
+    sql:
+    CASE
+      WHEN {% condition vendor_to_count %} ${vendor} {% endcondition %} AND ${event} = 'outlink_sent'
+      THEN ${looker_visitor_id}
+      ELSE ""
+    END
+  ;;
+  }
+
+  measure: ordered_user_by_vendor {
+    group_label: "Unique Users"
+    type: count_distinct
+    sql:
+    CASE
+      WHEN {% condition vendor_to_count %} ${vendor} {% endcondition %} AND ${event} = 'order_completed'
+      THEN ${looker_visitor_id}
+      ELSE ""
+    END
+  ;;
+  }
+
+  filter: vendor_to_count {
+#     type: string
+    suggest_dimension: vendor
   }
 
   measure: unique_ordered_user {
