@@ -324,6 +324,13 @@ explore: product_facts {
   }
 }
 #
-# explore: cashbacks {}
+explore: sv_cashbacks {
+  label: "Cashback"
+  join: catch_users {
+    type: left_outer
+    sql_on: ${sv_cashbacks.user_id} = ${catch_users.id} ;;
+    relationship: many_to_one
+  }
+}
 #
 # explore: orders {}
