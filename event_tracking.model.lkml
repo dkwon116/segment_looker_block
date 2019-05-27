@@ -171,12 +171,14 @@ explore: order_items {
   }
 
   join: catch_users {
+    view_label: "Users"
     sql_on: ${order_items.user_id} = ${catch_users.id} ;;
     type: left_outer
     relationship: many_to_one
   }
 
   join: user_facts {
+    view_label: "Users"
     sql_on: ${catch_users.id} = ${user_facts.looker_visitor_id} ;;
     type: left_outer
     relationship: one_to_one

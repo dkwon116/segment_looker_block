@@ -89,11 +89,13 @@ view: user_facts {
   dimension: user_type {
     type: string
     sql: ${TABLE}.user_type ;;
+    group_label: "Info"
   }
 
   dimension: number_of_sessions {
     type: number
     sql: ${TABLE}.number_of_sessions ;;
+    group_label: "Total Events"
   }
 
   dimension: number_of_sessions_tiered {
@@ -107,6 +109,7 @@ view: user_facts {
       5,
       10
     ]
+    group_label: "Total Events"
   }
 
   dimension_group: first_visited {
@@ -130,11 +133,13 @@ view: user_facts {
   dimension: products_viewed {
     type: number
     sql: ${TABLE}.products_viewed ;;
+    group_label: "Total Events"
   }
 
   dimension: orders_completed {
     type: number
     sql: ${TABLE}.orders_completed ;;
+    group_label: "Total Events"
   }
 
   dimension_group: first_purchased {
@@ -146,16 +151,19 @@ view: user_facts {
   dimension: time_to_signup {
     type: number
     sql:  timestamp_diff(${signed_up_raw}, ${first_visited_raw}, day) ;;
+    group_label: "Time to"
   }
 
   dimension: time_to_purchased {
     type: number
     sql:  timestamp_diff(${first_purchased_raw}, ${first_visited_raw}, day) ;;
+    group_label: "Time to"
   }
 
   dimension: days_to_signup_to_purchased {
     type: number
     sql:  timestamp_diff(${first_purchased_raw}, ${signed_up_raw}, day) ;;
+    group_label: "Time to"
   }
 
   dimension: lifetime_order_value {
@@ -171,31 +179,37 @@ view: user_facts {
   dimension: first_source {
     type: string
     sql: ${TABLE}.first_source ;;
+    group_label: "Acquisition"
   }
 
   dimension: first_medium {
     type: string
     sql: ${TABLE}.first_medium ;;
+    group_label: "Acquisition"
   }
 
   dimension: first_campaign {
     type: string
     sql: ${TABLE}.first_campaign ;;
+    group_label: "Acquisition"
   }
 
   dimension: first_content {
     type: string
     sql: ${TABLE}.first_content ;;
+    group_label: "Acquisition"
   }
 
   dimension: first_term {
     type: string
     sql: ${TABLE}.first_term ;;
+    group_label: "Acquisition"
   }
 
   dimension: first_referrer {
     type: string
     sql: ${TABLE}.first_referrer ;;
+    group_label: "Acquisition"
   }
 
 

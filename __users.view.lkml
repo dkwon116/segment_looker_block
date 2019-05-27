@@ -38,6 +38,7 @@ view: users {
   }
 
   dimension: email {
+    group_label: "Info"
     type: string
     sql: ${TABLE}.email ;;
   }
@@ -48,16 +49,19 @@ view: users {
   }
 
   dimension: mobile {
+    group_label: "Info"
     type: string
     sql: ${TABLE}.mobile ;;
   }
 
   dimension: name {
+    group_label: "Info"
     type: string
     sql: ${TABLE}.name ;;
   }
 
   dimension: phone {
+    group_label: "Info"
     type: string
     sql: ${TABLE}.phone ;;
   }

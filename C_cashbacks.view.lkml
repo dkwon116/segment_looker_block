@@ -22,7 +22,7 @@ view: cashbacks {
       , DATE_DIFF(CAST(c.transaction_date as DATE), CAST(c.paid_date as DATE), DAY) as time_to_pay
 
     FROM mysql_smile_ventures.cashbacks as c
-    where c._fivetran_deleted = false
+    where c._fivetran_deleted = false and c.status != "deleted"
     ;;
   }
 

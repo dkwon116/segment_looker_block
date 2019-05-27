@@ -12,6 +12,7 @@ view: session_facts {
         , t2s.first_content as first_content
         , t2s.first_term as first_term
         , t2s.first_purchased as first_ordered
+        , t2s.first_visited as first_visited
         , max(t2s.timestamp) as end_at
         , sum(case when t2s.event = 'order_completed' then t2s.order_value else 0 end) as order_value
         , count(case when t2s.event_source = 'tracks' then 1 else null end) as tracks_count
@@ -26,7 +27,7 @@ view: session_facts {
       from ${sessions.SQL_TABLE_NAME} as s
         inner join ${event_facts.SQL_TABLE_NAME} as t2s
           on s.session_id = t2s.session_id
-      group by 1,2,3,4,5,6,7,8
+      group by 1,2,3,4,5,6,7,8,9
        ;;
   }
 
@@ -39,10 +40,12 @@ view: session_facts {
 
   dimension: first_referrer {
     sql: ${TABLE}.first_referrer ;;
+    group_label: "First"
   }
 
   dimension: first_referrer_domain {
     sql: split_part(${first_referrer},'/',3) ;;
+    group_label: "First"
   }
 
   dimension: first_referrer_domain_mapped {
@@ -54,38 +57,45 @@ view: session_facts {
     WHEN ${first_referrer} like '%catchfashion%' THEN 'Catch'
     WHEN ${first_referrer} IS NULL THEN 'Direct'
     ELSE 'Other' END ;;
+    group_label: "First"
   }
 
   dimension: first_campaign {
     type:  string
     sql: ${TABLE}.first_campaign ;;
+    group_label: "First"
   }
 
   dimension: first_source {
     type:  string
     sql: ${TABLE}.first_source ;;
     drill_fields: [first_campaign, first_medium]
+    group_label: "First"
   }
 
   dimension: first_medium {
     type:  string
     sql: ${TABLE}.first_medium ;;
+    group_label: "First"
   }
 
   dimension: first_content {
     type:  string
     sql: ${TABLE}.first_content ;;
+    group_label: "First"
   }
 
   dimension: first_term {
     type:  string
     sql: ${TABLE}.first_term ;;
+    group_label: "First"
   }
 
   dimension: is_pre_purchase {
     type: yesno
     sql: IF(${TABLE}.first_ordered IS NULL, true,
       IF(${sessions.start_raw} <= ${TABLE}.first_ordered, true, false))  ;;
+    group_label: "Session Flags"
   }
 
   dimension_group: end {
@@ -97,16 +107,19 @@ view: session_facts {
   dimension: tracks_count {
     type: number
     sql: ${TABLE}.tracks_count ;;
+    group_label: "Event Counts"
   }
 
   dimension: pages_count {
     type:  number
     sql: ${TABLE}.pages_count ;;
+    group_label: "Event Counts"
   }
 
   dimension: total_events {
     type: number
     sql: ${tracks_count} + ${pages_count} ;;
+    group_label: "Event Counts"
   }
 
   dimension: referrer {
@@ -132,6 +145,7 @@ view: session_facts {
     sql: CASE WHEN ${total_events} = 1 THEN 'Bounced Session'
       ELSE 'Not Bounced Session' END
        ;;
+    group_label: "Session Flags"
   }
 
   dimension: session_duration_minutes {
@@ -155,36 +169,43 @@ view: session_facts {
   dimension: signed_up {
     type:  number
     sql: ${TABLE}.count_signed_up ;;
+    group_label: "Event Counts"
   }
 
   dimension: products_viewed {
     type: number
     sql: ${TABLE}.count_product_viewed ;;
+    group_label: "Event Counts"
   }
 
   dimension: product_lists_viewed {
     type: number
     sql: ${TABLE}.count_product_list_viewed ;;
+    group_label: "Event Counts"
   }
 
   dimension: outlinked {
     type: number
     sql: ${TABLE}.count_outlinked ;;
+    group_label: "Event Counts"
   }
 
   dimension: concierge_clicked {
     type: number
     sql: ${TABLE}.count_concierge_clicked ;;
+    group_label: "Event Counts"
   }
 
   dimension: added_to_wishlist {
     type: number
     sql: ${TABLE}.count_added_to_wishlist ;;
+    group_label: "Event Counts"
   }
 
   dimension: order_completed {
     type: number
     sql: ${TABLE}.count_order_completed ;;
+    group_label: "Event Counts"
   }
 
   dimension: order_value {
@@ -192,29 +213,6 @@ view: session_facts {
     sql: ${TABLE}.order_value ;;
     value_format_name: decimal_0
   }
-
-  # dimension: days_since_first_visit {
-  #   hidden: yes
-  #   type: number
-  #   sql: DATEDIFF(${sessions.start_raw}, ${user_facts.first_visited});;
-  # }
-
-  # dimension: weeks_since_first_visit {
-  #   type: number
-  #   sql: FLOOR(${days_since_first_visit}/(7)) ;;
-  # }
-
-  # dimension: months_since_first_visit {
-  #   type: number
-  #   sql: FLOOR(${days_since_first_visit}/(30)) ;;
-  # }
-
-  # dimension: months_since_first_visit_tier {
-  #   type: tier
-  #   tiers: [1,3,6,12,24]
-  #   style: integer
-  #   sql: ${months_since_first_visit} ;;
-  # }
 
   # ----- Measures -----
 

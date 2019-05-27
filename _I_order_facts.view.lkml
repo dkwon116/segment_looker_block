@@ -129,6 +129,7 @@ view: order_facts {
       field: order_sequence_number
       value: ">=2"
     }
+    value_format_name: decimal_0
 
   }
 

@@ -74,11 +74,13 @@ view: catch_users {
   }
 
   dimension: email {
+    group_label: "Info"
     type: string
     sql: ${TABLE}.email ;;
   }
 
   dimension: email_source {
+    group_label: "Info"
     type: string
     sql: CASE
       WHEN ${email} LIKE "%naver%" THEN "Naver"
@@ -105,6 +107,7 @@ view: catch_users {
   }
 
   dimension: name {
+    group_label: "Info"
     type: string
     sql: CONCAT(${last_name}, ${first_name}) ;;
   }
@@ -116,6 +119,7 @@ view: catch_users {
   }
 
   dimension: gender {
+    group_label: "Info"
     type: string
     sql: ${TABLE}.gender ;;
   }
@@ -128,6 +132,7 @@ view: catch_users {
   dimension: ip {
     type: string
     sql: ${TABLE}.ip ;;
+    hidden: yes
   }
 
   dimension: is_temporary_password {
@@ -175,6 +180,7 @@ view: catch_users {
   }
 
   dimension: phone {
+    group_label: "Info"
     type: string
     sql: ${TABLE}.phone ;;
   }
