@@ -333,6 +333,30 @@ explore: sv_cashbacks {
     sql_on: ${sv_cashbacks.user_id} = ${catch_users.id} ;;
     relationship: many_to_one
   }
+
+  join: order_items {
+    type: left_outer
+    sql_on: ${sv_cashbacks.order_id} = ${order_items.order_id} and ${sv_cashbacks.sku_number} = ${order_items.sku_id};;
+    relationship: one_to_many
+  }
+
+  join: product_maps {
+    type: left_outer
+    sql_on: ${order_items.vendor_product_id} = ${product_maps.affiliate_product_id} ;;
+    relationship: one_to_many
+  }
 }
 #
-# explore: orders {}
+explore: user_facts {
+  join: users {
+    type: left_outer
+    sql_on: ${user_facts.looker_visitor_id} = ${users.id};;
+    relationship: one_to_one
+  }
+
+  join: catch_users {
+    type: left_outer
+    sql_on: ${user_facts.looker_visitor_id} = ${catch_users.id} ;;
+    relationship: one_to_one
+  }
+}

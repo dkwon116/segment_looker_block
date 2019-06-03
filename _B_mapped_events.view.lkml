@@ -54,7 +54,7 @@ view: mapped_events {
 
         select CONCAT(cast(t.transaction_at as string), t.user_id, '-r') as event_id
           ,t.user_id as anonymous_id
-          ,t.user_id as looker_visitor_id
+          ,coalesce(a2v.looker_visitor_id,a2v.alias) as looker_visitor_id
           ,t.transaction_at as timestamp
           ,'order_completed' as event
           ,t.created_at as received
@@ -69,6 +69,8 @@ view: mapped_events {
           ,'' as ip
           ,'rakuten' as event_source
         from ${orders.SQL_TABLE_NAME} as t
+        inner join ${page_aliases_mapping.SQL_TABLE_NAME} as a2v
+          on a2v.alias = t.user_id
       ) as e
       WHERE (e.ip NOT IN ('210.123.124.177', '222.106.98.162', '121.134.191.141', '63.118.26.234', '14.39.183.130', '125.140.120.54', '98.113.6.12')
       AND e.page_url LIKE '%catchfashion%'

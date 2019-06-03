@@ -16,6 +16,22 @@ view: page_aliases_mapping {
           ,user_id
           ,timestamp
         from javascript.pages_view
+
+        union distinct
+
+        select
+          user_id
+          ,user_id
+          ,timestamp
+        from javascript.pages_view
+
+        union distinct
+
+        select
+          id as user_id
+          ,id as user_id
+          ,null as timestamp
+        from mysql_smile_ventures.users
       )
         select
           distinct anonymous_id as alias,
@@ -26,6 +42,7 @@ view: page_aliases_mapping {
                 rows between unbounded preceding and unbounded following), user_id, anonymous_id) as looker_visitor_id
 
         from all_mappings
+        where anonymous_id IS NOT NULL
        ;;
   }
 

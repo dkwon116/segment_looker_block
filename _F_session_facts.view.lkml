@@ -12,7 +12,6 @@ view: session_facts {
         , t2s.first_content as first_content
         , t2s.first_term as first_term
         , t2s.first_purchased as first_ordered
-        , t2s.first_visited as first_visited
         , max(t2s.timestamp) as end_at
         , sum(case when t2s.event = 'order_completed' then t2s.order_value else 0 end) as order_value
         , count(case when t2s.event_source = 'tracks' then 1 else null end) as tracks_count
@@ -27,7 +26,7 @@ view: session_facts {
       from ${sessions.SQL_TABLE_NAME} as s
         inner join ${event_facts.SQL_TABLE_NAME} as t2s
           on s.session_id = t2s.session_id
-      group by 1,2,3,4,5,6,7,8,9
+      group by 1,2,3,4,5,6,7,8
        ;;
   }
 
@@ -212,6 +211,27 @@ view: session_facts {
     type: number
     sql: ${TABLE}.order_value ;;
     value_format_name: decimal_0
+  }
+
+  dimension_group: since_first_visited {
+    type: duration
+    intervals: [day, week, month]
+    sql_start: ${user_facts.first_visited_raw} ;;
+    sql_end: ${sessions.start_raw} ;;
+  }
+
+  dimension_group: since_sign_up {
+    type: duration
+    intervals: [day, week, month]
+    sql_start: ${user_facts.signed_up_raw} ;;
+    sql_end: ${sessions.start_raw} ;;
+  }
+
+  dimension_group: since_first_purchase {
+    type: duration
+    intervals: [day, week, month]
+    sql_start: ${user_facts.first_purchased_raw} ;;
+    sql_end: ${sessions.start_raw} ;;
   }
 
   # ----- Measures -----

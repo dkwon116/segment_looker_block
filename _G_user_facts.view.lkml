@@ -21,9 +21,19 @@ view: user_facts {
           LEFT JOIN ${session_facts.SQL_TABLE_NAME} as sf
           ON s.session_id = sf.session_id) as source
         group by 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
+      ), all_users as (
+        SELECT
+          s.looker_visitor_id as user_id
+        FROM ${sessions.SQL_TABLE_NAME} as s
+
+        UNION DISTINCT
+
+        SELECT
+          cu.id as user_id
+        FROM mysql_smile_ventures.users as cu
       )
       SELECT
-        s.looker_visitor_id
+        au.user_id as looker_visitor_id
         , cu.first_name as name
         , us.first_source as first_source
         , us.first_medium as first_medium
@@ -34,7 +44,7 @@ view: user_facts {
         , cu.id as is_user
         , cu.created_at as signed_up_date
         , COALESCE(ut.type,"Customer") as user_type
-        , MIN(s.session_start_at) as first_date
+        , COALESCE(MIN(s.session_start_at), cu.created_at) as first_date
         , MAX(s.session_start_at) as last_date
         , COUNT(s.session_id) as number_of_sessions
         , MIN(o.transaction_at) as first_purchased
@@ -42,9 +52,11 @@ view: user_facts {
         , COUNT(o.order_id) as orders_completed
         , SUM(o.total) as lifetime_order_value
 
-      FROM mysql_smile_ventures.users as cu
+      FROM all_users as au
       LEFT JOIN ${sessions.SQL_TABLE_NAME} as s
-        ON cu.id = s.looker_visitor_id
+        ON au.user_id = s.looker_visitor_id
+      LEFT JOIN mysql_smile_ventures.users as cu
+        ON au.user_id = cu.id
       LEFT JOIN ${session_facts.SQL_TABLE_NAME} as sf
         ON s.session_id = sf.session_id
       LEFT JOIN user_sources as us
@@ -60,7 +72,7 @@ view: user_facts {
 
   #     Define your dimensions and measures here, like this:
   dimension: looker_visitor_id {
-    hidden: yes
+#     hidden: yes
     primary_key: yes
     sql: ${TABLE}.looker_visitor_id ;;
     link: {
@@ -154,7 +166,16 @@ view: user_facts {
     group_label: "Time to"
   }
 
-  dimension: time_to_purchased {
+  dimension_group: since_signup_to_purchased {
+#     hidden: yes
+    type: duration
+    intervals: [day, week, month]
+    sql_start:  ${signed_up_raw};;
+    sql_end: ${first_purchased_raw} ;;
+  }
+
+  dimension: days_to_purchased {
+    alias: [time_to_purchased]
     type: number
     sql:  timestamp_diff(${first_purchased_raw}, ${first_visited_raw}, day) ;;
     group_label: "Time to"
@@ -231,7 +252,7 @@ view: user_facts {
 
   measure: average_time_to_purchase {
     type: average
-    sql: ${time_to_purchased} ;;
+    sql: ${days_to_purchased} ;;
     value_format_name: decimal_2
     drill_fields: [user_details*]
   }
@@ -248,7 +269,7 @@ view: user_facts {
   }
 
   set: user_details {
-    fields: [looker_visitor_id, name, number_of_sessions, time_to_signup, time_to_purchased]
+    fields: [looker_visitor_id, name, number_of_sessions, time_to_signup, days_to_purchased]
   }
 }
 

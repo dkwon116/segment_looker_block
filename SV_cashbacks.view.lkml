@@ -26,6 +26,12 @@ view: sv_cashbacks {
     sql: ${TABLE}._fivetran_synced ;;
   }
 
+  dimension_group: since_available_to_paid {
+    type: duration
+    sql_start: ${withdrawal_raw} ;;
+    sql_end: ${paid_raw} ;;
+  }
+
   dimension: account_number {
     type: string
     sql: ${TABLE}.account_number ;;
