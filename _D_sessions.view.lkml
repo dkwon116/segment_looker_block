@@ -27,7 +27,7 @@ where (idle_time_minutes > 30 or idle_time_minutes is null)
 
   dimension_group: start {
     type: time
-    timeframes: [time, date, hour_of_day, day_of_week_index, week, hour, month, raw]
+    timeframes: [time, date, hour_of_day, day_of_week_index, week, hour, month, quarter, raw]
     sql: ${TABLE}.session_start_at ;;
   }
 
