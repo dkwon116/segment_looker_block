@@ -141,7 +141,8 @@ view: session_facts {
 
 
   dimension: is_bounced_session {
-    sql: CASE WHEN ${total_events} = 1 THEN 'Bounced Session'
+    sql:
+      CASE WHEN ${total_events} = 1 THEN 'Bounced Session'
       ELSE 'Not Bounced Session' END
        ;;
     group_label: "Session Flags"
@@ -235,6 +236,12 @@ view: session_facts {
   }
 
   # ----- Measures -----
+
+  measure: total_pages {
+    type: sum
+    sql: ${pages_count} ;;
+    value_format_name: "decimal_0"
+  }
 
   measure: pages_per_session {
     type: average

@@ -5,7 +5,7 @@ view: tracks_sanitized {
     sql:  SELECT *
           FROM javascript.tracks_view
 
-          -- deduplicate multiple product viewed events for same product in short interval
+          -- deduplicate multiple product viewed and outlink events from same user and same url in short interval
           WHERE id NOT IN
 
             (SELECT
@@ -13,12 +13,11 @@ view: tracks_sanitized {
             FROM (
               SELECT
                 t.id
-                , row_number() over (partition by t.context_page_path order by t.timestamp) as first_url
-                , timestamp_diff(timestamp, lag(timestamp) over (partition by t.context_page_path order by t.timestamp), MILLISECOND) as time_sec
+                , timestamp_diff(timestamp, lag(timestamp) over (partition by t.context_page_path, t.anonymous_id order by t.timestamp), MILLISECOND) as time_sec
               from javascript.tracks_view as t
               inner join ${page_aliases_mapping.SQL_TABLE_NAME} as a2v
               on a2v.alias = coalesce(t.user_id, t.anonymous_id)
-              WHERE t.event = "product_viewed")
+              WHERE t.event = "product_viewed" OR t.event = "outlink_sent")
             WHERE
               time_sec < 5000)
     ;;

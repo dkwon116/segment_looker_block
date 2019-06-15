@@ -57,7 +57,7 @@ view: orders {
 
   dimension_group: transaction_at {
     type: time
-    timeframes: [raw, time, hour, date, week, month, quarter]
+    timeframes: [raw, time, hour, day_of_week, date, week, month, quarter]
     sql: ${TABLE}.transaction_at ;;
   }
 
@@ -179,6 +179,16 @@ view: orders {
 
   measure: average_order_value {
     type: average
+    sql: ${total} ;;
+    value_format_name: decimal_0
+    filters: {
+      field: total
+      value: ">0"
+    }
+  }
+
+  measure: median_order_value {
+    type: median
     sql: ${total} ;;
     value_format_name: decimal_0
     filters: {

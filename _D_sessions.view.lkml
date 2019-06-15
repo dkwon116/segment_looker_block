@@ -86,6 +86,16 @@ where (idle_time_minutes > 30 or idle_time_minutes is null)
     sql: ${count_sessions} ;;
   }
 
+  measure: count_first_visitors {
+    type: count_distinct
+    sql: ${looker_visitor_id} ;;
+
+    filters: {
+      field: is_first_session
+      value: "First Session"
+    }
+  }
+
   measure: count_repeat_visitors {
     type: count_distinct
     sql: ${looker_visitor_id} ;;

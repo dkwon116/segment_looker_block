@@ -65,6 +65,7 @@ view: catch_users {
       year
     ]
     sql: ${TABLE}.created_at ;;
+    hidden: yes
   }
 
   dimension: customs_code {
@@ -85,6 +86,7 @@ view: catch_users {
     sql: CASE
       WHEN ${email} LIKE "%naver%" THEN "Naver"
       WHEN ${email} LIKE "%gmail%" THEN "Gmail"
+      WHEN ${email} IS NULL THEN "No Email"
       ELSE "Other" END;;
   }
 

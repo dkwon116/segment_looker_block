@@ -44,10 +44,12 @@ view: user_facts {
         , cu.id as is_user
         , cu.created_at as signed_up_date
         , COALESCE(ut.type,"Customer") as user_type
+        , IF(DATE(cu.created_at) < DATE(2018,11,20), "Giveaway", "Beta") as joined_at
         , COALESCE(MIN(s.session_start_at), cu.created_at) as first_date
         , MAX(s.session_start_at) as last_date
         , COUNT(s.session_id) as number_of_sessions
         , MIN(o.transaction_at) as first_purchased
+        , MAX(o.transaction_at) as last_purchased
         , SUM(sf.count_product_viewed) as products_viewed
         , COUNT(o.order_id) as orders_completed
         , SUM(o.total) as lifetime_order_value
@@ -124,6 +126,11 @@ view: user_facts {
     group_label: "Total Events"
   }
 
+  dimension: joined_at {
+    type: string
+    sql: ${TABLE}.joined_at ;;
+  }
+
   dimension_group: first_visited {
     type: time
     timeframes: [time, date, week, month, raw]
@@ -160,6 +167,12 @@ view: user_facts {
     sql: ${TABLE}.first_purchased ;;
   }
 
+  dimension_group: last_purchased {
+    type: time
+    timeframes: [time, date, week, month, raw]
+    sql: ${TABLE}.last_purchased ;;
+  }
+
   dimension: time_to_signup {
     type: number
     sql:  timestamp_diff(${signed_up_raw}, ${first_visited_raw}, day) ;;
@@ -190,6 +203,7 @@ view: user_facts {
   dimension: lifetime_order_value {
     type: number
     sql: ${TABLE}.lifetime_order_value ;;
+    value_format_name: decimal_0
   }
 
   dimension: is_purchased {
