@@ -58,25 +58,25 @@ view: funnel_explorer {
 
   dimension_group: event1 {
     type: time
-    timeframes: [raw, time]
+    timeframes: [raw, time, date, week, month]
     sql: ${TABLE}.event1_time ;;
   }
 
   dimension_group: event2 {
     type: time
-    timeframes: [raw, time]
+    timeframes: [raw, time, date, week, month]
     sql: ${TABLE}.event2_time ;;
   }
 
   dimension_group: event3 {
     type: time
-    timeframes: [raw, time]
+    timeframes: [raw, time, date, week, month]
     sql: ${TABLE}.event3_time ;;
   }
 
   dimension_group: event4 {
     type: time
-    timeframes: [raw, time]
+    timeframes: [raw, time, date, week, month]
     sql: ${TABLE}.event4_time ;;
   }
 

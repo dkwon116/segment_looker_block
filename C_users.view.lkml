@@ -129,6 +129,7 @@ view: catch_users {
   dimension: gender_preference {
     type: string
     sql: ${TABLE}.gender_preference ;;
+    hidden: yes
   }
 
   dimension: ip {

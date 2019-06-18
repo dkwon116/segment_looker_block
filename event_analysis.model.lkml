@@ -26,6 +26,8 @@ explore: funnel_explorer {
   }
 }
 
+explore: event_list {}
+
 explore: weekly_activities {
   join: users {
     sql_on: ${weekly_activities.user_id} = ${users.id} ;;

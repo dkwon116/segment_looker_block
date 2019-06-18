@@ -67,7 +67,7 @@ view: mapped_events {
           ,'' as user_agent
           ,'http://www.catchfashion.com' as page_url
           ,'' as ip
-          ,'rakuten' as event_source
+          ,'affiliate' as event_source
         from ${orders.SQL_TABLE_NAME} as t
         inner join ${page_aliases_mapping.SQL_TABLE_NAME} as a2v
           on a2v.alias = t.user_id

@@ -152,6 +152,12 @@ explore: event_facts {
     relationship: many_to_one
     fields: []
   }
+
+  join: dynamic_cohort_users {
+    type: inner
+    relationship: many_to_one
+    sql_on: ${user_facts.looker_visitor_id} = ${dynamic_cohort_users.user_id} ;;
+  }
 }
 
 explore: order_items {
@@ -360,3 +366,7 @@ explore: user_facts {
     relationship: one_to_one
   }
 }
+
+explore: email_activity {}
+
+explore: customer_service_log {}
