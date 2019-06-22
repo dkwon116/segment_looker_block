@@ -221,4 +221,31 @@ view: outlink_sent {
     type: count
     drill_fields: [id, context_library_name, name]
   }
+
+  measure: product_outlinked_users {
+    type: count_distinct
+    sql: ${user_id} ;;
+    filters: {
+      field: type
+      value: "product"
+    }
+  }
+
+  measure: promotion_outlinked_users {
+    type: count_distinct
+    sql: ${user_id} ;;
+    filters: {
+      field: type
+      value: "promotion"
+    }
+  }
+
+  measure: channel_outlinked_users {
+    type: count_distinct
+    sql: ${user_id} ;;
+    filters: {
+      field: type
+      value: "channel"
+    }
+  }
 }

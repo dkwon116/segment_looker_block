@@ -282,6 +282,37 @@ view: user_facts {
     }
   }
 
+  parameter: cohort_type {
+    type: string
+    allowed_value: {
+      label: "First Visited"
+      value: "first_visited"
+    }
+    allowed_value: {
+      label: "Signed Up"
+      value: "signed_up"
+    }
+    allowed_value: {
+      label: "First Purchased"
+      value: "first_purchased"
+    }
+  }
+
+  dimension: cohort_by {
+    label_from_parameter: cohort_type
+    sql:
+      CASE
+        WHEN {% parameter cohort_type %} = 'first_visited' THEN
+          ${first_visited_month}
+        WHEN {% parameter cohort_type %} = 'signed_up' THEN
+          ${signed_up_month}
+        WHEN {% parameter cohort_type %} = 'first_purchased' THEN
+          ${first_purchased_month}
+        ELSE
+          NULL
+      END ;;
+  }
+
   set: user_details {
     fields: [looker_visitor_id, name, number_of_sessions, time_to_signup, days_to_purchased]
   }

@@ -265,6 +265,37 @@ view: order_facts {
 
 ## Used for Cohort Analysis
 
+  parameter: duration_type {
+    type: string
+    allowed_value: {
+      label: "Months Since First Visited"
+      value: "first_visited"
+    }
+    allowed_value: {
+      label: "Months Since Signed Up"
+      value: "signed_up"
+    }
+    allowed_value: {
+      label: "Months Since First Purchased"
+      value: "first_purchased"
+    }
+  }
+
+  dimension: cohort_duration {
+    label_from_parameter: duration_type
+    sql:
+      CASE
+        WHEN {% parameter duration_type %} = 'first_visited' THEN
+          ${months_since_first_visit}
+        WHEN {% parameter duration_type %} = 'signed_up' THEN
+          ${months_since_signup}
+        WHEN {% parameter duration_type %} = 'first_purchased' THEN
+          ${months_since_first_purchase}
+        ELSE
+          NULL
+      END ;;
+  }
+
   dimension_group: since_first_visit {
 #     hidden: yes
     type: duration
