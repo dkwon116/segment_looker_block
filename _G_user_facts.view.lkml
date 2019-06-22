@@ -31,6 +31,11 @@ view: user_facts {
         SELECT
           cu.id as user_id
         FROM mysql_smile_ventures.users as cu
+      ), reseller_list as (
+        SELECT
+          oi.user_id
+        FROM ${order_items.SQL_TABLE_NAME} as oi
+        WHERE oi.quantity >= 3
       )
       SELECT
         au.user_id as looker_visitor_id
@@ -43,7 +48,7 @@ view: user_facts {
         , us.first_referrer as first_referrer
         , cu.id as is_user
         , cu.created_at as signed_up_date
-        , COALESCE(ut.type,"Customer") as user_type
+        , IF(au.user_id IN (SELECT oi.user_id FROM ${order_items.SQL_TABLE_NAME} as oi  WHERE oi.quantity >= 3), "Reseller", "Customer") as user_type
         , IF(DATE(cu.created_at) < DATE(2018,11,20), "Giveaway", "Beta") as joined_at
         , COALESCE(MIN(s.session_start_at), cu.created_at) as first_date
         , MAX(s.session_start_at) as last_date
