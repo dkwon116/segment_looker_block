@@ -4,6 +4,7 @@ view: catch_users {
   dimension: id {
     primary_key: yes
     type: string
+    tags: ["user_id"]
     sql: ${TABLE}.id ;;
     link: {
       label: "Go to {{value}} dashboard"
@@ -77,6 +78,7 @@ view: catch_users {
   dimension: email {
     group_label: "Info"
     type: string
+    tags: ["email"]
     sql: ${TABLE}.email ;;
   }
 
