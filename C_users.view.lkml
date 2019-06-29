@@ -187,7 +187,7 @@ view: catch_users {
   dimension: phone {
     group_label: "Info"
     type: string
-    sql: ${TABLE}.phone ;;
+    sql: replace(replace(replace(replace(${TABLE}.phone,"-",""), "~",""), " ",""), "/", "") ;;
   }
 
   dimension: referred_by {

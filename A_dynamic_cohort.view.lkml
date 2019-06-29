@@ -12,6 +12,8 @@ view: dynamic_cohort_users {
             AND ({% condition cohort_filter_source %} ef.first_source {% endcondition %} )
             AND ({% condition cohort_filter_campaign %} ef.first_campaign {% endcondition %} )
             AND ({% condition cohort_filter_medium %} ef.first_medium {% endcondition %} )
+            AND ({% condition cohort_filter_signed_up_at %} uf.signed_up {% endcondition %} )
+            AND ({% condition cohort_filter_users_first_source %} uf.first_source {% endcondition %} )
           GROUP BY 1;;
   }
 
@@ -58,6 +60,11 @@ view: dynamic_cohort_users {
     suggest_dimension: session_facts.first_medium
   }
 
+  filter: cohort_filter_signed_up_at {
+    description: "Only users signed up at"
+    type: date_time
+  }
+
   filter: cohort_filter_users {
     description: "Signed up only to filter cohort"
     type: yesno
@@ -79,6 +86,13 @@ view: dynamic_cohort_users {
     description: "Sign up date to filter cohort"
     group_label: "User Filters"
     type: date_time
+  }
+
+  filter: cohort_filter_users_first_source {
+    description: "Signed up only to filter cohort"
+    type: string
+    suggest_explore: event_facts
+    suggest_dimension: user_facts.first_source
   }
 
 
