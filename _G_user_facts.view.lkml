@@ -105,311 +105,221 @@ view: user_facts {
     sql: ${TABLE}.is_user ;;
   }
 
-#   dimension: user_type {
-#     type: string
-#     sql: ${TABLE}.user_type ;;
-#     group_label: "Info"
-#   }
-#
-#   dimension: number_of_sessions {
-#     type: number
-#     sql: ${TABLE}.number_of_sessions ;;
-#     group_label: "Total Events"
-#   }
-#
-#   dimension: number_of_sessions_tiered {
-#     type: tier
-#     sql: ${number_of_sessions} ;;
-#     tiers: [
-#       1,
-#       2,
-#       3,
-#       4,
-#       5,
-#       10
-#     ]
-#     group_label: "Total Events"
-#   }
-#
-#   dimension: joined_at {
-#     type: string
-#     sql: ${TABLE}.joined_at ;;
-#   }
-#
-#   dimension_group: first_visited {
-#     type: time
-#     timeframes: [time, date, week, month, raw]
-#     sql: ${TABLE}.first_date ;;
-#   }
-#
-#   dimension_group: last_visited {
-#     type: time
-#     timeframes: [time, date, week, month]
-#     sql: ${TABLE}.last_date ;;
-#   }
-#
-#   dimension_group: signed_up {
-#     type: time
-#     timeframes: [time, date, week, month, raw]
-#     sql: ${TABLE}.signed_up_date ;;
-#   }
-#
-#   dimension: products_viewed {
-#     type: number
-#     sql: ${TABLE}.products_viewed ;;
-#     group_label: "Total Events"
-#   }
-#
-#   dimension: orders_completed {
-#     type: number
-#     sql: ${TABLE}.orders_completed ;;
-#     group_label: "Total Events"
-#   }
-#
-#   dimension_group: first_purchased {
-#     type: time
-#     timeframes: [time, date, week, month, raw]
-#     sql: ${TABLE}.first_purchased ;;
-#   }
-#
-#   dimension_group: last_purchased {
-#     type: time
-#     timeframes: [time, date, week, month, raw]
-#     sql: ${TABLE}.last_purchased ;;
-#   }
-#
-#   dimension: time_to_signup {
-#     type: number
-#     sql:  timestamp_diff(${signed_up_raw}, ${first_visited_raw}, day) ;;
-#     group_label: "Time to"
-#   }
-#
-#   dimension_group: since_signup_to_purchased {
-# #     hidden: yes
-#     type: duration
-#     intervals: [day, week, month]
-#     sql_start:  ${signed_up_raw};;
-#     sql_end: ${first_purchased_raw} ;;
-#   }
-#
-#   dimension: days_to_purchased {
-#     alias: [time_to_purchased]
-#     type: number
-#     sql:  timestamp_diff(${first_purchased_raw}, ${first_visited_raw}, day) ;;
-#     group_label: "Time to"
-#   }
-#
-#   dimension: days_to_signup_to_purchased {
-#     type: number
-#     sql:  timestamp_diff(${first_purchased_raw}, ${signed_up_raw}, day) ;;
-#     group_label: "Time to"
-#   }
-#
-#   dimension: lifetime_order_value {
-#     type: number
-#     sql: ${TABLE}.lifetime_order_value ;;
-#     value_format_name: decimal_0
-#   }
-#
-#   dimension: is_purchased {
-#     type: yesno
-#     sql: IF(${orders_completed} > 0, true, false) ;;
-#   }
-#
-#   dimension: first_source {
-#     type: string
-#     sql: ${TABLE}.first_source ;;
-#     group_label: "Acquisition"
-#   }
-#
-#   dimension: first_medium {
-#     type: string
-#     sql: ${TABLE}.first_medium ;;
-#     group_label: "Acquisition"
-#   }
-#
-#   dimension: first_campaign {
-#     type: string
-#     sql: ${TABLE}.first_campaign ;;
-#     group_label: "Acquisition"
-#   }
-#
-#   dimension: first_content {
-#     type: string
-#     sql: ${TABLE}.first_content ;;
-#     group_label: "Acquisition"
-#   }
-#
-#   dimension: first_term {
-#     type: string
-#     sql: ${TABLE}.first_term ;;
-#     group_label: "Acquisition"
-#   }
-#
-#   dimension: first_referrer {
-#     type: string
-#     sql: ${TABLE}.first_referrer ;;
-#     group_label: "Acquisition"
-#   }
-#
-#
-#   measure: total_users {
-#     type: count_distinct
-#     sql: ${looker_visitor_id} ;;
-#   }
-#
-#   measure: average_time_to_signup {
-#     type: average
-#     sql: ${time_to_signup} ;;
-#     value_format_name: decimal_2
-#     drill_fields: [user_details*]
-#     filters: {
-#       field: time_to_signup
-#       value: ">=0"
-#     }
-#   }
-#
-#   measure: average_time_to_purchase {
-#     type: average
-#     sql: ${days_to_purchased} ;;
-#     value_format_name: decimal_2
-#     drill_fields: [user_details*]
-#   }
-#
-#   measure: average_days_signup_to_purchase {
-#     type: average
-#     sql: ${days_to_signup_to_purchased} ;;
-#     value_format_name: decimal_2
-#     drill_fields: [user_details*]
-#     filters: {
-#       field: time_to_signup
-#       value: ">=0"
-#     }
-#   }
-#
-#   parameter: cohort_type {
-#     type: string
-#     allowed_value: {
-#       label: "First Visited"
-#       value: "first_visited"
-#     }
-#     allowed_value: {
-#       label: "Signed Up"
-#       value: "signed_up"
-#     }
-#     allowed_value: {
-#       label: "First Purchased"
-#       value: "first_purchased"
-#     }
-#   }
-#
-#   dimension: cohort_by {
-#     label_from_parameter: cohort_type
-#     sql:
-#       CASE
-#         WHEN {% parameter cohort_type %} = 'first_visited' THEN
-#           ${first_visited_month}
-#         WHEN {% parameter cohort_type %} = 'signed_up' THEN
-#           ${signed_up_month}
-#         WHEN {% parameter cohort_type %} = 'first_purchased' THEN
-#           ${first_purchased_month}
-#         ELSE
-#           NULL
-#       END ;;
-#   }
-#
-#   set: user_details {
-#     fields: [looker_visitor_id, name, number_of_sessions, time_to_signup, days_to_purchased]
-#   }
-
-
   dimension: user_type {
     type: string
-    sql: null ;;
-    group_label: "Temp"
+    sql: ${TABLE}.user_type ;;
+    group_label: "Info"
   }
 
   dimension: number_of_sessions {
     type: number
-    sql: null ;;
-    group_label: "Temp"
+    sql: ${TABLE}.number_of_sessions ;;
+    group_label: "Total Events"
+  }
+
+  dimension: number_of_sessions_tiered {
+    type: tier
+    sql: ${number_of_sessions} ;;
+    tiers: [
+      1,
+      2,
+      3,
+      4,
+      5,
+      10
+    ]
+    group_label: "Total Events"
+  }
+
+  dimension: joined_at {
+    type: string
+    sql: ${TABLE}.joined_at ;;
   }
 
   dimension_group: first_visited {
     type: time
     timeframes: [time, date, week, month, raw]
-    sql: null ;;
-    group_label: "Temp"
+    sql: ${TABLE}.first_date ;;
   }
 
   dimension_group: last_visited {
     type: time
     timeframes: [time, date, week, month]
-    sql: null ;;
-    group_label: "Temp"
+    sql: ${TABLE}.last_date ;;
   }
 
   dimension_group: signed_up {
     type: time
     timeframes: [time, date, week, month, raw]
-    sql: null ;;
-    group_label: "Temp"
+    sql: ${TABLE}.signed_up_date ;;
   }
 
   dimension: products_viewed {
     type: number
-    sql: null ;;
-    group_label: "Temp"
+    sql: ${TABLE}.products_viewed ;;
+    group_label: "Total Events"
   }
 
   dimension: orders_completed {
     type: number
-    sql: null ;;
-    group_label: "Temp"
+    sql: ${TABLE}.orders_completed ;;
+    group_label: "Total Events"
   }
 
   dimension_group: first_purchased {
     type: time
     timeframes: [time, date, week, month, raw]
-    sql: null ;;
-    group_label: "Temp"
+    sql: ${TABLE}.first_purchased ;;
   }
 
   dimension_group: last_purchased {
     type: time
     timeframes: [time, date, week, month, raw]
-    sql: null ;;
-    group_label: "Temp"
+    sql: ${TABLE}.last_purchased ;;
+  }
+
+  dimension: time_to_signup {
+    type: number
+    sql:  timestamp_diff(${signed_up_raw}, ${first_visited_raw}, day) ;;
+    group_label: "Time to"
+  }
+
+  dimension_group: since_signup_to_purchased {
+#     hidden: yes
+    type: duration
+    intervals: [day, week, month]
+    sql_start:  ${signed_up_raw};;
+    sql_end: ${first_purchased_raw} ;;
+  }
+
+  dimension: days_to_purchased {
+    alias: [time_to_purchased]
+    type: number
+    sql:  timestamp_diff(${first_purchased_raw}, ${first_visited_raw}, day) ;;
+    group_label: "Time to"
+  }
+
+  dimension: days_to_signup_to_purchased {
+    type: number
+    sql:  timestamp_diff(${first_purchased_raw}, ${signed_up_raw}, day) ;;
+    group_label: "Time to"
   }
 
   dimension: lifetime_order_value {
     type: number
-    sql: null ;;
-    group_label: "Temp"
+    sql: ${TABLE}.lifetime_order_value ;;
+    value_format_name: decimal_0
   }
 
   dimension: is_purchased {
-    type: string
-    sql: null ;;
-    group_label: "Temp"
+    type: yesno
+    sql: IF(${orders_completed} > 0, true, false) ;;
   }
 
   dimension: first_source {
     type: string
-    sql: null ;;
-    group_label: "Temp"
+    sql: ${TABLE}.first_source ;;
+    group_label: "Acquisition"
   }
 
   dimension: first_medium {
     type: string
-    sql: null ;;
-    group_label: "Temp"
+    sql: ${TABLE}.first_medium ;;
+    group_label: "Acquisition"
   }
 
   dimension: first_campaign {
     type: string
-    sql: null ;;
-    group_label: "Temp"
+    sql: ${TABLE}.first_campaign ;;
+    group_label: "Acquisition"
+  }
+
+  dimension: first_content {
+    type: string
+    sql: ${TABLE}.first_content ;;
+    group_label: "Acquisition"
+  }
+
+  dimension: first_term {
+    type: string
+    sql: ${TABLE}.first_term ;;
+    group_label: "Acquisition"
+  }
+
+  dimension: first_referrer {
+    type: string
+    sql: ${TABLE}.first_referrer ;;
+    group_label: "Acquisition"
+  }
+
+
+  measure: total_users {
+    type: count_distinct
+    sql: ${looker_visitor_id} ;;
+  }
+
+  measure: average_time_to_signup {
+    type: average
+    sql: ${time_to_signup} ;;
+    value_format_name: decimal_2
+    drill_fields: [user_details*]
+    filters: {
+      field: time_to_signup
+      value: ">=0"
+    }
+  }
+
+  measure: average_time_to_purchase {
+    type: average
+    sql: ${days_to_purchased} ;;
+    value_format_name: decimal_2
+    drill_fields: [user_details*]
+  }
+
+  measure: average_days_signup_to_purchase {
+    type: average
+    sql: ${days_to_signup_to_purchased} ;;
+    value_format_name: decimal_2
+    drill_fields: [user_details*]
+    filters: {
+      field: time_to_signup
+      value: ">=0"
+    }
+  }
+
+  parameter: cohort_type {
+    type: string
+    allowed_value: {
+      label: "First Visited"
+      value: "first_visited"
+    }
+    allowed_value: {
+      label: "Signed Up"
+      value: "signed_up"
+    }
+    allowed_value: {
+      label: "First Purchased"
+      value: "first_purchased"
+    }
+  }
+
+  dimension: cohort_by {
+    label_from_parameter: cohort_type
+    sql:
+      CASE
+        WHEN {% parameter cohort_type %} = 'first_visited' THEN
+          ${first_visited_month}
+        WHEN {% parameter cohort_type %} = 'signed_up' THEN
+          ${signed_up_month}
+        WHEN {% parameter cohort_type %} = 'first_purchased' THEN
+          ${first_purchased_month}
+        ELSE
+          NULL
+      END ;;
+  }
+
+  set: user_details {
+    fields: [looker_visitor_id, name, number_of_sessions, time_to_signup, days_to_purchased]
   }
 }
 
