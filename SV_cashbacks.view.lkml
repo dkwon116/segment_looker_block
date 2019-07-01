@@ -32,6 +32,12 @@ view: sv_cashbacks {
     sql_end: ${paid_raw} ;;
   }
 
+  dimension_group: since_available {
+    type: duration
+    sql_start: ${withdrawal_raw} ;;
+    sql_end: CURRENT_TIMESTAMP() ;;
+  }
+
   dimension: account_number {
     type: string
     sql: ${TABLE}.account_number ;;
@@ -218,5 +224,10 @@ view: sv_cashbacks {
   measure: count {
     type: count
     drill_fields: [id, entity_name]
+  }
+
+  measure: total_amount {
+    type: sum
+    sql: ${amount} ;;
   }
 }
