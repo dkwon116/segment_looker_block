@@ -79,6 +79,25 @@ where (idle_time_minutes > 30 or idle_time_minutes is null)
     type: count_distinct
     sql: ${session_id} ;;
     drill_fields: [session_detail*]
+    group_label: "Session Facts"
+  }
+
+  measure: count_repeat_sessions {
+    type: count_distinct
+    sql: ${session_id} ;;
+
+    filters: {
+      field: is_first_session
+      value: "Repeat Session"
+    }
+    group_label: "Session Facts"
+  }
+
+  measure: percent_repeat_sessions {
+    type: number
+    value_format_name: decimal_2
+    sql: ${count_repeat_sessions} / ${count_sessions} ;;
+    group_label: "Session Facts"
   }
 
   measure: percent_of_total_count {
@@ -98,7 +117,7 @@ where (idle_time_minutes > 30 or idle_time_minutes is null)
 
   measure: count_repeat_visitors {
     type: count_distinct
-    sql: ${looker_visitor_id} ;;
+    sql: ${looker_visitor_id};;
 
     filters: {
       field: is_first_session

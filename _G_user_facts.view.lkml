@@ -67,7 +67,7 @@ view: user_facts {
       LEFT JOIN ${session_facts.SQL_TABLE_NAME} as sf
         ON s.session_id = sf.session_id
       LEFT JOIN user_sources as us
-        ON cu.id = us.looker_visitor_id
+        ON au.user_id = us.looker_visitor_id
       LEFT JOIN ${order_facts.SQL_TABLE_NAME} as o
         ON s.session_id = o.session_id
       LEFT JOIN google_sheets.user_type as ut
@@ -284,6 +284,15 @@ view: user_facts {
     filters: {
       field: time_to_signup
       value: ">=0"
+    }
+  }
+
+  measure: average_orders {
+    type: average
+    sql: ${orders_completed} ;;
+    filters: {
+      field: orders_completed
+      value: ">0"
     }
   }
 

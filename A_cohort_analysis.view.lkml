@@ -6,13 +6,13 @@ view: weekly_activities {
     sql:WITH
           week_list as (
             SELECT
-              DISTINCT(TIMESTAMP_TRUNC(e.timestamp, week)) as product_view_week
+              DISTINCT(TIMESTAMP_TRUNC(e.timestamp, WEEK(MONDAY))) as product_view_week
             FROM ${mapped_events.SQL_TABLE_NAME} as e
             WHERE e.event = "Product"
         ), data as (
             SELECT
                   me.looker_visitor_id as user_id
-                , TIMESTAMP_TRUNC(me.timestamp, week) as product_view_week
+                , TIMESTAMP_TRUNC(me.timestamp, WEEK(MONDAY)) as product_view_week
                 , COUNT(distinct me.event_id) AS weekly_views
             FROM ${mapped_events.SQL_TABLE_NAME} as me
             WHERE me.event = "Product"
@@ -21,7 +21,7 @@ view: weekly_activities {
 
          SELECT
             u.looker_visitor_id as user_id
-          , TIMESTAMP_TRUNC(u.first_date, week) as first_week
+          , TIMESTAMP_TRUNC(u.first_date, WEEK(MONDAY)) as first_week
           , week_list.product_view_week as product_view_week
           -- , d.weekly_views as weekly_views
           , COALESCE(d.weekly_views, 0) as weekly_views
@@ -30,8 +30,8 @@ view: weekly_activities {
           ${user_facts.SQL_TABLE_NAME} as u
           CROSS JOIN week_list
           LEFT JOIN data as d ON (d.user_id = u.looker_visitor_id AND d.product_view_week = week_list.product_view_week)
-          WHERE cast(TIMESTAMP_TRUNC(u.first_date, week) as date)
-          BETWEEN DATE_ADD(cast(TIMESTAMP_TRUNC(u.first_date, week) as date), INTERVAL -100 WEEK) AND cast(TIMESTAMP_TRUNC(week_list.product_view_week, week) as date)
+          WHERE cast(TIMESTAMP_TRUNC(u.first_date, WEEK(MONDAY)) as date)
+          BETWEEN DATE_ADD(cast(TIMESTAMP_TRUNC(u.first_date, WEEK(MONDAY)) as date), INTERVAL -100 WEEK) AND cast(TIMESTAMP_TRUNC(week_list.product_view_week, WEEK(MONDAY)) as date)
           ;;
   }
 
@@ -124,6 +124,27 @@ view: weekly_activities {
     type: number
     value_format_name: percent_2
     sql: 1.0 * ${7_days_active_users} / nullif(${total_active_users},0) ;;
+  }
+
+  measure: 28_days_active_users {
+    description: "number of users who viewed 1 or more products after fourth week of visit"
+    type: count_distinct
+    sql: ${user_id} ;;
+
+    filters: {
+      field: weekly_views
+      value: ">0"
+    }
+    filters: {
+      field: weeks_since_first_visit
+      value: ">4"
+    }
+  }
+
+  measure: 28_days_retention_rate {
+    type: number
+    value_format_name: percent_2
+    sql: 1.0 * ${28_days_active_users} / nullif(${total_active_users},0) ;;
   }
 
 #   measure: total_amount_spent {

@@ -247,12 +247,14 @@ view: session_facts {
     type: average
     sql: ${pages_count} ;;
     value_format_name: "decimal_1"
+    group_label: "Session Facts"
   }
 
   measure: avg_session_duration_minutes {
     type: average
     value_format_name: decimal_1
     sql: ${session_duration_minutes};;
+    group_label: "Session Facts"
 
 #     filters: {
 #       field: session_duration_minutes
@@ -264,18 +266,21 @@ view: session_facts {
     type: average
     value_format_name: decimal_1
     sql: ${tracks_count}::float ;;
+    group_label: "Session Facts"
   }
 
   measure: average_events_per_session {
     type: average
     sql: ${total_events} ;;
     value_format_name: decimal_1
+    group_label: "Session Facts"
   }
 
   measure: cumulative_session_duration {
     type: sum
     sql: ${session_duration_minutes} ;;
     value_format_name: decimal_2
+    group_label: "Session Facts"
   }
 
   measure: average_session_duration_per_user {
@@ -456,7 +461,7 @@ view: session_facts {
   measure: outlinked_conversion_rate {
     type: number
     sql: ${total_outlinked_users} / NULLIF(${sessions.count_visitors}, 0) ;;
-    value_format_name: percent_0
+    value_format_name: percent_2
     group_label: "Outlinked"
   }
 
@@ -581,6 +586,17 @@ view: session_facts {
     }
   }
 
+  measure: total_order_completed_sessions {
+    type: count_distinct
+    sql: ${sessions.session_id} ;;
+    group_label: "Order Completed"
+
+    filters: {
+      field: order_completed
+      value: ">0"
+    }
+  }
+
   measure: order_completed_per_converted_user {
     type: number
     sql: ${order_completed_total} / NULLIF(${total_order_completed_users}, 0);;
@@ -591,6 +607,14 @@ view: session_facts {
   measure: order_completed_conversion_rate {
     type: number
     sql: ${total_order_completed_users} / ${sessions.count_visitors} ;;
+    value_format_name: percent_2
+    group_label: "Order Completed"
+    drill_fields: [order_completed_details*]
+  }
+
+  measure: order_completed_session_conversion_rate {
+    type: number
+    sql: ${total_order_completed_sessions} / ${sessions.count_sessions} ;;
     value_format_name: percent_2
     group_label: "Order Completed"
     drill_fields: [order_completed_details*]
@@ -609,6 +633,7 @@ view: session_facts {
     sql: ${count_bounced_sessions} / ${sessions.count_sessions} ;;
     value_format_name: percent_2
     drill_fields: [campaign_details*]
+    group_label: "Session Facts"
   }
 
 
