@@ -168,7 +168,7 @@ view: user_facts {
 
   dimension_group: first_purchased {
     type: time
-    timeframes: [time, date, week, month, raw]
+    timeframes: [time, date, week, month, day_of_month, raw]
     sql: ${TABLE}.first_purchased ;;
   }
 
@@ -249,6 +249,12 @@ view: user_facts {
   dimension: first_referrer {
     type: string
     sql: ${TABLE}.first_referrer ;;
+    group_label: "Acquisition"
+  }
+
+  dimension: first_referrer_domain {
+    type: string
+    sql: NET.REG_DOMAIN(${first_referrer}) ;;
     group_label: "Acquisition"
   }
 

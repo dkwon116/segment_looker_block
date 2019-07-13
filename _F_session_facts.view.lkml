@@ -43,19 +43,7 @@ view: session_facts {
   }
 
   dimension: first_referrer_domain {
-    sql: split_part(${first_referrer},'/',3) ;;
-    group_label: "First"
-  }
-
-  dimension: first_referrer_domain_mapped {
-    sql: CASE
-    WHEN ${first_referrer} like '%facebook%' THEN 'Facebook'
-    WHEN ${first_referrer} like '%google%' THEN 'Google'
-    WHEN ${first_referrer} like '%naver%' THEN 'Naver'
-    WHEN ${first_referrer} like '%instagram%' THEN 'Instagram'
-    WHEN ${first_referrer} like '%catchfashion%' THEN 'Catch'
-    WHEN ${first_referrer} IS NULL THEN 'Direct'
-    ELSE 'Other' END ;;
+    sql: NET.REG_DOMAIN(${first_referrer}) ;;
     group_label: "First"
   }
 
