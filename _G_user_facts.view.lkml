@@ -56,6 +56,7 @@ view: user_facts {
         , MIN(o.transaction_at) as first_purchased
         , MAX(o.transaction_at) as last_purchased
         , SUM(sf.count_product_viewed) as products_viewed
+        , SUM(sf.count_outlinked) as number_of_outlinks
         , COUNT(o.order_id) as orders_completed
         , SUM(o.total) as lifetime_order_value
 
@@ -166,9 +167,15 @@ view: user_facts {
     group_label: "Total Events"
   }
 
+  dimension: number_of_outlinks {
+    type: number
+    sql: ${TABLE}.number_of_outlinks ;;
+    group_label: "Total Events"
+  }
+
   dimension_group: first_purchased {
     type: time
-    timeframes: [time, date, week, month, day_of_month, raw]
+    timeframes: [time, date, week, day_of_week, month, day_of_month, raw]
     sql: ${TABLE}.first_purchased ;;
   }
 
@@ -258,11 +265,58 @@ view: user_facts {
     group_label: "Acquisition"
   }
 
-
-  measure: total_users {
+  measure: total_visitors {
+    description: "total unique visitors"
     type: count_distinct
     sql: ${looker_visitor_id} ;;
   }
+
+  measure: total_users {
+    description: "total unique visitors who signed up"
+    type: count_distinct
+    sql: ${looker_visitor_id} ;;
+    filters: {
+      field: is_user
+      value: "Yes"
+    }
+  }
+
+  measure: total_outlinked_users {
+    type: count_distinct
+    sql: ${looker_visitor_id} ;;
+    filters: {
+      field: is_user
+      value: "Yes"
+    }
+    filters: {
+      field: number_of_outlinks
+      value: ">0"
+    }
+  }
+
+  measure: total_customer {
+    description: "total unique users who made purchase"
+    type: count_distinct
+    sql: ${looker_visitor_id} ;;
+    filters: {
+      field: is_purchased
+      value: "Yes"
+    }
+  }
+
+  measure: activation_rate {
+    description: "% of users who made purchase"
+    type: number
+    sql: ${total_customer} / NULLIF(${total_users}, 0) ;;
+    value_format_name: percent_0
+  }
+
+
+#   visitors (not signed up)
+#   users (signed up)
+#   users (signed up, outlinked)
+#   customers (purchased)
+
 
   measure: average_time_to_signup {
     type: average

@@ -40,11 +40,19 @@ view: session_facts {
   dimension: first_referrer {
     sql: ${TABLE}.first_referrer ;;
     group_label: "First"
+    type: string
   }
 
   dimension: first_referrer_domain {
     sql: NET.REG_DOMAIN(${first_referrer}) ;;
     group_label: "First"
+    type: string
+  }
+
+  dimension: first_referral_name {
+    sql: split(${first_referrer_domain}, ".")[OFFSET(0)]  ;;
+    group_label: "First"
+    type: string
   }
 
   dimension: first_campaign {
@@ -289,6 +297,7 @@ view: session_facts {
   }
 
   measure: pre_purchase_users {
+    description: "Count of distinct users who have not made purchase yet"
     type: count_distinct
     sql: ${sessions.looker_visitor_id} ;;
     filters: {
