@@ -95,7 +95,7 @@ where (idle_time_minutes > 30 or idle_time_minutes is null)
 
   measure: percent_repeat_sessions {
     type: number
-    value_format_name: decimal_2
+    value_format_name: percent_0
     sql: ${count_repeat_sessions} / ${count_sessions} ;;
     group_label: "Session Facts"
   }

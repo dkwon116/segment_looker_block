@@ -40,6 +40,7 @@ view: user_facts {
       SELECT
         au.user_id as looker_visitor_id
         , cu.first_name as name
+        , cu.email as email
         , us.first_source as first_source
         , us.first_medium as first_medium
         , us.first_campaign as first_campaign
@@ -73,7 +74,7 @@ view: user_facts {
         ON s.session_id = o.session_id
       LEFT JOIN google_sheets.user_type as ut
         ON cu.id = ut.user_id
-      GROUP BY 1,2,3,4,5,6,7,8,9,10,11
+      GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12
 
        ;;
   }
@@ -94,6 +95,11 @@ view: user_facts {
     type: string
     sql: ${TABLE}.name ;;
     hidden: yes
+  }
+
+  dimension: email {
+    type: string
+    sql: ${TABLE}.email ;;
   }
 
   dimension: is_user {

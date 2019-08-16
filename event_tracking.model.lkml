@@ -82,6 +82,11 @@ explore: event_facts {
     relationship: many_to_one
   }
 
+  join: event_flow {
+    sql_on: ${event_facts.event_id} = ${event_flow.event_id} ;;
+    relationship: one_to_one
+  }
+
   join: concierge_clicked_view {
     view_label: "T_Concierge Clicked"
     type: left_outer
@@ -154,9 +159,15 @@ explore: event_facts {
   }
 
   join: dynamic_cohort_users {
-    type: inner
+    type: left_outer
     relationship: many_to_one
     sql_on: ${user_facts.looker_visitor_id} = ${dynamic_cohort_users.user_id} ;;
+  }
+
+  join: email_activity {
+    type: left_outer
+    sql_on: ${catch_users.email} = ${email_activity.email} ;;
+    relationship: one_to_many
   }
 }
 
@@ -367,6 +378,6 @@ explore: user_facts {
   }
 }
 
-explore: email_activity {}
+# explore: email_activity {}
 
 explore: customer_service_log {}

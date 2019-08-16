@@ -5,11 +5,38 @@ view: email_activity {
     primary_key: yes
     type: string
     sql: ${TABLE}.id ;;
+    hidden: yes
+  }
+
+  dimension: asm_group_id {
+    type: number
+    sql: ${TABLE}.asm_group_id ;;
+    hidden: yes
+  }
+
+  dimension: attempt {
+    type: string
+    sql: ${TABLE}.attempt ;;
+    hidden: yes
   }
 
   dimension: category {
     type: string
     sql: ${TABLE}.category ;;
+  }
+
+  dimension_group: date {
+    type: time
+    timeframes: [
+      raw,
+      time,
+      date,
+      week,
+      month,
+      quarter,
+      year
+    ]
+    sql: ${TABLE}.date ;;
   }
 
   dimension: email {
@@ -20,65 +47,6 @@ view: email_activity {
   dimension: event {
     type: string
     sql: ${TABLE}.event ;;
-  }
-
-  dimension: reason {
-    type: string
-    sql: ${TABLE}.reason ;;
-  }
-
-  dimension: response {
-    type: string
-    sql: ${TABLE}.response ;;
-  }
-
-  dimension: status {
-    type: string
-    sql: ${TABLE}.status ;;
-  }
-
-  dimension_group: timestamp {
-    type: time
-    sql: TIMESTAMP(DATETIME(TIMESTAMP_SECONDS(${TABLE}.timestamp))) ;;
-    timeframes: [
-      raw,
-      time,
-      date,
-      week,
-      month,
-      quarter,
-      year
-    ]
-  }
-
-  dimension: url {
-    type: string
-    sql: ${TABLE}.url ;;
-  }
-
-  dimension: url_offset_index {
-    type: number
-    sql: ${TABLE}.url_offset_index ;;
-  }
-
-  dimension: url_offset_type {
-    type: string
-    sql: ${TABLE}.url_offset_type ;;
-  }
-
-  dimension_group: received {
-    type: time
-    timeframes: [
-      raw,
-      time,
-      date,
-      week,
-      month,
-      quarter,
-      year
-    ]
-    sql: ${TABLE}.received_at ;;
-    hidden: yes
   }
 
   dimension: ip {
@@ -102,13 +70,51 @@ view: email_activity {
     hidden: yes
   }
 
-  dimension: useragent {
-    type: string
-    sql: ${TABLE}.useragent ;;
+  dimension: marketing_campaign_id {
+    type: number
+    sql: ${TABLE}.marketing_campaign_id ;;
     hidden: yes
   }
 
-  dimension_group: uuid_ts {
+  dimension: marketing_campaign_name {
+    type: string
+    sql: ${TABLE}.marketing_campaign_name ;;
+  }
+
+  dimension: marketing_campaign_split_id {
+    type: number
+    sql: ${TABLE}.marketing_campaign_split_id ;;
+  }
+
+  dimension: marketing_campaign_version {
+    type: string
+    sql: ${TABLE}.marketing_campaign_version ;;
+  }
+
+  dimension: mc_stats {
+    type: string
+    sql: ${TABLE}.mc_stats ;;
+    hidden: yes
+  }
+
+  dimension: phase_id {
+    type: string
+    sql: ${TABLE}.phase_id ;;
+    hidden: yes
+  }
+
+  dimension: processed {
+    type: number
+    sql: ${TABLE}.processed ;;
+    hidden: yes
+  }
+
+  dimension: reason {
+    type: string
+    sql: ${TABLE}.reason ;;
+  }
+
+  dimension_group: received {
     type: time
     timeframes: [
       raw,
@@ -119,20 +125,22 @@ view: email_activity {
       quarter,
       year
     ]
-    sql: ${TABLE}.uuid_ts ;;
-    hidden: yes
+    sql: ${TABLE}.received_at ;;
   }
 
-  dimension: tls {
-    type: number
-    sql: ${TABLE}.tls ;;
-    hidden: yes
+  dimension: response {
+    type: string
+    sql: ${TABLE}.response ;;
+  }
+
+  dimension: sg_content_type {
+    type: string
+    sql: ${TABLE}.sg_content_type ;;
   }
 
   dimension: sg_event_id {
     type: string
     sql: ${TABLE}.sg_event_id ;;
-    hidden: yes
   }
 
   dimension: sg_message_id {
@@ -150,6 +158,16 @@ view: email_activity {
   dimension: sg_template_name {
     type: string
     sql: ${TABLE}.sg_template_name ;;
+  }
+
+  dimension: sg_user_id {
+    type: number
+    sql: ${TABLE}.sg_user_id ;;
+  }
+
+  dimension: singlesend_id {
+    type: string
+    sql: ${TABLE}.singlesend_id ;;
     hidden: yes
   }
 
@@ -159,8 +177,102 @@ view: email_activity {
     hidden: yes
   }
 
+  dimension: status {
+    type: string
+    sql: ${TABLE}.status ;;
+  }
+
+  dimension: template_id {
+    type: string
+    sql: ${TABLE}.template_id ;;
+  }
+
+  dimension: timestamp {
+    type: number
+    sql: ${TABLE}.timestamp ;;
+  }
+
+  dimension: tls {
+    type: number
+    sql: ${TABLE}.tls ;;
+  }
+
+  dimension: type {
+    type: string
+    sql: ${TABLE}.type ;;
+  }
+
+  dimension: url {
+    type: string
+    sql: ${TABLE}.url ;;
+  }
+
+  dimension: url_offset_index {
+    type: number
+    sql: ${TABLE}.url_offset_index ;;
+    hidden: yes
+  }
+
+  dimension: url_offset_type {
+    type: string
+    sql: ${TABLE}.url_offset_type ;;
+    hidden: yes
+  }
+
+  dimension: useragent {
+    type: string
+    sql: ${TABLE}.useragent ;;
+  }
+
+  dimension_group: uuid_ts {
+    type: time
+    timeframes: [
+      raw,
+      time,
+      date,
+      week,
+      month,
+      quarter,
+      year
+    ]
+    sql: ${TABLE}.uuid_ts ;;
+  }
+
   measure: count {
     type: count
-    drill_fields: [id, sg_template_name]
+    drill_fields: [id, marketing_campaign_name, sg_template_name]
+  }
+
+  measure: users_delievered {
+    type: count_distinct
+    sql: ${email} ;;
+    filters: {
+      field: event
+      value: "delivered"
+    }
+  }
+
+  measure: users_clicked {
+    type: count_distinct
+    sql: ${email} ;;
+    filters: {
+      field: event
+      value: "click"
+    }
+  }
+
+  measure: users_opened {
+    type: count_distinct
+    sql: ${email} ;;
+    filters: {
+      field: event
+      value: "open"
+    }
+  }
+
+  measure: click_through_rate {
+    type: number
+    sql: ${users_clicked} / NULLIF(${users_delievered}, 0) ;;
+    value_format_name: percent_1
   }
 }

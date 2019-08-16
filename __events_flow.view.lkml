@@ -1,31 +1,32 @@
-view: tracks_flow {
+view: event_flow {
   derived_table: {
-    sql: select a.event_id
-      , a.session_id
-      , a.track_sequence_number
-      , a.event
-      , a.looker_visitor_id
-      , a.timestamp
-      , b.event as event_2
-      , c.event as event_3
-      , d.event as event_4
-      , e.event as event_5
-from ${track_facts.SQL_TABLE_NAME} a
-left join ${track_facts.SQL_TABLE_NAME} b
-on a.track_sequence_number + 1 = b.track_sequence_number
-and a.session_id = b.session_id
-left join ${track_facts.SQL_TABLE_NAME} c
-on a.track_sequence_number + 2 = c.track_sequence_number
-and a.session_id = c.session_id
-left join ${track_facts.SQL_TABLE_NAME} d
-on a.track_sequence_number + 3 = d.track_sequence_number
-and a.session_id = d.session_id
-left join ${track_facts.SQL_TABLE_NAME} e
-on a.track_sequence_number + 4 = e.track_sequence_number
-and a.session_id = e.session_id
-order by a.session_id, a.track_sequence_number
- ;;
-#     sql_trigger_value: select count(*) from ${sessions_trk.SQL_TABLE_NAME} ;;
+    sql_trigger_value: select count(*) from ${event_facts.SQL_TABLE_NAME} ;;
+    sql:
+      select a.event_id
+        , a.session_id
+        , a.track_sequence_number
+        , a.event
+        , a.looker_visitor_id
+        , a.timestamp
+        , b.event as event_2
+        , c.event as event_3
+        , d.event as event_4
+        , e.event as event_5
+      from ${event_facts.SQL_TABLE_NAME} a
+      left join ${event_facts.SQL_TABLE_NAME} b
+        on a.track_sequence_number + 1 = b.track_sequence_number
+        and a.session_id = b.session_id
+      left join ${event_facts.SQL_TABLE_NAME} c
+        on a.track_sequence_number + 2 = c.track_sequence_number
+        and a.session_id = c.session_id
+      left join ${event_facts.SQL_TABLE_NAME} d
+        on a.track_sequence_number + 3 = d.track_sequence_number
+        and a.session_id = d.session_id
+      left join ${event_facts.SQL_TABLE_NAME} e
+        on a.track_sequence_number + 4 = e.track_sequence_number
+        and a.session_id = e.session_id
+      order by a.session_id, a.track_sequence_number
+       ;;
   }
 
   dimension: event_id {

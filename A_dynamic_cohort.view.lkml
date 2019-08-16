@@ -1,10 +1,14 @@
 view: dynamic_cohort_users {
   derived_table: {
-    sql: SELECT uf.looker_visitor_id  AS user_id
+    sql: SELECT
+          uf.looker_visitor_id  AS user_id
+          , true AS is_cohort
+
           FROM ${event_facts.SQL_TABLE_NAME} as ef
           LEFT JOIN ${user_facts.SQL_TABLE_NAME} as uf on ef.looker_visitor_id = uf.looker_visitor_id
           LEFT JOIN ${product_events.SQL_TABLE_NAME} as pe on ef.event_id = pe.event_id
           LEFT JOIN ${product_facts.SQL_TABLE_NAME} as pf on pe.product_id = pf.id
+          LEFT JOIN ${email_activity.SQL_TABLE_NAME} as ea on uf.email = ea.email
 
 
           WHERE ({% condition cohort_filter_event %} ef.event {% endcondition %})
@@ -14,6 +18,7 @@ view: dynamic_cohort_users {
             AND ({% condition cohort_filter_medium %} ef.first_medium {% endcondition %} )
             AND ({% condition cohort_filter_signed_up_at %} uf.signed_up {% endcondition %} )
             AND ({% condition cohort_filter_users_first_source %} uf.first_source {% endcondition %} )
+            AND ({% condition cohort_filter_email_delivered %} ea.marketing_campaign_name {% endcondition %} )
           GROUP BY 1;;
   }
 
@@ -22,6 +27,11 @@ view: dynamic_cohort_users {
     description: "Unique ID for each user that has ordered"
     type: number
     sql: ${TABLE}.user_id ;;
+  }
+
+  dimension: is_cohort {
+    type: yesno
+    sql: ${TABLE}.is_cohort ;;
   }
 
   filter: cohort_filter_event {
@@ -58,6 +68,14 @@ view: dynamic_cohort_users {
     group_label: "Acquisition Filters"
     suggest_explore: event_facts
     suggest_dimension: session_facts.first_medium
+  }
+
+  filter: cohort_filter_email_delivered {
+    description: "Email to filter cohort"
+    type: string
+    group_label: "Email Filters"
+    suggest_explore: event_facts
+    suggest_dimension: email_activity.marketing_campaign_name
   }
 
   filter: cohort_filter_signed_up_at {
