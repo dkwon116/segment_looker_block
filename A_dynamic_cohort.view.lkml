@@ -18,8 +18,8 @@ view: dynamic_cohort_users {
             AND ({% condition cohort_filter_content %} ef.first_content {% endcondition %} )
             AND ({% condition cohort_filter_signed_up_at %} uf.signed_up_date {% endcondition %} )
             AND ({% condition cohort_filter_users_first_source %} uf.first_source {% endcondition %} )
-            AND ({% condition cohort_filter_email_delivered %} ea.marketing_campaign_name {% endcondition %} AND ea.event = "delivered")
-            AND ({% condition cohort_filter_email_clicked %} ea.marketing_campaign_name {% endcondition %} AND ea.event = "click")
+            AND ({% condition cohort_filter_email_campaign %} ea.marketing_campaign_name {% endcondition %} )
+            AND ({% condition cohort_filter_email_event %} ea.event {% endcondition %})
           GROUP BY 1;;
   }
 
@@ -79,7 +79,7 @@ view: dynamic_cohort_users {
     suggest_dimension: session_facts.first_content
   }
 
-  filter: cohort_filter_email_delivered {
+  filter: cohort_filter_email_campaign {
     description: "Email to filter cohort"
     type: string
     group_label: "Email Filters"
@@ -87,12 +87,12 @@ view: dynamic_cohort_users {
     suggest_dimension: email_activity.marketing_campaign_name
   }
 
-  filter: cohort_filter_email_clicked {
+  filter: cohort_filter_email_event {
     description: "Email to filter cohort"
     type: string
     group_label: "Email Filters"
     suggest_explore: event_facts
-    suggest_dimension: email_activity.marketing_campaign_name
+    suggest_dimension: email_activity.event
   }
 
   filter: cohort_filter_signed_up_at {
