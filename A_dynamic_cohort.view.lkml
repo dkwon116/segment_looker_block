@@ -1,7 +1,7 @@
 view: dynamic_cohort_users {
   derived_table: {
     sql: SELECT
-          uf.looker_visitor_id  AS user_id
+          DISTINCT uf.looker_visitor_id  AS user_id
           , true AS is_cohort
 
           FROM ${event_facts.SQL_TABLE_NAME} as ef
@@ -10,15 +10,16 @@ view: dynamic_cohort_users {
           LEFT JOIN ${product_facts.SQL_TABLE_NAME} as pf on pe.product_id = pf.id
           LEFT JOIN ${email_activity.SQL_TABLE_NAME} as ea on uf.email = ea.email
 
-
           WHERE ({% condition cohort_filter_event %} ef.event {% endcondition %})
             AND ({% condition cohort_filter_event_time %} ef.timestamp {% endcondition %} )
             AND ({% condition cohort_filter_source %} ef.first_source {% endcondition %} )
             AND ({% condition cohort_filter_campaign %} ef.first_campaign {% endcondition %} )
             AND ({% condition cohort_filter_medium %} ef.first_medium {% endcondition %} )
-            AND ({% condition cohort_filter_signed_up_at %} uf.signed_up {% endcondition %} )
+            AND ({% condition cohort_filter_content %} ef.first_content {% endcondition %} )
+            AND ({% condition cohort_filter_signed_up_at %} uf.signed_up_date {% endcondition %} )
             AND ({% condition cohort_filter_users_first_source %} uf.first_source {% endcondition %} )
-            AND ({% condition cohort_filter_email_delivered %} ea.marketing_campaign_name {% endcondition %} )
+            AND ({% condition cohort_filter_email_delivered %} ea.marketing_campaign_name {% endcondition %} AND ea.event = "delivered")
+            AND ({% condition cohort_filter_email_clicked %} ea.marketing_campaign_name {% endcondition %} AND ea.event = "click")
           GROUP BY 1;;
   }
 
@@ -70,7 +71,23 @@ view: dynamic_cohort_users {
     suggest_dimension: session_facts.first_medium
   }
 
+  filter: cohort_filter_content {
+    description: "Medium to filter cohort"
+    type: string
+    group_label: "Acquisition Filters"
+    suggest_explore: event_facts
+    suggest_dimension: session_facts.first_content
+  }
+
   filter: cohort_filter_email_delivered {
+    description: "Email to filter cohort"
+    type: string
+    group_label: "Email Filters"
+    suggest_explore: event_facts
+    suggest_dimension: email_activity.marketing_campaign_name
+  }
+
+  filter: cohort_filter_email_clicked {
     description: "Email to filter cohort"
     type: string
     group_label: "Email Filters"
@@ -81,6 +98,8 @@ view: dynamic_cohort_users {
   filter: cohort_filter_signed_up_at {
     description: "Only users signed up at"
     type: date_time
+    suggest_explore: event_facts
+    suggest_dimension: user_facts.signed_up_date
   }
 
   filter: cohort_filter_users {

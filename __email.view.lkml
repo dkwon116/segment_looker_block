@@ -8,18 +8,6 @@ view: email_activity {
     hidden: yes
   }
 
-  dimension: asm_group_id {
-    type: number
-    sql: ${TABLE}.asm_group_id ;;
-    hidden: yes
-  }
-
-  dimension: attempt {
-    type: string
-    sql: ${TABLE}.attempt ;;
-    hidden: yes
-  }
-
   dimension: category {
     type: string
     sql: ${TABLE}.category ;;
@@ -91,18 +79,6 @@ view: email_activity {
     sql: ${TABLE}.marketing_campaign_version ;;
   }
 
-  dimension: mc_stats {
-    type: string
-    sql: ${TABLE}.mc_stats ;;
-    hidden: yes
-  }
-
-  dimension: phase_id {
-    type: string
-    sql: ${TABLE}.phase_id ;;
-    hidden: yes
-  }
-
   dimension: processed {
     type: number
     sql: ${TABLE}.processed ;;
@@ -171,12 +147,6 @@ view: email_activity {
     hidden: yes
   }
 
-  dimension: smtp_id {
-    type: string
-    sql: ${TABLE}.smtp_id ;;
-    hidden: yes
-  }
-
   dimension: status {
     type: string
     sql: ${TABLE}.status ;;
@@ -207,21 +177,28 @@ view: email_activity {
     sql: ${TABLE}.url ;;
   }
 
-  dimension: url_offset_index {
-    type: number
-    sql: ${TABLE}.url_offset_index ;;
-    hidden: yes
-  }
-
-  dimension: url_offset_type {
-    type: string
-    sql: ${TABLE}.url_offset_type ;;
-    hidden: yes
-  }
-
   dimension: useragent {
     type: string
     sql: ${TABLE}.useragent ;;
+  }
+
+  dimension: device {
+    type: string
+    sql:  CASE
+            WHEN ${useragent} LIKE '%iPhone%' THEN "iPhone"
+            WHEN ${useragent} LIKE '%Android%' THEN "Android"
+            WHEN ${useragent} LIKE '%Macintosh%' THEN "Mac"
+            WHEN ${useragent} LIKE '%Windows%' THEN "Windows"
+            ELSE "Other"
+          END;;
+  }
+
+  dimension: is_mobile {
+    type: yesno
+    sql: CASE
+          WHEN ${device} IN ("iPhone", "Android") THEN true
+          ELSE false
+        END;;
   }
 
   dimension_group: uuid_ts {
