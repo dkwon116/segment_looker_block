@@ -34,6 +34,7 @@ view: order_items {
           WHERE e._fivetran_deleted = false AND e.order_id NOT IN (SELECT order_id FROM google_sheets.test_orders)
         )
 
+
         SELECT
           oi.id
           , oi.order_id
@@ -50,7 +51,10 @@ view: order_items {
           , oi.advertiser_id
           , oi.vendor_product_id
           , oi.is_confirmed
+--          , c.commission
         FROM raw_order_items as oi
+--        LEFT JOIN affiliate_commission as c
+--          ON oi.order_id = c.order_id AND oi.sku_id = c.sku_id
 
 
 -- shift last 4 days of the month from May ~ June

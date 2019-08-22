@@ -51,3 +51,7 @@ explore: active_users {
     relationship: many_to_one
   }
 }
+
+explore: rakuten_events {}
+
+explore: currencies {}

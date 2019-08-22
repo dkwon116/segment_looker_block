@@ -1,19 +1,58 @@
 view: orders {
   derived_table: {
     sql_trigger_value: select count(*) from ${order_items.SQL_TABLE_NAME} ;;
-    sql:
-    SELECT e.order_id
-        , e.user_id
-        , e.vendor
-        , e.transaction_at
-        , max(e.process_at) as created_at
-        , sum(e.quantity) as quantity
-        , sum(e.sale_amount) as original_total
-        , sum(IF(e.order_type = "P", e.krw_amount, 0)) / 1000 as total
-        , sum(IF(e.order_type = "R", e.krw_amount, 0)) / 1000 as total_return
-        , row_number() over(partition by e.user_id order by e.transaction_at) as order_sequence_number
-    FROM ${order_items.SQL_TABLE_NAME} as e
-    GROUP BY 1, 2, 3, 4
+    sql: WITH affiliate_commission as (
+          SELECT
+            pe.order_id
+            , sum(pe.item_publisher_commission * c.rate) as commission
+          FROM data_data_api_db.partnerize_events as pe
+          LEFT JOIN ${currencies.SQL_TABLE_NAME} as c
+            ON DATE(pe.transaction_date) = c.date AND c.unit = pe.currency
+          WHERE pe.item_status = "p"
+          GROUP BY 1
+
+          union all
+
+          SELECT
+            re.order_id
+            , SUM(re.commissions * c.rate) as commission
+          FROM data_data_api_db.rakuten_events as re
+          LEFT JOIN ${currencies.SQL_TABLE_NAME} as c
+            ON DATE(re.transaction_date) = c.date AND c.unit = re.currency
+          WHERE re.commissions > 0
+           AND re.is_event = "N"
+          -- AND re.order_id = "OMF180249912"
+          GROUP BY 1
+        ), orders as (
+          SELECT e.order_id
+            , e.user_id
+            , e.vendor
+            , e.transaction_at
+            , max(e.process_at) as created_at
+            , sum(e.quantity) as quantity
+            , sum(e.sale_amount) as original_total
+            , sum(IF(e.order_type = "P", e.krw_amount, 0)) / 1000 as total
+            , sum(IF(e.order_type = "R", e.krw_amount, 0)) / 1000 as total_return
+            , row_number() over(partition by e.user_id order by e.transaction_at) as order_sequence_number
+          FROM ${order_items.SQL_TABLE_NAME} as e
+          GROUP BY 1, 2, 3, 4
+        )
+        SELECT
+          o.order_id
+            , o.user_id
+            , o.vendor
+            , o.transaction_at
+            , o.created_at
+            , o.quantity
+            , o.original_total
+            , o.total
+            , o.total_return
+            , o.order_sequence_number
+            , c.commission / 1000 as commission
+        FROM orders as o
+        LEFT JOIN affiliate_commission as c
+          ON o.order_id = c.order_id
+
 
     ;;
   }
@@ -121,11 +160,23 @@ view: orders {
 
   dimension: is_refund {
     type: yesno
-    sql: ${total} <= 0 ;;
+    sql: ${total_return} <> 0 ;;
+  }
+
+  dimension: affiliate_commission {
+    type: number
+    sql: ${TABLE}.commission ;;
+    value_format_name: decimal_0
   }
 
   measure: count {
     type: count
+  }
+
+  measure: total_commission {
+    type: sum
+    sql: ${affiliate_commission} ;;
+    value_format_name: decimal_0
   }
 
   measure: unique_user_count {
