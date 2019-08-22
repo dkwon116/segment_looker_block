@@ -3,35 +3,58 @@ view: order_items {
     sql_trigger_value: select count(*) from data_data_api_db.affiliate_order_item ;;
     sql:
         -- group by single order item. order_id and sku_id should be unique
-        SELECT
-          CONCAT(e.order_id, "-", e.sku_number, "-", e.order_type) as id
-          ,e.order_id
-          ,e.sku_number as sku_id
-          ,first_value(e.transaction_date) over (partition by e.order_id order by e.transaction_date rows between unbounded preceding and unbounded following) as transaction_at
-          ,coalesce(r.name, r2.name) as vendor
-          ,e.order_type
-          ,IF(e.order_type = "P", e.quantity, 0 - e.quantity) as quantity
-          ,e.user_id
-          ,e.product_name
-          ,e.sale_amount
-          ,e.krw_amount
-          ,e.process_date as process_at
-          ,e.advertiser_id
-          , CASE
-            -- Matches Fashion
-            WHEN e.advertiser_id = "39265" THEN substr(e.sku_number, 1, 7)
-            -- Farfetch
-            WHEN e.advertiser_id = "37938" THEN IF(STARTS_WITH(e.sku_number, "R"), substr(e.sku_number, 3, 8), substr(e.sku_number, 1, 8))
-            ELSE e.sku_number END
-          as vendor_product_id
-          ,IF(e.confirmed, true, false) as is_confirmed
-        FROM data_data_api_db.affiliate_order_item as e
-        LEFT JOIN ${retailers.SQL_TABLE_NAME} as r
-          ON e.advertiser_id = r.vendor_id
-        LEFT JOIN ${retailers.SQL_TABLE_NAME} as r2
-          ON e.advertiser_id = r2.partnerize_id
-        WHERE e._fivetran_deleted = false
+        WITH raw_order_items as (
+          SELECT
+            CONCAT(e.order_id, "-", e.sku_number, "-", e.order_type) as id
+            ,e.order_id
+            ,e.sku_number as sku_id
+            ,first_value(e.transaction_date) over (partition by e.order_id order by e.transaction_date rows between unbounded preceding and unbounded following) as transaction_at
+            ,coalesce(r.name, r2.name) as vendor
+            ,e.order_type
+            ,IF(e.order_type = "P", e.quantity, 0 - e.quantity) as quantity
+            ,e.user_id
+            ,e.product_name
+            ,e.sale_amount
+            ,e.krw_amount
+            ,e.process_date as process_at
+            ,e.advertiser_id
+            , CASE
+              -- Matches Fashion
+              WHEN e.advertiser_id = "39265" THEN substr(e.sku_number, 1, 7)
+              -- Farfetch
+              WHEN e.advertiser_id = "37938" THEN IF(STARTS_WITH(e.sku_number, "R"), substr(e.sku_number, 3, 8), substr(e.sku_number, 1, 8))
+              ELSE e.sku_number END
+            as vendor_product_id
+            ,IF(e.confirmed, true, false) as is_confirmed
+          FROM data_data_api_db.affiliate_order_item as e
+          LEFT JOIN ${retailers.SQL_TABLE_NAME} as r
+            ON e.advertiser_id = r.vendor_id
+          LEFT JOIN ${retailers.SQL_TABLE_NAME} as r2
+            ON e.advertiser_id = r2.partnerize_id
+          WHERE e._fivetran_deleted = false AND e.order_id NOT IN (SELECT order_id FROM google_sheets.test_orders)
+        )
 
+        SELECT
+          oi.id
+          , oi.order_id
+          , oi.sku_id
+          , IF(EXTRACT(YEAR from oi.transaction_at) = 2019 AND (EXTRACT(MONTH from oi.transaction_at) IN (5, 7) AND EXTRACT(DAY from oi.transaction_at) > 27) OR (EXTRACT(MONTH from oi.transaction_at) = 6 AND EXTRACT(DAY from oi.transaction_at) > 26), TIMESTAMP_ADD(oi.transaction_at, INTERVAL 96 HOUR), oi.transaction_at) as transaction_at
+          , oi.vendor
+          , oi.order_type
+          , oi.quantity
+          , oi.user_id
+          , oi.product_name
+          , oi.sale_amount
+          , oi.krw_amount
+          , IF(EXTRACT(YEAR from oi.transaction_at) = 2019 AND (EXTRACT(MONTH from oi.transaction_at) IN (5, 7) AND EXTRACT(DAY from oi.transaction_at) > 27) OR (EXTRACT(MONTH from oi.transaction_at) = 6 AND EXTRACT(DAY from oi.transaction_at) > 26), TIMESTAMP_ADD(oi.process_at, INTERVAL 96 HOUR), oi.process_at) as process_at
+          , oi.advertiser_id
+          , oi.vendor_product_id
+          , oi.is_confirmed
+        FROM raw_order_items as oi
+
+
+-- shift last 4 days of the month from May ~ June
+-- create order filters for obsolete > google spreadsheet
 
     ;;
   }

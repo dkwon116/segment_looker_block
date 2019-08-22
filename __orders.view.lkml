@@ -13,7 +13,6 @@ view: orders {
         , sum(IF(e.order_type = "R", e.krw_amount, 0)) / 1000 as total_return
         , row_number() over(partition by e.user_id order by e.transaction_at) as order_sequence_number
     FROM ${order_items.SQL_TABLE_NAME} as e
-    WHERE e.order_id NOT IN (SELECT order_id FROM google_sheets.test_orders)
     GROUP BY 1, 2, 3, 4
 
     ;;
