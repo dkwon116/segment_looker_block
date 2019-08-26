@@ -12,14 +12,21 @@ view: dynamic_cohort_users {
 
           WHERE ({% condition cohort_filter_event %} ef.event {% endcondition %})
             AND ({% condition cohort_filter_event_time %} ef.timestamp {% endcondition %} )
+
+            -- session filters
             AND ({% condition cohort_filter_source %} ef.first_source {% endcondition %} )
             AND ({% condition cohort_filter_campaign %} ef.first_campaign {% endcondition %} )
             AND ({% condition cohort_filter_medium %} ef.first_medium {% endcondition %} )
             AND ({% condition cohort_filter_content %} ef.first_content {% endcondition %} )
-            AND ({% condition cohort_filter_signed_up_at %} uf.signed_up_date {% endcondition %} )
-            AND ({% condition cohort_filter_users_first_source %} uf.first_source {% endcondition %} )
+
+            -- email filters
             AND ({% condition cohort_filter_email_campaign %} ea.marketing_campaign_name {% endcondition %} )
             AND ({% condition cohort_filter_email_event %} ea.event {% endcondition %})
+
+            -- user filters
+            AND ({% condition cohort_user_gender %} uf.gender {% endcondition %})
+            AND ({% condition cohort_filter_signed_up_at %} uf.signed_up_date {% endcondition %} )
+            AND ({% condition cohort_filter_users_first_source %} uf.first_source {% endcondition %} )
           GROUP BY 1;;
   }
 
@@ -102,7 +109,7 @@ view: dynamic_cohort_users {
     suggest_dimension: user_facts.signed_up_date
   }
 
-  filter: cohort_filter_users {
+  filter: cohort_is_user {
     description: "Signed up only to filter cohort"
     type: yesno
   }
@@ -111,6 +118,8 @@ view: dynamic_cohort_users {
     description: "Gender to filter cohort"
     group_label: "User Filters"
     type: string
+    suggest_explore: event_facts
+    suggest_dimension: user_facts.gender
   }
 
   filter: cohort_user_first_purchased {

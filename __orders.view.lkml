@@ -177,6 +177,20 @@ view: orders {
     type: sum
     sql: ${affiliate_commission} ;;
     value_format_name: decimal_0
+    filters: {
+      field: affiliate_commission
+      value: ">0"
+    }
+  }
+
+  measure: commissionable_total_order_amount {
+    type: sum
+    sql: ${total} ;;
+
+    filters: {
+      field: affiliate_commission
+      value: ">0"
+    }
   }
 
   measure: unique_user_count {
@@ -258,5 +272,11 @@ view: orders {
     type: count_distinct
     sql_distinct_key: ${user_id} ;;
     sql: ${user_id} ;;
+  }
+
+  measure: dealtake {
+    type: number
+    sql: ${total_commission} / NULLIF(${commissionable_total_order_amount}, 0) ;;
+    value_format_name: percent_1
   }
 }

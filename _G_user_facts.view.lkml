@@ -48,7 +48,9 @@ view: user_facts {
         , us.first_term as first_term
         , us.first_referrer as first_referrer
         , cu.id as is_user
+        , cu.gender as gender
         , cu.created_at as signed_up_date
+        , sr.custom_fields_random_index as random_idx
         , IF(au.user_id IN (SELECT oi.user_id FROM ${order_items.SQL_TABLE_NAME} as oi  WHERE oi.quantity >= 3), "Reseller", "Customer") as user_type
         , IF(DATE(cu.created_at) < DATE(2018,11,20), "Giveaway", "Beta") as joined_at
         , COALESCE(MIN(s.session_start_at), cu.created_at) as first_date
@@ -74,7 +76,9 @@ view: user_facts {
         ON s.session_id = o.session_id
       LEFT JOIN google_sheets.user_type as ut
         ON cu.id = ut.user_id
-      GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12
+      LEFT JOIN sendgrid.recipients_view as sr
+        ON cu.email = sr.email
+      GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
 
        ;;
   }
@@ -105,6 +109,11 @@ view: user_facts {
   dimension: is_user {
     type: yesno
     sql: ${TABLE}.is_user IS NOT NULL ;;
+  }
+
+  dimension: gender {
+    type: string
+    sql: ${TABLE}.gender ;;
   }
 
   dimension: is_user_id {
@@ -395,6 +404,15 @@ view: user_facts {
 
   set: user_details {
     fields: [looker_visitor_id, name, number_of_sessions, time_to_signup, days_to_purchased]
+  }
+
+
+  dimension: 201908_email_target {
+    sql: CASE
+          WHEN ${TABLE}.random_idx < 0.7 THEN "Target"
+          WHEN ${TABLE}.random_idx < 1 THEN "Control"
+          ELSE "None" END;;
+    type: string
   }
 }
 
