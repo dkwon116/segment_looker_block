@@ -186,6 +186,7 @@ view: orders {
   measure: commissionable_total_order_amount {
     type: sum
     sql: ${total} ;;
+    value_format_name: decimal_0
 
     filters: {
       field: affiliate_commission

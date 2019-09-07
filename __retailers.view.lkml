@@ -5,6 +5,7 @@ view: retailers {
         SELECT r.mid as vendor_id
           , r.partnerize_id as partnerize_id
           , r.retailer_list as name
+          , r.slug as slug
         FROM google_sheets.retailers as r
         WHERE r._fivetran_deleted = false
       ;;
@@ -23,5 +24,10 @@ view: retailers {
   dimension: name {
     type: string
     sql: ${TABLE}.name ;;
+  }
+
+  dimension: slug {
+    type: string
+    sql: ${TABLE}.slug ;;
   }
 }

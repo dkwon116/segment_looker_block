@@ -10,6 +10,7 @@ view: order_items {
             ,e.sku_number as sku_id
             ,first_value(e.transaction_date) over (partition by e.order_id order by e.transaction_date rows between unbounded preceding and unbounded following) as transaction_at
             ,coalesce(r.name, r2.name) as vendor
+            ,coalesce(r.slug, r2.slug) as vendor_slug
             ,e.order_type
             ,IF(e.order_type = "P", e.quantity, 0 - e.quantity) as quantity
             ,e.user_id
@@ -23,6 +24,8 @@ view: order_items {
               WHEN e.advertiser_id = "39265" THEN substr(e.sku_number, 1, 7)
               -- Farfetch
               WHEN e.advertiser_id = "37938" THEN IF(STARTS_WITH(e.sku_number, "R"), substr(e.sku_number, 3, 8), substr(e.sku_number, 1, 8))
+              -- MyT
+              WHEN e.advertiser_id = "43171" THEN e.product_name
               ELSE e.sku_number END
             as vendor_product_id
             ,IF(e.confirmed, true, false) as is_confirmed
@@ -39,14 +42,17 @@ view: order_items {
           oi.id
           , oi.order_id
           , oi.sku_id
+          -- 2019 5 ~ 7 last 4 day shift
           , IF(EXTRACT(YEAR from oi.transaction_at) = 2019 AND (EXTRACT(MONTH from oi.transaction_at) IN (5, 7) AND EXTRACT(DAY from oi.transaction_at) > 27) OR (EXTRACT(MONTH from oi.transaction_at) = 6 AND EXTRACT(DAY from oi.transaction_at) > 26), TIMESTAMP_ADD(oi.transaction_at, INTERVAL 96 HOUR), oi.transaction_at) as transaction_at
           , oi.vendor
+          , oi.vendor_slug
           , oi.order_type
           , oi.quantity
           , oi.user_id
           , oi.product_name
           , oi.sale_amount
           , oi.krw_amount
+          -- 2019 5 ~ 7 last 4 day shift
           , IF(EXTRACT(YEAR from oi.transaction_at) = 2019 AND (EXTRACT(MONTH from oi.transaction_at) IN (5, 7) AND EXTRACT(DAY from oi.transaction_at) > 27) OR (EXTRACT(MONTH from oi.transaction_at) = 6 AND EXTRACT(DAY from oi.transaction_at) > 26), TIMESTAMP_ADD(oi.process_at, INTERVAL 96 HOUR), oi.process_at) as process_at
           , oi.advertiser_id
           , oi.vendor_product_id
@@ -107,6 +113,12 @@ view: order_items {
   }
 
   dimension: vendor {
+    type: string
+    sql: ${TABLE}.vendor ;;
+  }
+
+  dimension: vendor_slug {
+    hidden: yes
     type: string
     sql: ${TABLE}.vendor ;;
   }

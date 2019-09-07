@@ -216,7 +216,7 @@ explore: order_items {
   join: product_maps {
     view_label: "Product"
     type: left_outer
-    sql_on: ${order_items.vendor_product_id} = ${product_maps.affiliate_product_id} ;;
+    sql_on: ${order_items.vendor_product_id} = ${product_maps.affiliate_product_id} and ${order_items.vendor_slug} = ${product_maps.vendor};;
     relationship: many_to_one
 #     fields: []
   }
@@ -254,6 +254,10 @@ explore: product_list_viewed {
 }
 
 explore: event_list {
+  hidden: yes
+}
+
+explore: utm_values {
   hidden: yes
 }
 

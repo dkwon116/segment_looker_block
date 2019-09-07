@@ -242,30 +242,40 @@ view: user_facts {
     type: string
     sql: ${TABLE}.first_source ;;
     group_label: "Acquisition"
+    suggest_explore: utm_values
+    suggest_dimension: utm_values.campaign_source
   }
 
   dimension: first_medium {
     type: string
     sql: ${TABLE}.first_medium ;;
     group_label: "Acquisition"
+    suggest_explore: utm_values
+    suggest_dimension: utm_values.campaign_medium
   }
 
   dimension: first_campaign {
     type: string
     sql: ${TABLE}.first_campaign ;;
     group_label: "Acquisition"
+    suggest_explore: utm_values
+    suggest_dimension: utm_values.campaign_name
   }
 
   dimension: first_content {
     type: string
     sql: ${TABLE}.first_content ;;
     group_label: "Acquisition"
+    suggest_explore: utm_values
+    suggest_dimension: utm_values.campaign_content
   }
 
   dimension: first_term {
     type: string
     sql: ${TABLE}.first_term ;;
     group_label: "Acquisition"
+    suggest_explore: utm_values
+    suggest_dimension: utm_values.campaign_term
   }
 
   dimension: first_referrer {
