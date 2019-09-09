@@ -120,7 +120,7 @@ view: order_items {
   dimension: vendor_slug {
     hidden: yes
     type: string
-    sql: ${TABLE}.vendor ;;
+    sql: ${TABLE}.vendor_slug ;;
   }
 
   dimension: quantity {
