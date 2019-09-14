@@ -7,6 +7,7 @@ view: product_maps {
           , p.name
           , pm.internal_vendor_product_id as vendor_product_id
           , CASE WHEN pm.vendor = "ssense" THEN sp.sku
+              WHEN pm.vendor = "24sevres" THEN substr(pm.internal_vendor_product_id, strpos(pm.internal_vendor_product_id, "_") + 1, 5)
               ELSE pm.internal_vendor_product_id END as affiliate_product_id
           , pm.vendor as vendor
 
@@ -55,7 +56,7 @@ view: product_maps {
   dimension: affiliate_product_id {
     type: string
     sql: ${TABLE}.affiliate_product_id ;;
-    hidden: yes
+#     hidden: yes
   }
 
   dimension: vendor {

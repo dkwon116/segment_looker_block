@@ -26,6 +26,7 @@ view: order_items {
               WHEN e.advertiser_id = "37938" THEN IF(STARTS_WITH(e.sku_number, "R"), substr(e.sku_number, 3, 8), substr(e.sku_number, 1, 8))
               -- MyT
               WHEN e.advertiser_id = "43171" THEN e.product_name
+              WHEN e.advertiser_id = "42680" THEN substr(e.sku_number, 1, 5)
               ELSE e.sku_number END
             as vendor_product_id
             ,IF(e.confirmed, true, false) as is_confirmed

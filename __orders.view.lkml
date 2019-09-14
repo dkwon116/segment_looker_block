@@ -19,8 +19,7 @@ view: orders {
           FROM data_data_api_db.rakuten_events as re
           LEFT JOIN ${currencies.SQL_TABLE_NAME} as c
             ON DATE(re.transaction_date) = c.date AND c.unit = re.currency
-          WHERE re.commissions > 0
-           AND re.is_event = "N"
+          WHERE re.is_event = "N"
           -- AND re.order_id = "OMF180249912"
           GROUP BY 1
         ), orders as (
