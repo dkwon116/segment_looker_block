@@ -27,6 +27,7 @@ view: orders {
             , e.user_id
             , e.vendor
             , e.transaction_at
+            , e.is_confirmed
             , max(e.process_at) as created_at
             , sum(e.quantity) as quantity
             , sum(e.sale_amount) as original_total
@@ -34,13 +35,14 @@ view: orders {
             , sum(IF(e.order_type = "R", e.krw_amount, 0)) / 1000 as total_return
             , row_number() over(partition by e.user_id order by e.transaction_at) as order_sequence_number
           FROM ${order_items.SQL_TABLE_NAME} as e
-          GROUP BY 1, 2, 3, 4
+          GROUP BY 1, 2, 3, 4, 5
         )
         SELECT
           o.order_id
             , o.user_id
             , o.vendor
             , o.transaction_at
+            , o.is_confirmed
             , o.created_at
             , o.quantity
             , o.original_total
@@ -119,6 +121,11 @@ view: orders {
     sql: ${TABLE}.total ;;
     description: "in 천원"
     value_format_name: decimal_0
+  }
+
+  dimension: is_confirmed {
+    type: yesno
+    sql: ${TABLE}.is_confirmed ;;
   }
 
   dimension: total_return {
@@ -206,16 +213,33 @@ view: orders {
     value_format_name: decimal_0
   }
 
-  measure: net_order_amount {
-    type: sum
-    description: "Net of returns & cancellation"
-    sql: ${net_sales} ;;
+  measure: total_not_confirmed_amount {
+    type:  sum
+    sql: ${total} ;;
     value_format_name: decimal_0
+    filters: {
+      field: is_confirmed
+      value: "No"
+    }
   }
 
   measure: total_return_amount {
     type: sum
     sql: ${total_return} ;;
+    value_format_name: decimal_0
+  }
+
+  measure: net_of_not_confirmed {
+    type: number
+    description: "Net of assumed cancellation"
+    sql: ${total_order_amount} - ${total_not_confirmed_amount} ;;
+    value_format_name: decimal_0
+  }
+
+  measure: net_order_amount {
+    type: number
+    description: "Net of returns & assumed cancellation"
+    sql: ${net_of_not_confirmed} + ${total_return_amount} ;;
     value_format_name: decimal_0
   }
 
@@ -232,6 +256,12 @@ view: orders {
   measure: return_rate {
     type: number
     sql: - ${total_return_amount} / NULLIF(${total_order_amount}, 0) ;;
+    value_format_name: percent_1
+  }
+
+  measure: cancellation_rate {
+    type: number
+    sql: ${total_not_confirmed_amount} / NULLIF(${total_order_amount}, 0) ;;
     value_format_name: percent_1
   }
 

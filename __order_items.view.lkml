@@ -57,7 +57,8 @@ view: order_items {
           , IF(EXTRACT(YEAR from oi.transaction_at) = 2019 AND (EXTRACT(MONTH from oi.transaction_at) IN (5, 7) AND EXTRACT(DAY from oi.transaction_at) > 27) OR (EXTRACT(MONTH from oi.transaction_at) = 6 AND EXTRACT(DAY from oi.transaction_at) > 26), TIMESTAMP_ADD(oi.process_at, INTERVAL 96 HOUR), oi.process_at) as process_at
           , oi.advertiser_id
           , oi.vendor_product_id
-          , oi.is_confirmed
+          , first_value(oi.is_confirmed) over (partition by oi.order_id order by oi.process_at rows between unbounded preceding and unbounded following) as is_confirmed
+--          , oi.is_confirmed
 --          , c.commission
         FROM raw_order_items as oi
 --        LEFT JOIN affiliate_commission as c
