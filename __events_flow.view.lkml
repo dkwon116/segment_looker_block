@@ -25,7 +25,8 @@ view: event_flow {
       left join ${event_facts.SQL_TABLE_NAME} e
         on a.track_sequence_number + 4 = e.track_sequence_number
         and a.session_id = e.session_id
-      order by a.session_id, a.track_sequence_number
+      where a.event_source = "pages" and b.event_source = "pages" and c.event_source = "pages" and d.event_source = "pages" and e.event_source = "pages"
+--      order by a.session_id, a.track_sequence_number
        ;;
   }
 

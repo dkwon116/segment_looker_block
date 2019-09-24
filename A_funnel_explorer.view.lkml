@@ -1,8 +1,8 @@
 view: funnel_explorer {
   derived_table: {
     sql: SELECT
-        CAST(TIMESTAMP(FORMAT_TIMESTAMP('%F %T', tracks_sessions_map.timestamp , 'Asia/Seoul')) AS {% parameter timeframe_picker %}) as date
-
+        --CAST(TIMESTAMP(FORMAT_TIMESTAMP('%F %T', tracks_sessions_map.timestamp , 'Asia/Seoul')) AS {% parameter timeframe_picker %}) as date
+        tracks_sessions_map.session_id
         ,tracks_sessions_map.looker_visitor_id as user_id
         , MIN(
             CASE WHEN
@@ -302,28 +302,28 @@ view: funnel_explorer {
 
   measure: event2_conversion {
     type: number
-    sql: ${count_users_event12} / ${count_users_event1} ;;
+    sql: ${count_users_event12} / NULLIF(${count_users_event1},0) ;;
     value_format_name: percent_0
     group_label: "Conversion"
   }
 
   measure: event3_conversion {
     type: number
-    sql: ${count_users_event123} / ${count_users_event1} ;;
+    sql: ${count_users_event123} / NULLIF(${count_users_event1},0) ;;
     value_format_name: percent_0
     group_label: "Conversion"
   }
 
   measure: event4_conversion {
     type: number
-    sql: ${count_users_event1234} / ${count_users_event1} ;;
+    sql: ${count_users_event1234} / NULLIF(${count_users_event1},0) ;;
     value_format_name: percent_0
     group_label: "Conversion"
   }
 
   measure: event5_conversion {
     type: number
-    sql: ${count_users_event12345} / ${count_users_event1} ;;
+    sql: ${count_users_event12345} / NULLIF(${count_users_event1},0) ;;
     value_format_name: percent_0
     group_label: "Conversion"
   }
