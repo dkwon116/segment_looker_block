@@ -138,16 +138,6 @@ view: mapped_events {
     sql: ${TABLE}.idle_time_minutes ;;
   }
 
-  dimension: root_page {
-    type: string
-    sql: ${TABLE}.root_page  ;;
-  }
-
-  dimension: root_page_prop {
-    type: string
-    sql: ${TABLE}.root_page_prop ;;
-  }
-
   set: detail {
     fields: [
       event_id,

@@ -18,6 +18,8 @@ view: event_facts {
         , t.campaign_term as campaign_term
         , t.ip as ip
         , t.page_url as url
+        , t.root_page as root_page
+        , t.root_page_prop as root_page_prop
         , coalesce(o.vendor, os.retailer) as vendor
         , o.total as order_value
         , row_number() over(partition by s.session_id order by t.timestamp) as track_sequence_number
@@ -203,6 +205,16 @@ view: event_facts {
             WHEN ${user_agent} LIKE '%NAVER%' THEN "Naver"
             ELSE "Other"
           END;;
+  }
+
+  dimension: root_page {
+    type: string
+    sql: ${TABLE}.root_page  ;;
+  }
+
+  dimension: root_page_prop {
+    type: string
+    sql: ${TABLE}.root_page_prop ;;
   }
 
   measure: count_visitors {
