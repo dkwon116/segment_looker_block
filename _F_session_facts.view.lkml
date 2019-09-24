@@ -17,6 +17,7 @@ view: session_facts {
         , count(case when t2s.event_source = 'tracks' then 1 else null end) as tracks_count
         , count(case when t2s.event_source = 'pages' then 1 else null end) as pages_count
         , count(case when t2s.event = "signed_up" then event_id else null end) as count_signed_up
+        , count(case when t2s.event in ("Search", "Hashtag", "Category", "New", "Sale", "Brand") then event_id else null end) as count_product_discovery
         , count(case when t2s.event = 'Product' then event_id else null end) as count_product_viewed
         , count(case when t2s.event = 'product_list_viewed' then event_id else null end) as count_product_list_viewed
         , count(case when t2s.event = 'outlink_sent' then event_id else null end) as count_outlinked
@@ -168,6 +169,13 @@ view: session_facts {
     group_label: "Event Counts"
   }
 
+  dimension: product_discovery {
+    type: number
+    sql: ${TABLE}.count_product_discovery ;;
+    group_label: "Event Counts"
+    description: "Viewed Search, Category, Brand, Hashtag, New, Sale Product List"
+  }
+
   dimension: products_viewed {
     type: number
     sql: ${TABLE}.count_product_viewed ;;
@@ -286,8 +294,12 @@ view: session_facts {
   }
 
   measure: total_signed_up {
-    type: sum
-    sql: ${signed_up} ;;
+    type: count_distinct
+    sql: ${sessions.looker_visitor_id} ;;
+    filters: {
+      field: signed_up
+       value: ">0"
+    }
   }
 
   measure: signup_conversion {
@@ -304,6 +316,64 @@ view: session_facts {
       field: is_pre_purchase
       value: "yes"
     }
+  }
+
+
+######################################
+#   Product Discovery measures
+
+  measure: product_discovery_viewed_total {
+    type: sum
+    sql: ${product_discovery} ;;
+    group_label: "Product Discovery"
+#     drill_fields: []
+  }
+
+  measure: product_discovery_viewed_per_session {
+    type: average
+    sql: ${product_discovery} ;;
+    value_format_name:decimal_2
+    group_label: "Product Discovery"
+    drill_fields: [campaign_details*, product_viewed_details*]
+  }
+
+  measure: total_product_discovery_viewed_users {
+    type: count_distinct
+    sql: ${sessions.looker_visitor_id} ;;
+    group_label: "Product Discovery"
+
+    filters: {
+      field: product_discovery
+      value: ">0"
+    }
+  }
+
+  measure: product_discovery_session_durations {
+    type: average
+    sql: ${session_duration_minutes} ;;
+    group_label: "Product Discovery"
+    value_format_name: decimal_1
+
+    filters: {
+      field: product_discovery
+      value: ">0"
+    }
+
+  }
+
+  measure: product_discovery_viewed_per_converted_user {
+    type: number
+    sql: ${product_discovery_viewed_total} / NULLIF(${total_product_discovery_viewed_users}, 0);;
+    value_format_name:decimal_2
+    group_label: "Product Discovery"
+  }
+
+  measure: product_discovery_viewed_conversion_rate {
+    type: number
+    sql: ${total_product_discovery_viewed_users} / ${sessions.count_visitors} ;;
+    value_format_name: percent_0
+    group_label: "Product Discovery"
+    drill_fields: [product_viewed_details*]
   }
 
 

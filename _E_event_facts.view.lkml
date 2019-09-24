@@ -188,12 +188,11 @@ view: event_facts {
           END;;
   }
 
-  dimension: is_mobile {
-    type: yesno
-    sql: CASE
-          WHEN ${device} IN ("iPhone", "Android") THEN true
-          ELSE false
-        END;;
+  dimension: platform {
+    type: string
+    sql:  CASE
+            WHEN ${user_agent} LIKE '%Mobile%' THEN "Mobile"
+            ELSE "Desktop" END;;
   }
 
   dimension: in_app {

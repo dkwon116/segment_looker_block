@@ -193,6 +193,7 @@ view: product_list_viewed {
     WHEN ${type} = 'daily' THEN 'Daily'
     WHEN ${type} = 'hashtag' THEN 'Hashtag'
     WHEN ${type} = 'category' THEN 'Category'
+    WHEN ${type} = 'brand' THEN 'Brand'
     WHEN ${context_page_path} = '/sale' THEN 'Sale'
     WHEN ${context_page_path} LIKE '%/new-arrival%' THEN 'New'
     WHEN ${context_page_path} LIKE '%/brands/view%' THEN 'Brand'

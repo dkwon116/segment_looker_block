@@ -66,7 +66,6 @@ view: catch_users {
       year
     ]
     sql: ${TABLE}.created_at ;;
-    hidden: yes
   }
 
   dimension: customs_code {
@@ -200,6 +199,11 @@ view: catch_users {
     type: string
     sql: ${TABLE}.role ;;
     hidden: yes
+  }
+
+  dimension: signup_utm {
+    type: string
+    sql: ${TABLE}.signup_utm ;;
   }
 
   dimension: terms_accepted {
