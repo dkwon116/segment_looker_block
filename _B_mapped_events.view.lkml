@@ -5,6 +5,8 @@ view: mapped_events {
     sql_trigger_value: select count(*) from ${page_aliases_mapping.SQL_TABLE_NAME} ;;
     sql: select *
         ,timestamp_diff(timestamp, lag(timestamp) over(partition by looker_visitor_id order by timestamp), minute) as idle_time_minutes
+        ,IF(e.event_source='pages' AND e.event NOT IN ('Product'), e.event, LAST_VALUE(IF(e.event_source='pages' AND e.event NOT IN ('Product'), e.event, NULL) IGNORE NULLS) OVER (PARTITION BY e.anonymous_id ORDER BY e.timestamp ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING)) AS root_page
+        ,REGEXP_EXTRACT(e.page_path,"^/.*/(.*)$") AS root_page_prop
       from (
         select CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') as event_id
           ,t.anonymous_id
@@ -22,6 +24,7 @@ view: mapped_events {
           ,t.context_page_url as page_url
           ,t.context_ip as ip
           ,'tracks' as event_source
+          ,t.context_page_path AS page_path
         from javascript.tracks_view as t
         inner join ${tracks_sanitized.SQL_TABLE_NAME} as ts
         on t.id = ts.id
@@ -46,6 +49,7 @@ view: mapped_events {
           ,t.context_page_url as page_url
           ,t.context_ip as ip
           ,'pages' as event_source
+          ,t.context_page_path AS page_path
         from javascript.pages_view as t
         inner join ${page_aliases_mapping.SQL_TABLE_NAME} as a2v
           on a2v.alias = t.anonymous_id
@@ -68,6 +72,7 @@ view: mapped_events {
           ,'http://www.catchfashion.com' as page_url
           ,'' as ip
           ,'affiliate' as event_source
+          ,'' AS page_path
         from ${orders.SQL_TABLE_NAME} as t
         inner join ${page_aliases_mapping.SQL_TABLE_NAME} as a2v
           on a2v.alias = t.user_id
@@ -131,6 +136,16 @@ view: mapped_events {
   dimension: idle_time_minutes {
     type: number
     sql: ${TABLE}.idle_time_minutes ;;
+  }
+
+  dimension: root_page {
+    type: string
+    sql: ${TABLE}.root_page  ;;
+  }
+
+  dimension: root_page_prop {
+    type: string
+    sql: ${TABLE}.root_page_prop ;;
   }
 
   set: detail {
