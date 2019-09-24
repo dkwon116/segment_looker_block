@@ -160,6 +160,18 @@ view: order_items {
     sql: ${TABLE}.advertiser_id ;;
   }
 
+  dimension: item_value {
+    type: number
+    sql: (${krw_amount} / 1000) / NULLIF(${quantity}, 0) ;;
+  }
+
+  dimension: item_value_tier {
+    type: tier
+    tiers: [500,1000,2000,3000,4000,5000]
+    style: integer
+    sql: ${item_value} ;;
+  }
+
   measure: total_sales {
     type: sum
     sql: ${krw_amount} / 1000 ;;
@@ -171,8 +183,8 @@ view: order_items {
   }
 
   measure: average_item_value {
-    type: number
-    sql:  ${total_sales} / NULLIF(${total_units}, 0);;
+    type: average
+    sql:  ${item_value};;
     value_format_name: decimal_0
   }
 
