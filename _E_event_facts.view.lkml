@@ -87,18 +87,57 @@ view: event_facts {
   }
 
   dimension: first_referrer {
+    group_label: "Session UTM"
     sql: ${TABLE}.first_referrer ;;
   }
 
   dimension: first_referrer_domain {
+    group_label: "Session UTM"
     sql: NET.REG_DOMAIN(${first_referrer}) ;;
   }
 
+  dimension: first_campaign {
+    group_label: "Session UTM"
+    type:  string
+    sql: ${TABLE}.first_campaign ;;
+  }
+
+  dimension: first_source {
+    group_label: "Session UTM"
+    type:  string
+    sql: ${TABLE}.first_source ;;
+  }
+
+  dimension: first_medium {
+    group_label: "Session UTM"
+    type:  string
+    sql: ${TABLE}.first_medium ;;
+  }
+
+  dimension: first_content {
+    group_label: "Session UTM"
+    type:  string
+    sql: ${TABLE}.first_content ;;
+  }
+
+  dimension: first_term {
+    group_label: "Session UTM"
+    type:  string
+    sql: ${TABLE}.first_term ;;
+  }
+
   dimension: ip {
+    group_label: "Event Context"
     sql: ${TABLE}.ip ;;
   }
 
+  dimension: referrer {
+    group_label: "Event Context"
+    sql: ${TABLE}.referrer ;;
+  }
+
   dimension: url {
+    group_label: "Event Context"
     sql: ${TABLE}.url ;;
   }
 
@@ -118,52 +157,32 @@ view: event_facts {
   }
 
   dimension: is_user_at_event {
+    group_label: "Event Flag"
     type: yesno
     sql: IF(${anonymous_id}=${looker_visitor_id}, false, true)  ;;
   }
 
   dimension: is_pre_purchase {
+    group_label: "Event Flag"
     type: yesno
     sql: IF(${first_purchased_time} IS NULL, true,
     IF(${timestamp_time} <= ${first_purchased_time}, true, false))  ;;
   }
 
   dimension: sequence_number {
+    group_label: "Event Context"
     type: number
     sql: ${TABLE}.track_sequence_number ;;
   }
 
   dimension: source_sequence_number {
+    group_label: "Event Context"
     type: number
     sql: ${TABLE}.source_sequence_number ;;
   }
 
-  dimension: first_campaign {
-    type:  string
-    sql: ${TABLE}.first_campaign ;;
-  }
-
-  dimension: first_source {
-    type:  string
-    sql: ${TABLE}.first_source ;;
-  }
-
-  dimension: first_medium {
-    type:  string
-    sql: ${TABLE}.first_medium ;;
-  }
-
-  dimension: first_content {
-    type:  string
-    sql: ${TABLE}.first_content ;;
-  }
-
-  dimension: first_term {
-    type:  string
-    sql: ${TABLE}.first_term ;;
-  }
-
   dimension: user_agent {
+    group_label: "Event Context"
     type: string
     sql: ${TABLE}.user_agent ;;
   }
@@ -180,6 +199,7 @@ view: event_facts {
   }
 
   dimension: device {
+    group_label: "Event Context"
     type: string
     sql:  CASE
             WHEN ${user_agent} LIKE '%iPhone%' THEN "iPhone"
@@ -191,6 +211,7 @@ view: event_facts {
   }
 
   dimension: platform {
+    group_label: "Event Context"
     type: string
     sql:  CASE
             WHEN ${user_agent} LIKE '%Mobile%' THEN "Mobile"
@@ -198,6 +219,7 @@ view: event_facts {
   }
 
   dimension: in_app {
+    group_label: "Event Context"
     type: string
     sql:  CASE
             WHEN ${user_agent} LIKE '%KAKAO%' THEN "Kakao"
@@ -229,6 +251,15 @@ view: event_facts {
     filters: {
       field: event
       value: "outlink_sent"
+    }
+  }
+
+  measure: unique_product_viewed_user {
+    type: count_distinct
+    sql: ${looker_visitor_id} ;;
+    filters: {
+      field: event
+      value: "Product"
     }
   }
 

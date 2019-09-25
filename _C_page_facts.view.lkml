@@ -56,6 +56,18 @@ FROM ${mapped_events.SQL_TABLE_NAME} AS e
     sql: ${duration_page_view_seconds} ;;
   }
 
+  measure: total_pageview_duration_seconds {
+    type: sum
+    sql: ${duration_page_view_seconds} ;;
+    value_format_name: decimal_0
+  }
+
+  measure: avg_pageview_duration_minutes_per_visitor {
+    type: number
+    sql: ${total_pageview_duration_seconds} / ${event_facts.count_visitors} / 60 ;;
+    value_format_name: decimal_1
+  }
+
   set: detail {
     fields: [event_id]
   }
