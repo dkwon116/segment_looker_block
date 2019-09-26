@@ -18,6 +18,11 @@ view: event_facts {
         , t.campaign_term as campaign_term
         , t.ip as ip
         , t.page_url as url
+        , IF(t.event_source='pages' AND t.event NOT IN ('Product', 'Signup', 'Login'), t.event,
+            IFNULL(LAST_VALUE(IF(t.event_source='pages' AND t.event NOT IN ('Product', 'Signup', 'Login'), t.event, NULL) IGNORE NULLS) OVER (PARTITION BY s.session_id ORDER BY t.timestamp ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING),
+              'Direct')
+            )AS journey_type
+        , REGEXP_EXTRACT(t.page_path,"^/.*/(.*)$") AS journey_prop
         , t.journey_type
         , t.journey_prop
         , t.page_path
