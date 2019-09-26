@@ -5,8 +5,6 @@ view: mapped_events {
     sql_trigger_value: select count(*) from ${page_aliases_mapping.SQL_TABLE_NAME} ;;
     sql: select *
         ,timestamp_diff(timestamp, lag(timestamp) over(partition by looker_visitor_id order by timestamp), minute) as idle_time_minutes
-        ,IF(e.event_source='pages' AND e.event NOT IN ('Product', 'Signup', 'Login'), e.event, LAST_VALUE(IF(e.event_source='pages' AND e.event NOT IN ('Product', 'Signup', 'Login'), e.event, NULL) IGNORE NULLS) OVER (PARTITION BY e.anonymous_id ORDER BY e.timestamp ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING)) AS journey_type
-        ,REGEXP_EXTRACT(e.page_path,"^/.*/(.*)$") AS journey_prop
       from (
         select CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') as event_id
           ,t.anonymous_id
@@ -136,16 +134,6 @@ view: mapped_events {
   dimension: idle_time_minutes {
     type: number
     sql: ${TABLE}.idle_time_minutes ;;
-  }
-
-  dimension: journey_type {
-    type: string
-    sql: ${TABLE}.journey_type  ;;
-  }
-
-  dimension: journey_prop {
-    type: string
-    sql: ${TABLE}.journey_prop ;;
   }
 
   set: detail {
