@@ -58,15 +58,10 @@ view: order_items {
           , oi.advertiser_id
           , oi.vendor_product_id
           , first_value(oi.is_confirmed) over (partition by oi.order_id order by oi.process_at rows between unbounded preceding and unbounded following) as is_confirmed
---          , oi.is_confirmed
---          , c.commission
         FROM raw_order_items as oi
---        LEFT JOIN affiliate_commission as c
---          ON oi.order_id = c.order_id AND oi.sku_id = c.sku_id
-
-
--- shift last 4 days of the month from May ~ June
--- create order filters for obsolete > google spreadsheet
+        WHERE oi.order_id NOT IN
+        -- Removed abuser return orders
+        (SELECT DISTINCT o.order_id FROM raw_order_items as o WHERE o.user_id = "97e69be9-023d-42ae-bafa-9f29f75eceb7" AND o.order_type = "R")
 
     ;;
   }
