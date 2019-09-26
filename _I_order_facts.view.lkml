@@ -12,7 +12,7 @@ view: order_facts {
         , c.rate as cashback_rate
         , LEAD(o.transaction_at) OVER(partition by o.user_id ORDER BY o.transaction_at) as next_ordered
         , DATE_DIFF(CAST(o.transaction_at as DATE), CAST(LAG(o.transaction_at) over(partition by o.user_id ORDER BY o.transaction_at) AS DATE), DAY) as repurchase_gap
-        , DATE_DIFF(CAST(MIN(o.transaction_at) OVER(partition by o.user_id) as DATE), CURRENT_DATE(), DAY) as days_since_first_order
+        , DATE_DIFF(CURRENT_DATE(), CAST(MIN(o.transaction_at) OVER(partition by o.user_id) as DATE), DAY) as days_since_first_order
         , SUM(c.amount) as total_cashback
       from ${orders.SQL_TABLE_NAME} as o
       LEFT JOIN ${event_facts.SQL_TABLE_NAME} as ef
@@ -283,25 +283,28 @@ view: order_facts {
 
   dimension: cohort_duration {
     label_from_parameter: duration_type
+    type: number
     sql:
       CASE
         WHEN {% parameter duration_type %} = 'first_visited' THEN
-          ${months_since_first_visit}
+          ${since_first_visit}
         WHEN {% parameter duration_type %} = 'signed_up' THEN
           ${months_since_signup}
         WHEN {% parameter duration_type %} = 'first_purchased' THEN
-          ${months_since_first_purchase}
+          ${since_first_purchase}
         ELSE
           NULL
       END ;;
   }
 
-  dimension_group: since_first_visit {
-#     hidden: yes
-    type: duration
-    intervals: [day, week, month]
-    sql_start: ${user_facts.first_visited_raw} ;;
-    sql_end: ${transaction_at_raw} ;;
+  dimension: since_first_visit {
+    type: number
+    sql: date_diff(DATE(${transaction_at_raw}), ${user_facts.first_visited_date}, MONTH) ;;
+  }
+
+  dimension: since_first_purchase {
+    type: number
+    sql: date_diff(DATE(${transaction_at_raw}), ${user_facts.first_purchased_date}, MONTH) ;;
   }
 
   dimension_group: since_signup {
@@ -312,13 +315,13 @@ view: order_facts {
     sql_end: ${transaction_at_raw} ;;
   }
 
-  dimension_group: since_first_purchase {
-#     hidden: yes
-    type: duration
-    intervals: [day, week, month]
-    sql_start: ${user_facts.first_purchased_raw} ;;
-    sql_end: ${transaction_at_raw} ;;
-  }
+#   dimension_group: since_first_purchase {
+# #     hidden: yes
+#     type: duration
+#     intervals: [day, week, month]
+#     sql_start: ${user_facts.first_purchased_raw} ;;
+#     sql_end: ${transaction_at_raw} ;;
+#   }
 
 #   dimension: days_since_signup {
 #     hidden: yes

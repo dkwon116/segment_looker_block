@@ -189,7 +189,7 @@ view: event_facts {
 
   dimension: vendor {
     type: string
-    sql: ${TABLE}.vendor ;;
+    sql: lower(${TABLE}.vendor) ;;
   }
 
   dimension: order_value {
