@@ -399,6 +399,7 @@ view: user_facts {
 
   dimension: cohort_by {
     label_from_parameter: cohort_type
+#     type: date_month_num
     sql:
       CASE
         WHEN {% parameter cohort_type %} = 'first_visited' THEN
