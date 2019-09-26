@@ -190,7 +190,15 @@ view: event_facts {
 
   dimension: vendor {
     type: string
-    sql: lower(${TABLE}.vendor) ;;
+    sql: CASE
+            WHEN lower(${TABLE}.vendor) LIKE "%saks%" THEN "Saks"
+            WHEN lower(${TABLE}.vendor) LIKE '%neiman%' THEN "Neiman"
+            WHEN lower(${TABLE}.vendor) IN ("net-a-porter", "netaporter") THEN "NAP"
+            WHEN lower(${TABLE}.vendor) LIKE "%barneys%" THEN "Barneys"
+            WHEN lower(${TABLE}.vendor) LIKE "%bergdorf%" THEN "Bergdorf"
+            WHEN lower(${TABLE}.vendor) LIKE "%browns%" THEN "Browns"
+            ELSE lower(${TABLE}.vendor)
+          END;;
   }
 
   dimension: order_value {
