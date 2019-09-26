@@ -18,8 +18,9 @@ view: event_facts {
         , t.campaign_term as campaign_term
         , t.ip as ip
         , t.page_url as url
-        , t.root_page as root_page
-        , t.root_page_prop as root_page_prop
+        , t.journey_type
+        , t.journey_prop
+        , t.page_path
         , coalesce(o.vendor, os.retailer) as vendor
         , o.total as order_value
         , row_number() over(partition by s.session_id order by t.timestamp) as track_sequence_number
@@ -207,14 +208,14 @@ view: event_facts {
           END;;
   }
 
-  dimension: root_page {
+  dimension: journey_type {
     type: string
-    sql: ${TABLE}.root_page  ;;
+    sql: ${TABLE}.journey_type  ;;
   }
 
-  dimension: root_page_prop {
+  dimension: journey_prop {
     type: string
-    sql: ${TABLE}.root_page_prop ;;
+    sql: ${TABLE}.journey_prop ;;
   }
 
   measure: count_visitors {
