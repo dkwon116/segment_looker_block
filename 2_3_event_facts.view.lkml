@@ -7,7 +7,7 @@ view: event_facts {
         , t.event_id
         , t.event_source
         , t.event
-        , s.session_id
+        , es.session_id
         , t.looker_visitor_id
         , t.received
         , t.referrer as referrer
@@ -19,28 +19,26 @@ view: event_facts {
         , t.ip as ip
         , t.page_url as url
         , IF(t.event_source='pages' AND t.event NOT IN ('Product', 'Signup', 'Login'), t.event,
-            IFNULL(LAST_VALUE(IF(t.event_source='pages' AND t.event NOT IN ('Product', 'Signup', 'Login'), t.event, NULL) IGNORE NULLS) OVER (PARTITION BY s.session_id ORDER BY t.timestamp ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING),
+            IFNULL(LAST_VALUE(IF(t.event_source='pages' AND t.event NOT IN ('Product', 'Signup', 'Login'), t.event, NULL) IGNORE NULLS) OVER (PARTITION BY es.session_id ORDER BY t.timestamp ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING),
               'Direct')
             ) AS journey_type
         , REGEXP_EXTRACT(t.page_path,"^/.*/(.*)$") AS journey_prop
         , t.page_path
         , coalesce(o.vendor, os.retailer) as vendor
         , o.total as order_value
-        , row_number() over(partition by s.session_id order by t.timestamp) as track_sequence_number
-        , row_number() over(partition by s.session_id, t.event_source order by t.timestamp) as source_sequence_number
-        , first_value(t.referrer) over (partition by s.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_referrer
-        , first_value(t.campaign_source) over (partition by s.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_source
-        , first_value(t.campaign_medium) over (partition by s.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_medium
-        , first_value(t.campaign_name) over (partition by s.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_campaign
-        , first_value(t.campaign_content) over (partition by s.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_content
-        , first_value(t.campaign_term) over (partition by s.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_term
-        , first_value(t.user_agent) over (partition by s.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as user_agent
+        , es.track_sequence_number as track_sequence_number
+        , es.source_sequence_number as source_sequence_number
+        , first_value(t.referrer) over (partition by es.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_referrer
+        , first_value(t.campaign_source) over (partition by es.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_source
+        , first_value(t.campaign_medium) over (partition by es.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_medium
+        , first_value(t.campaign_name) over (partition by es.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_campaign
+        , first_value(t.campaign_content) over (partition by es.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_content
+        , first_value(t.campaign_term) over (partition by es.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_term
+        , first_value(t.user_agent) over (partition by es.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as user_agent
         , first_value(o.transaction_at IGNORE NULLS) over (partition by t.looker_visitor_id order by o.order_sequence_number rows between unbounded preceding and unbounded following) as first_purchased
       from ${mapped_events.SQL_TABLE_NAME} as t
-      left join ${sessions.SQL_TABLE_NAME} as s
-      on t.looker_visitor_id = s.looker_visitor_id
-        and t.timestamp >= s.session_start_at
-        and (t.timestamp < s.next_session_start_at or s.next_session_start_at is null)
+      left join ${event_sessions.SQL_TABLE_NAME} as es
+      on t.event_id = es.event_id
       left join ${orders.SQL_TABLE_NAME} as o
       on t.looker_visitor_id = o.user_id
         and t.event_id = CONCAT(cast(o.transaction_at as string), o.user_id, '-r')
