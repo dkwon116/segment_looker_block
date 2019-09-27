@@ -98,4 +98,10 @@ view:journeys {
     sql: ${TABLE}.journey_prop ;;
   }
 
+  dimension_group: timestamp {
+    type: time
+    timeframes: [time, hour, date, week, month]
+    sql: ${TABLE}.timestamp ;;
+  }
+
 }
