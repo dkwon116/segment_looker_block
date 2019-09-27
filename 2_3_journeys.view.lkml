@@ -13,7 +13,7 @@ view:journeys {
             and last_value(IF(e.journey_type IN ('Brand','Category','Product Search'),e.journey_prop,NULL) ignore nulls) over (partition by e.session_id order by e.track_sequence_number rows between unbounded preceding and 1 preceding)<>e.journey_prop
             and e.journey_type IN ('Brand','Category','Product Search') then e.track_sequence_number
           else null
-        end as start_track
+        end as first_track
         ,*
       from(
         select
@@ -24,6 +24,7 @@ view:journeys {
           ,last_value(es.track_sequence_number) over (partition by es.session_id order by es.track_sequence_number rows between unbounded preceding and unbounded following) as last_track_sequence_number
           ,IF(e.event_source='pages' AND e.event NOT IN ('Product', 'Signup', 'Login'), e.event, IFNULL(LAST_VALUE(IF(e.event_source='pages' AND e.event NOT IN ('Product', 'Signup', 'Login'), e.event, NULL) IGNORE NULLS) OVER (PARTITION BY es.session_id ORDER BY es.timestamp ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING), 'Direct')) as journey_type
           ,REGEXP_EXTRACT(e.page_path,"^/.*/(.*)$") AS journey_prop
+          ,e.timestamp
         from ${mapped_events.SQL_TABLE_NAME} e
         join ${event_sessions.SQL_TABLE_NAME} es on es.event_id=e.event_id
       ) e
@@ -41,11 +42,12 @@ view:journeys {
           and (lag(t.journey_prop,2) over (partition by t.session_id order by t.track_sequence_number)<>t.journey_prop or lag(t.journey_prop,2) over (partition by t.session_id order by t.track_sequence_number) is null) then 1
         else null
       end as journey_issearch
-      ,t.start_track
-      ,ifnull(lead(t.start_track) over (partition by t.session_id order by t.track_sequence_number)-1,t.last_track_sequence_number) as last_track
+      ,t.first_track
+      ,ifnull(lead(t.first_track) over (partition by t.session_id order by t.track_sequence_number)-1,t.last_track_sequence_number) as last_track
       ,IF(t.journey_type IN ('Brand','Category','Product Search'),t.journey_prop,NULL) AS journey_prop
+      ,t.timestamp
     from t
-    where t.start_track is not null
+    where t.first_track is not null
 
       ;;
   }
@@ -81,9 +83,9 @@ view:journeys {
     sql: ${TABLE}.journey_issearch ;;
   }
 
-  dimension: start_track {
+  dimension: first_track {
     type: number
-    sql: ${TABLE}.start_track ;;
+    sql: ${TABLE}.first_track ;;
   }
 
   dimension: last_track {
