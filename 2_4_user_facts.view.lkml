@@ -17,10 +17,15 @@ view: user_facts {
             , last_value(sf.first_campaign IGNORE NULLS) over(partition by s.looker_visitor_id order by sf.session_id rows between unbounded preceding and unbounded following) as last_campaign
             , last_value(sf.first_content IGNORE NULLS) over(partition by s.looker_visitor_id order by sf.session_id rows between unbounded preceding and unbounded following) as last_content
             , last_value(sf.first_term IGNORE NULLS) over(partition by s.looker_visitor_id order by sf.session_id rows between unbounded preceding and unbounded following) as last_term
+            , first_value(sf.first_source IGNORE NULLS) over(partition by s.looker_visitor_id order by sf.count_signed_up desc rows between unbounded preceding and unbounded following) as signup_source
+            , first_value(sf.first_medium IGNORE NULLS) over(partition by s.looker_visitor_id order by sf.count_signed_up desc rows between unbounded preceding and unbounded following) as signup_medium
+            , first_value(sf.first_campaign IGNORE NULLS) over(partition by s.looker_visitor_id order by sf.count_signed_up desc rows between unbounded preceding and unbounded following) as signup_campaign
+            , first_value(sf.first_content IGNORE NULLS) over(partition by s.looker_visitor_id order by sf.count_signed_up desc rows between unbounded preceding and unbounded following) as signup_content
+            , first_value(sf.first_term IGNORE NULLS) over(partition by s.looker_visitor_id order by sf.count_signed_up desc rows between unbounded preceding and unbounded following) as signup_term
           FROM ${sessions.SQL_TABLE_NAME} as s
           LEFT JOIN ${session_facts.SQL_TABLE_NAME} as sf
           ON s.session_id = sf.session_id) as source
-        group by 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
+        group by 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17
       ), all_users as (
         SELECT
           s.looker_visitor_id as user_id
@@ -47,6 +52,11 @@ view: user_facts {
         , us.first_content as first_content
         , us.first_term as first_term
         , us.first_referrer as first_referrer
+        , us.signup_source as signup_source
+        , us.signup_medium as signup_medium
+        , us.signup_campaign as signup_campaign
+        , us.signup_content as signup_content
+        , us.signup_term as signup_term
         , cu.id as is_user
         , cu.gender as gender
         , cu.created_at as signed_up_date
@@ -78,7 +88,7 @@ view: user_facts {
         ON cu.id = ut.user_id
       LEFT JOIN sendgrid.recipients_view as sr
         ON cu.email = sr.email
-      GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
+      GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18
 
        ;;
   }
@@ -274,6 +284,46 @@ view: user_facts {
     type: string
     sql: ${TABLE}.first_term ;;
     group_label: "Acquisition"
+    suggest_explore: utm_values
+    suggest_dimension: utm_values.campaign_term
+  }
+
+  dimension: signup_source {
+    type: string
+    sql: ${TABLE}.signup_source ;;
+    group_label: "Signup"
+    suggest_explore: utm_values
+    suggest_dimension: utm_values.campaign_source
+  }
+
+  dimension: signup_medium {
+    type: string
+    sql: ${TABLE}.signup_medium ;;
+    group_label: "Signup"
+    suggest_explore: utm_values
+    suggest_dimension: utm_values.campaign_medium
+  }
+
+  dimension: signup_campaign {
+    type: string
+    sql: ${TABLE}.signup_campaign ;;
+    group_label: "Signup"
+    suggest_explore: utm_values
+    suggest_dimension: utm_values.campaign_name
+  }
+
+  dimension: signup_content {
+    type: string
+    sql: ${TABLE}.signup_content ;;
+    group_label: "Signup"
+    suggest_explore: utm_values
+    suggest_dimension: utm_values.campaign_content
+  }
+
+  dimension: signup_term {
+    type: string
+    sql: ${TABLE}.signup_term ;;
+    group_label: "Signup"
     suggest_explore: utm_values
     suggest_dimension: utm_values.campaign_term
   }

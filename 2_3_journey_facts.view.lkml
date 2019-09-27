@@ -1,4 +1,4 @@
-view: 2_journey_facts {
+view: journey_facts {
   derived_table: {
     sql_trigger_value: select count(*) from ${event_facts.SQL_TABLE_NAME} ;;
     sql:
@@ -53,6 +53,7 @@ view: 2_journey_facts {
           ,last_value(t.chunk_start ignore nulls) over (partition by t.session_id order by t.timestamp rows between unbounded preceding and current row) as chunk_set
         from(
           select
+            -- mark chunk start when journey type changes or journey prop of same type changes
             e.anonymous_id
             ,e.session_id
             ,e.timestamp
