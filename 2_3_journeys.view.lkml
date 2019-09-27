@@ -26,7 +26,6 @@ view:journeys {
           ,REGEXP_EXTRACT(e.page_path,"^/.*/(.*)$") AS journey_prop
         from ${mapped_events.SQL_TABLE_NAME} e
         join ${event_sessions.SQL_TABLE_NAME} es on es.event_id=e.event_id
-        order by es.session_id, es.track_sequence_number
       ) e
     )
     select
