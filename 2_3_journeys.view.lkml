@@ -1,4 +1,4 @@
-view:journeyss {
+view:journeys {
 
 
   derived_table: {
