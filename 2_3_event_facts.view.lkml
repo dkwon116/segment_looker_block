@@ -38,7 +38,7 @@ view: event_facts {
         , first_value(o.transaction_at IGNORE NULLS) over (partition by t.looker_visitor_id order by o.order_sequence_number rows between unbounded preceding and unbounded following) as first_purchased
       from ${mapped_events.SQL_TABLE_NAME} as t
       left join ${event_sessions.SQL_TABLE_NAME} as es
-      on t.event_id = es.event_id
+      on t.event_id = es.event_id and t.looker_visitor_id = es.looker_visitor_id
       left join ${orders.SQL_TABLE_NAME} as o
       on t.looker_visitor_id = o.user_id
         and t.event_id = CONCAT(cast(o.transaction_at as string), o.user_id, '-r')

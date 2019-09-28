@@ -6,6 +6,8 @@ view:event_sessions {
     sql:
       select
         t.event_id
+        , t.anonymous_id
+        , t.looker_visitor_id
         , s.session_id
         , row_number() over(partition by s.session_id order by t.timestamp) as track_sequence_number
         , row_number() over(partition by s.session_id, t.event_source order by t.timestamp) as source_sequence_number
