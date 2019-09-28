@@ -2,13 +2,19 @@ view: event_facts {
   derived_table: {
     # Rebuilds after sessions rebuilds
     sql_trigger_value: select count(*) from ${sessions.SQL_TABLE_NAME} ;;
-    sql: select t.timestamp
+    sql:
+    select
+        t.timestamp
         , t.anonymous_id
+        , t.looker_visitor_id
+        , es.session_id
         , t.event_id
         , t.event_source
         , t.event
-        , es.session_id
-        , t.looker_visitor_id
+        , j.journey_id
+        , j.journey_type
+        , j.journey_issearch
+        , j.journey_prop
         , t.received
         , t.referrer as referrer
         , t.campaign_source as campaign_source
@@ -18,11 +24,6 @@ view: event_facts {
         , t.campaign_term as campaign_term
         , t.ip as ip
         , t.page_url as url
-        , IF(t.event_source='pages' AND t.event NOT IN ('Product', 'Signup', 'Login'), t.event,
-            IFNULL(LAST_VALUE(IF(t.event_source='pages' AND t.event NOT IN ('Product', 'Signup', 'Login'), t.event, NULL) IGNORE NULLS) OVER (PARTITION BY es.session_id ORDER BY t.timestamp ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING),
-              'Direct')
-            ) AS journey_type
-        , REGEXP_EXTRACT(t.page_path,"^/.*/(.*)$") AS journey_prop
         , t.page_path
         , coalesce(o.vendor, os.retailer) as vendor
         , o.total as order_value
@@ -38,12 +39,14 @@ view: event_facts {
         , first_value(o.transaction_at IGNORE NULLS) over (partition by t.looker_visitor_id order by o.order_sequence_number rows between unbounded preceding and unbounded following) as first_purchased
       from ${mapped_events.SQL_TABLE_NAME} as t
       left join ${event_sessions.SQL_TABLE_NAME} as es
-      on t.event_id = es.event_id and t.looker_visitor_id = es.looker_visitor_id
+        on t.event_id = es.event_id and t.looker_visitor_id = es.looker_visitor_id
+      left join ${journeys.SQL_TABLE_NAME} as j
+        on j.session_id=es.session_id and es.track_sequence_number between j.first_track and j.last_track
       left join ${orders.SQL_TABLE_NAME} as o
-      on t.looker_visitor_id = o.user_id
+        on t.looker_visitor_id = o.user_id
         and t.event_id = CONCAT(cast(o.transaction_at as string), o.user_id, '-r')
       left join javascript.outlink_sent_view as os
-      on t.looker_visitor_id = os.user_id
+        on t.looker_visitor_id = os.user_id
         and t.event_id = CONCAT(cast(os.timestamp AS string), os.anonymous_id, '-t')
        ;;
   }
@@ -237,6 +240,16 @@ view: event_facts {
             WHEN ${user_agent} LIKE '%NAVER%' THEN "Naver"
             ELSE "Other"
           END;;
+  }
+
+  dimension: journey_id {
+    type: string
+    sql: ${TABLE}.event_id ;;
+  }
+
+  dimension: journey_issearch {
+    type: yesno
+    sql: ${TABLE}.journey_issearch ;;
   }
 
   dimension: journey_type {
