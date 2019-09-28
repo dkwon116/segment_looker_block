@@ -1,16 +1,16 @@
 view: track_facts {
   derived_table: {
-    sql_trigger_value: select count(*) from ${tracks_sanitized.SQL_TABLE_NAME} ;;
+    sql_trigger_value: select count(*) from ${event_sessions.SQL_TABLE_NAME} ;;
       sql: with events as (
           select
             e.event_id
             , e.event
-            , e.session_id
-            , t.context_page_path
-            , e.source_sequence_number as sequence
-          from ${event_facts.SQL_TABLE_NAME} as e
-          left join ${tracks_sanitized.SQL_TABLE_NAME} as t
-          on e.event_id = concat(cast(t.timestamp AS string), t.anonymous_id, '-t')
+            , es.session_id
+            , e.page_path
+            , es.source_sequence as sequence
+          from ${event_sessions.SQL_TABLE_NAME} as es
+          left join ${mapped_events.SQL_TABLE_NAME} as e
+            on es.event_id = e.event_id
           where e.event_source = "tracks"
         )
 
@@ -19,8 +19,8 @@ view: track_facts {
           , e.event
           , e2.event as prev_event
           , e.session_id
-          , e.context_page_path as current_path
-          , coalesce(e2.context_page_path, 'direct') as prev_path
+          , e.page_path as current_path
+          , coalesce(e2.page_path, 'direct') as prev_path
           , e.sequence as current_sequence
 
         from events as e

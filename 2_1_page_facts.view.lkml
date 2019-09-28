@@ -64,7 +64,7 @@ FROM ${mapped_events.SQL_TABLE_NAME} AS e
 
   measure: avg_pageview_duration_minutes_per_visitor {
     type: number
-    sql: ${total_pageview_duration_seconds} / ${event_facts.count_visitors} / 60 ;;
+    sql: ${total_pageview_duration_seconds} / ${event_facts.number_of_distinct_visitors} / 60 ;;
     value_format_name: decimal_1
   }
 

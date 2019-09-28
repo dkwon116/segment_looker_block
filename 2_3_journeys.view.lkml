@@ -1,53 +1,41 @@
 view:journeys {
-
-
   derived_table: {
     sql_trigger_value: select count(*) from ${sessions.SQL_TABLE_NAME} ;;
     sql:
     with t as(
+      -- mark start and end of journey creating first & last
       select
         case
-          when lag(e.journey_type) over (partition by e.session_id order by e.track_sequence_number) is null then e.track_sequence_number
-          when lag(e.journey_type) over (partition by e.session_id order by e.track_sequence_number)<>e.journey_type then e.track_sequence_number
-          when lag(e.journey_type) over (partition by e.session_id order by e.track_sequence_number)=e.journey_type
-            and last_value(IF(e.journey_type IN ('Brand','Category','Product Search'),e.journey_prop,NULL) ignore nulls) over (partition by e.session_id order by e.track_sequence_number rows between unbounded preceding and 1 preceding)<>e.journey_prop
-            and e.journey_type IN ('Brand','Category','Product Search') then e.track_sequence_number
+          when lag(e.journey_type) over (partition by e.session_id order by e.event_sequence) is null then e.event_sequence
+          when lag(e.journey_type) over (partition by e.session_id order by e.event_sequence)<>e.journey_type then e.event_sequence
+          when lag(e.journey_type) over (partition by e.session_id order by e.event_sequence)=e.journey_type
+            and last_value(IF(e.journey_type IN ('Brand','Category','Product Search'),e.journey_prop,NULL) ignore nulls) over (partition by e.session_id order by e.event_sequence rows between unbounded preceding and 1 preceding)<>e.journey_prop
+            and e.journey_type IN ('Brand','Category','Product Search') then e.event_sequence
           else null
-        end as first_track
+        end as first_journey_event_sequence
+        ,last_value(e.event_sequence) over (partition by e.session_id order by e.event_sequence rows between unbounded preceding and unbounded following) as last_session_event_sequence
         ,*
-      from(
-        select
-          e.looker_visitor_id
-          ,e.anonymous_id
-          ,es.session_id
-          ,es.track_sequence_number
-          ,last_value(es.track_sequence_number) over (partition by es.session_id order by es.track_sequence_number rows between unbounded preceding and unbounded following) as last_track_sequence_number
-          ,IF(e.event_source='pages' AND e.event NOT IN ('Product', 'Signup', 'Login'), e.event, IFNULL(LAST_VALUE(IF(e.event_source='pages' AND e.event NOT IN ('Product', 'Signup', 'Login'), e.event, NULL) IGNORE NULLS) OVER (PARTITION BY es.session_id ORDER BY es.timestamp ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING), 'Direct')) as journey_type
-          ,REGEXP_EXTRACT(e.page_path,"^/.*/(.*)$") AS journey_prop
-          ,e.timestamp
-        from ${mapped_events.SQL_TABLE_NAME} e
-        join ${event_sessions.SQL_TABLE_NAME} es on es.event_id=e.event_id
-      ) e
+      from ${event_sessions.SQL_TABLE_NAME} as e
     )
     select
-      concat(t.session_id, ' - ', cast(row_number() over(partition by t.session_id order by t.track_sequence_number) AS string)) AS journey_id
+      concat(t.session_id, ' - ', cast(row_number() over(partition by t.session_id order by t.event_sequence) AS string)) AS journey_id
       ,t.session_id
       ,t.anonymous_id
       ,t.looker_visitor_id
       ,t.journey_type
+      ,t.timestamp
+      ,IF(t.journey_type IN ('Brand','Category','Product Search'),t.journey_prop,NULL) AS journey_prop
       ,case
         when t.journey_type='Product Search' then 1
         when t.journey_type IN ('Brand','Category')
-          and lag(t.journey_type) over (partition by t.session_id order by t.track_sequence_number)='Search'
-          and (lag(t.journey_prop,2) over (partition by t.session_id order by t.track_sequence_number)<>t.journey_prop or lag(t.journey_prop,2) over (partition by t.session_id order by t.track_sequence_number) is null) then 1
+          and lag(t.journey_type) over (partition by t.session_id order by t.event_sequence)='Search'
+          and (lag(t.journey_prop,2) over (partition by t.session_id order by t.event_sequence)<>t.journey_prop or lag(t.journey_prop,2) over (partition by t.session_id order by t.event_sequence) is null) then 1
         else null
-      end as journey_issearch
-      ,t.first_track
-      ,ifnull(lead(t.first_track) over (partition by t.session_id order by t.track_sequence_number)-1,t.last_track_sequence_number) as last_track
-      ,IF(t.journey_type IN ('Brand','Category','Product Search'),t.journey_prop,NULL) AS journey_prop
-      ,t.timestamp
+      end as journey_is_search
+      ,t.first_journey_event_sequence
+      ,ifnull(lead(t.first_journey_event_sequence) over (partition by t.session_id order by t.event_sequence)-1,t.last_session_event_sequence) as last_journey_event_sequence
     from t
-    where t.first_track is not null
+    where t.first_journey_event_sequence is not null
 
       ;;
   }
@@ -55,6 +43,8 @@ view:journeys {
 
   dimension: journey_id {
     type: string
+    primary_key: yes
+    hidden: yes
     sql: ${TABLE}.event_id ;;
   }
 
@@ -78,19 +68,19 @@ view:journeys {
     sql: ${TABLE}.journey_type ;;
   }
 
-  dimension: journey_issearch {
+  dimension: journey_is_search {
     type: yesno
-    sql: ${TABLE}.journey_issearch ;;
+    sql: ${TABLE}.journey_is_search ;;
   }
 
-  dimension: first_track {
+  dimension: first_journey_event_sequence {
     type: number
-    sql: ${TABLE}.first_track ;;
+    sql: ${TABLE}.first_journey_event_sequence ;;
   }
 
-  dimension: last_track {
+  dimension: last_journey_event_sequence {
     type: number
-    sql: ${TABLE}.last_track ;;
+    sql: ${TABLE}.last_journey_event_sequence ;;
   }
 
   dimension: journey_prop {

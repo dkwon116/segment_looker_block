@@ -4,18 +4,22 @@ view: event_facts {
     sql_trigger_value: select count(*) from ${sessions.SQL_TABLE_NAME} ;;
     sql:
     select
-        t.timestamp
+        t.event_id
+        , j.journey_id
+        , es.session_id
+
         , t.anonymous_id
         , t.looker_visitor_id
-        , es.session_id
-        , t.event_id
-        , t.event_source
-        , t.event
-        , j.journey_id
-        , j.journey_type
-        , j.journey_issearch
-        , j.journey_prop
+        , t.timestamp
         , t.received
+
+        , t.event
+        , t.event_source
+
+        , j.journey_type
+        , j.journey_is_search
+        , j.journey_prop
+
         , t.referrer as referrer
         , t.campaign_source as campaign_source
         , t.campaign_medium as campaign_medium
@@ -25,10 +29,11 @@ view: event_facts {
         , t.ip as ip
         , t.page_url as url
         , t.page_path
+
         , coalesce(o.vendor, os.retailer) as vendor
         , o.total as order_value
-        , es.track_sequence_number as track_sequence_number
-        , es.source_sequence_number as source_sequence_number
+        , es.event_sequence as event_sequence
+        , es.source_sequence as source_sequence
         , first_value(t.referrer) over (partition by es.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_referrer
         , first_value(t.campaign_source) over (partition by es.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_source
         , first_value(t.campaign_medium) over (partition by es.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_medium
@@ -41,7 +46,7 @@ view: event_facts {
       left join ${event_sessions.SQL_TABLE_NAME} as es
         on t.event_id = es.event_id and t.looker_visitor_id = es.looker_visitor_id
       left join ${journeys.SQL_TABLE_NAME} as j
-        on j.session_id=es.session_id and es.track_sequence_number between j.first_track and j.last_track
+        on j.session_id=es.session_id and es.event_sequence between j.first_journey_event_sequence and j.last_journey_event_sequence
       left join ${orders.SQL_TABLE_NAME} as o
         on t.looker_visitor_id = o.user_id
         and t.event_id = CONCAT(cast(o.transaction_at as string), o.user_id, '-r')
@@ -92,41 +97,41 @@ view: event_facts {
   }
 
   dimension: first_referrer {
-    group_label: "Session UTM"
+    group_label: "Attribution"
     sql: ${TABLE}.first_referrer ;;
   }
 
   dimension: first_referrer_domain {
-    group_label: "Session UTM"
+    group_label: "Attribution"
     sql: NET.REG_DOMAIN(${first_referrer}) ;;
   }
 
   dimension: first_campaign {
-    group_label: "Session UTM"
+    group_label: "Attribution"
     type:  string
     sql: ${TABLE}.first_campaign ;;
   }
 
   dimension: first_source {
-    group_label: "Session UTM"
+    group_label: "Attribution"
     type:  string
     sql: ${TABLE}.first_source ;;
   }
 
   dimension: first_medium {
-    group_label: "Session UTM"
+    group_label: "Attribution"
     type:  string
     sql: ${TABLE}.first_medium ;;
   }
 
   dimension: first_content {
-    group_label: "Session UTM"
+    group_label: "Attribution"
     type:  string
     sql: ${TABLE}.first_content ;;
   }
 
   dimension: first_term {
-    group_label: "Session UTM"
+    group_label: "Attribution"
     type:  string
     sql: ${TABLE}.first_term ;;
   }
@@ -177,13 +182,13 @@ view: event_facts {
   dimension: sequence_number {
     group_label: "Event Context"
     type: number
-    sql: ${TABLE}.track_sequence_number ;;
+    sql: ${TABLE}.event_sequence ;;
   }
 
-  dimension: source_sequence_number {
+  dimension: source_sequence {
     group_label: "Event Context"
     type: number
-    sql: ${TABLE}.source_sequence_number ;;
+    sql: ${TABLE}.source_sequence ;;
   }
 
   dimension: user_agent {
@@ -244,12 +249,12 @@ view: event_facts {
 
   dimension: journey_id {
     type: string
-    sql: ${TABLE}.event_id ;;
+    sql: ${TABLE}.journey_id ;;
   }
 
-  dimension: journey_issearch {
+  dimension: journey_is_search {
     type: yesno
-    sql: ${TABLE}.journey_issearch ;;
+    sql: ${TABLE}.journey_is_search ;;
   }
 
   dimension: journey_type {
@@ -262,7 +267,7 @@ view: event_facts {
     sql: ${TABLE}.journey_prop ;;
   }
 
-  measure: count_visitors {
+  measure: number_of_distinct_visitors {
     type: count_distinct
     sql: ${looker_visitor_id} ;;
   }
@@ -332,7 +337,7 @@ view: event_facts {
 
   measure: events_per_visitor {
     type: number
-    sql: ${count_events} / ${count_visitors} ;;
+    sql: ${count_events} / ${number_of_distinct_visitors} ;;
     value_format_name: decimal_1
     drill_fields: [event, looker_visitor_id, users.name, count_events]
   }

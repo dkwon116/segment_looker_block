@@ -4,8 +4,8 @@ view: order_facts {
     sql: SELECT
         o.order_id
         , o.user_id
-        , ef.session_id
-        , ef.event_id
+        , es.session_id
+        , es.event_id
         , o.transaction_at
         , o.order_sequence_number
         , o.total
@@ -15,8 +15,8 @@ view: order_facts {
         , DATE_DIFF(CURRENT_DATE(), CAST(MIN(o.transaction_at) OVER(partition by o.user_id) as DATE), DAY) as days_since_first_order
         , SUM(c.amount) as total_cashback
       from ${orders.SQL_TABLE_NAME} as o
-      LEFT JOIN ${event_facts.SQL_TABLE_NAME} as ef
-      ON CONCAT(cast(o.transaction_at as string), o.user_id, '-r') = ef.event_id
+      LEFT JOIN ${event_sessions.SQL_TABLE_NAME} as es
+      ON CONCAT(cast(o.transaction_at as string), o.user_id, '-r') = es.event_id
       LEFT JOIN ${cashbacks.SQL_TABLE_NAME} as c
         ON o.order_id = c.order_id
       GROUP BY 1, 2, 3, 4, 5, 6, 7, 8
@@ -26,6 +26,7 @@ view: order_facts {
   dimension: order_id {
     type: string
     sql: ${TABLE}.order_id ;;
+    primary_key: yes
   }
 
   dimension: user_id {

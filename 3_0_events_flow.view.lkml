@@ -4,7 +4,7 @@ view: event_flow {
     sql:
       select a.event_id
         , a.session_id
-        , a.track_sequence_number
+        , a.event_sequence
         , a.event
         , a.looker_visitor_id
         , a.timestamp
@@ -14,19 +14,19 @@ view: event_flow {
         , e.event as event_5
       from ${event_facts.SQL_TABLE_NAME} a
       left join ${event_facts.SQL_TABLE_NAME} b
-        on a.track_sequence_number + 1 = b.track_sequence_number
+        on a.event_sequence + 1 = b.event_sequence
         and a.session_id = b.session_id
       left join ${event_facts.SQL_TABLE_NAME} c
-        on a.track_sequence_number + 2 = c.track_sequence_number
+        on a.event_sequence + 2 = c.event_sequence
         and a.session_id = c.session_id
       left join ${event_facts.SQL_TABLE_NAME} d
-        on a.track_sequence_number + 3 = d.track_sequence_number
+        on a.event_sequence + 3 = d.event_sequence
         and a.session_id = d.session_id
       left join ${event_facts.SQL_TABLE_NAME} e
-        on a.track_sequence_number + 4 = e.track_sequence_number
+        on a.event_sequence + 4 = e.event_sequence
         and a.session_id = e.session_id
       where a.event_source = "pages" and b.event_source = "pages" and c.event_source = "pages" and d.event_source = "pages" and e.event_source = "pages"
---      order by a.session_id, a.track_sequence_number
+--      order by a.session_id, a.event_sequence
        ;;
   }
 
@@ -41,10 +41,10 @@ view: event_flow {
     sql: ${TABLE}.session_id ;;
   }
 
-  dimension: track_sequence_number {
+  dimension: event_sequence {
     type: number
     hidden: yes
-    sql: ${TABLE}.track_sequence_number ;;
+    sql: ${TABLE}.event_sequence ;;
   }
 
   dimension: event {
@@ -144,7 +144,7 @@ view: event_flow {
     fields: [
       event_id,
       session_id,
-      track_sequence_number,
+      event_sequence,
       event,
       user_id,
       event_2,

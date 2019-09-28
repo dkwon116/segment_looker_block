@@ -2,7 +2,7 @@ view: user_facts {
   derived_table: {
     sql_trigger_value: select count(*) from ${sessions.SQL_TABLE_NAME} ;;
     sql:
-      WITH user_sources as (
+      WITH user_attribution as (
         SELECT * FROM
           (SELECT
             s.looker_visitor_id
@@ -36,11 +36,6 @@ view: user_facts {
         SELECT
           cu.id as user_id
         FROM mysql_smile_ventures.users as cu
-      ), reseller_list as (
-        SELECT
-          oi.user_id
-        FROM ${order_items.SQL_TABLE_NAME} as oi
-        WHERE oi.quantity >= 3
       )
       SELECT
         au.user_id as looker_visitor_id
@@ -74,14 +69,14 @@ view: user_facts {
         , SUM(o.total) as lifetime_order_value
 
       FROM all_users as au
-      LEFT JOIN ${sessions.SQL_TABLE_NAME} as s
-        ON au.user_id = s.looker_visitor_id
       LEFT JOIN mysql_smile_ventures.users as cu
         ON au.user_id = cu.id
+      LEFT JOIN user_attribution as us
+        ON au.user_id = us.looker_visitor_id
+      LEFT JOIN ${sessions.SQL_TABLE_NAME} as s
+        ON au.user_id = s.looker_visitor_id
       LEFT JOIN ${session_facts.SQL_TABLE_NAME} as sf
         ON s.session_id = sf.session_id
-      LEFT JOIN user_sources as us
-        ON au.user_id = us.looker_visitor_id
       LEFT JOIN ${order_facts.SQL_TABLE_NAME} as o
         ON s.session_id = o.session_id
       LEFT JOIN google_sheets.user_type as ut
