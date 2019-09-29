@@ -11,14 +11,9 @@ view: event_facts {
         , t.anonymous_id
         , t.looker_visitor_id
         , t.timestamp
-        , t.received
 
         , t.event
         , t.event_source
-
-        , j.journey_type
-        , j.journey_is_search
-        , j.journey_prop
 
         , t.referrer as referrer
         , t.campaign_source as campaign_source
@@ -62,13 +57,14 @@ view: event_facts {
     sql: ${TABLE}.event_id ;;
   }
 
+  dimension: journey_id {
+    type: string
+    sql: ${TABLE}.journey_id ;;
+  }
+
   dimension: session_id {
     sql: ${TABLE}.session_id ;;
   }
-
-#   dimension: order_id {
-#     sql: ${TABLE}.order_id ;;
-#   }
 
   dimension: event {
     sql: ${TABLE}.event ;;
@@ -76,12 +72,6 @@ view: event_facts {
 
   dimension: event_source {
     sql: ${TABLE}.event_source ;;
-  }
-
-  dimension_group: received {
-    type: time
-    timeframes: [time, date, week, month]
-    sql: ${TABLE}.received ;;
   }
 
   dimension_group: timestamp {
@@ -247,42 +237,17 @@ view: event_facts {
           END;;
   }
 
-  dimension: journey_id {
-    type: string
-    sql: ${TABLE}.journey_id ;;
-  }
-
-  dimension: journey_is_search {
-    type: yesno
-    sql: ${TABLE}.journey_is_search ;;
-  }
-
-  dimension: journey_type {
-    type: string
-    sql: ${TABLE}.journey_type  ;;
-  }
-
-  dimension: journey_prop {
-    type: string
-    sql: ${TABLE}.journey_prop ;;
-  }
-
-  measure: number_of_distinct_visitors {
+  measure: unique_visitor_count {
+    group_label: "Number of Unique Visitors"
+    group_item_label: "All"
     type: count_distinct
     sql: ${looker_visitor_id} ;;
   }
 
-  measure: unique_outlinked_user {
-    group_label: "Unique Users"
-    type: count_distinct
-    sql: ${looker_visitor_id} ;;
-    filters: {
-      field: event
-      value: "outlink_sent"
-    }
-  }
 
-  measure: unique_product_viewed_user {
+  measure: unique_product_viewed_visitor_count {
+    group_label: "Number of Unique Visitors"
+    group_item_label: "Product Viewed"
     type: count_distinct
     sql: ${looker_visitor_id} ;;
     filters: {
@@ -291,8 +256,31 @@ view: event_facts {
     }
   }
 
-  measure: outlinked_user_by_vendor {
-    group_label: "Unique Users"
+  measure: unique_outlinked_visitor_count {
+    group_label: "Number of Unique Visitors"
+    group_item_label: "Outlinked"
+    type: count_distinct
+    sql: ${looker_visitor_id} ;;
+    filters: {
+      field: event
+      value: "outlink_sent"
+    }
+  }
+
+  measure: unique_order_completed_visitor_count {
+    group_label: "Number of Unique Visitors"
+    group_item_label: "Order Completed"
+    type: count_distinct
+    sql: ${looker_visitor_id} ;;
+    filters: {
+      field: event
+      value: "order_completed"
+    }
+  }
+
+  measure: unique_vendor_outlinked_user_count {
+    group_label: "Number of Unique Visitors"
+    group_item_label: "Vendor Outlinked"
     type: count_distinct
     sql:
     CASE
@@ -303,8 +291,9 @@ view: event_facts {
   ;;
   }
 
-  measure: ordered_user_by_vendor {
-    group_label: "Unique Users"
+  measure: unique_vendor_ordered_visitor_count {
+    group_label: "Number of Unique Visitors"
+    group_item_label: "Vendor Ordered"
     type: count_distinct
     sql:
     CASE
@@ -320,26 +309,18 @@ view: event_facts {
     suggest_dimension: vendor
   }
 
-  measure: unique_ordered_user {
-    group_label: "Unique Users"
-    type: count_distinct
-    sql: ${looker_visitor_id} ;;
-    filters: {
-      field: event
-      value: "order_completed"
-    }
-  }
-
-  measure: count_events {
+  measure: count {
+    label: "Number of Events"
     type: count
     drill_fields: [user_facts.looker_visitor_id, users.name, user_agent]
   }
 
   measure: events_per_visitor {
+    label: "Number of Events per Visitor"
     type: number
-    sql: ${count_events} / ${number_of_distinct_visitors} ;;
+    sql: ${count} / ${unique_visitor_count} ;;
     value_format_name: decimal_1
-    drill_fields: [event, looker_visitor_id, users.name, count_events]
+    drill_fields: [event, looker_visitor_id, users.name, count]
   }
 
 

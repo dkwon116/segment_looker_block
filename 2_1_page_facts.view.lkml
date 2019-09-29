@@ -51,20 +51,26 @@ FROM ${mapped_events.SQL_TABLE_NAME} AS e
   }
 
   measure: avg_pageview_duration_seconds {
+    group_label: "Pageview Durations"
+    group_item_label: "Average Seconds"
     type: average
     value_format_name: decimal_0
     sql: ${duration_page_view_seconds} ;;
   }
 
   measure: total_pageview_duration_seconds {
+    group_label: "Pageview Durations"
+    group_item_label: "Total Seconds"
     type: sum
     sql: ${duration_page_view_seconds} ;;
     value_format_name: decimal_0
   }
 
   measure: avg_pageview_duration_minutes_per_visitor {
+    group_label: "Pageview Durations"
+    group_item_label: "Avg Minutes per Visitor"
     type: number
-    sql: ${total_pageview_duration_seconds} / ${event_facts.number_of_distinct_visitors} / 60 ;;
+    sql: ${total_pageview_duration_seconds} / ${event_facts.unique_visitor_count} / 60 ;;
     value_format_name: decimal_1
   }
 

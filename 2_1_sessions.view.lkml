@@ -31,6 +31,15 @@ where (idle_time_minutes > 30 or idle_time_minutes is null)
     sql: ${TABLE}.session_start_at ;;
   }
 
+  dimension: session_sequence_number {
+    type: number
+    sql: ${TABLE}.session_sequence_number ;;
+  }
+
+  dimension: next_session_start_at {
+    sql: ${TABLE}.next_session_start_at ;;
+  }
+
   dimension_group: today {
     type: time
     hidden: yes
@@ -41,71 +50,64 @@ where (idle_time_minutes > 30 or idle_time_minutes is null)
   dimension: is_same_day_of_week_as_today {
     type: yesno
     sql: ${today_day_of_week_index} = ${start_day_of_week_index} ;;
+    group_label: "Date Comp"
   }
 
   dimension: is_up_to_same_hour_of_day {
     type: yesno
     sql: ${today_hour_of_day} >= ${start_hour_of_day};;
+    group_label: "Date Comp"
   }
 
   dimension: is_last_24hours {
     type: yesno
     sql: timestamp_diff(CURRENT_TIMESTAMP, ${start_raw}, hour) < 24  ;;
+    group_label: "Date Comp"
   }
 
   dimension: is_last_7days {
     type: yesno
     sql: timestamp_diff(CURRENT_TIMESTAMP, ${start_raw}, day) < 7  ;;
-  }
-
-  dimension: session_sequence_number {
-    type: number
-    sql: ${TABLE}.session_sequence_number ;;
-  }
-
-  dimension: next_session_start_at {
-    sql: ${TABLE}.next_session_start_at ;;
+    group_label: "Date Comp"
   }
 
   dimension: is_first_session {
-    #     type: yesno
+    group_label: "Session Flags"
+    type: string
     sql: CASE WHEN ${session_sequence_number} = 1 THEN 'First Session'
            ELSE 'Repeat Session'
       END
        ;;
   }
 
-  measure: count_sessions {
-    type: count_distinct
-    sql: ${session_id} ;;
+  measure: count {
+    type: count
     drill_fields: [session_detail*]
     group_label: "Session Facts"
+    group_item_label: "Number of Sessions"
   }
 
-  measure: count_repeat_sessions {
-    type: count_distinct
-    sql: ${session_id} ;;
+  measure: repeat_count {
+    type: count
+    drill_fields: [session_detail*]
+    group_label: "Session Facts"
+    group_item_label: "Number of Repeat Sessions"
+
 
     filters: {
       field: is_first_session
       value: "Repeat Session"
     }
-    group_label: "Session Facts"
   }
 
-  measure: percent_repeat_sessions {
-    type: number
-    value_format_name: percent_0
-    sql: ${count_repeat_sessions} / ${count_sessions} ;;
-    group_label: "Session Facts"
+  measure: unique_visitor_count {
+    type: count_distinct
+    sql: ${looker_visitor_id} ;;
+    drill_fields: [user_detail*]
+    label: "Number of Unique Visitors"
   }
 
-  measure: percent_of_total_count {
-    type: percent_of_total
-    sql: ${count_sessions} ;;
-  }
-
-  measure: count_first_visitors {
+  measure: unique_first_session_visitor_count {
     type: count_distinct
     sql: ${looker_visitor_id} ;;
 
@@ -113,9 +115,10 @@ where (idle_time_minutes > 30 or idle_time_minutes is null)
       field: is_first_session
       value: "First Session"
     }
+    label: "Number of Unique First Session Visitors"
   }
 
-  measure: count_repeat_visitors {
+  measure: unique_repeat_session_visitor_count {
     type: count_distinct
     sql: ${looker_visitor_id};;
 
@@ -123,24 +126,31 @@ where (idle_time_minutes > 30 or idle_time_minutes is null)
       field: is_first_session
       value: "Repeat Session"
     }
+    label: "Number of Unique Repeat Session Visitors"
   }
 
-  measure: count_visitors {
-    type: count_distinct
-    sql: ${looker_visitor_id} ;;
-    drill_fields: [user_detail*]
-  }
-
-  measure: avg_sessions_per_user {
+  measure: sessions_per_unique_visitor {
     type: number
     value_format_name: decimal_2
-    sql: ${count_sessions} / nullif(${count_visitors}, 0) ;;
+    sql: ${count} / nullif(${unique_visitor_count}, 0) ;;
   }
 
-  measure: percent_of_repeat_users {
+  measure: unique_repeat_session_visitors_per_unique_visitor {
     type: number
-    sql: ${count_repeat_visitors} / ${count_visitors} ;;
+    sql: ${unique_repeat_session_visitor_count} / ${unique_visitor_count} ;;
     value_format_name: percent_0
+  }
+
+  measure: repeat_session_per_session {
+    type: number
+    value_format_name: percent_0
+    sql: ${repeat_count} / ${count} ;;
+    group_label: "Session Facts"
+  }
+
+  measure: percent_of_total_count {
+    type: percent_of_total
+    sql: ${count} ;;
   }
 
   set: session_detail {

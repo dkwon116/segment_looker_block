@@ -215,7 +215,7 @@ view: product_events {
 
   measure: product_viewed_conversion_rate {
     type: number
-    sql: ${count_product_viewed_user} / NULLIF(${sessions.count_visitors}, 0) ;;
+    sql: ${count_product_viewed_user} / NULLIF(${sessions.unique_visitor_count}, 0) ;;
     value_format_name: percent_0
   }
 }

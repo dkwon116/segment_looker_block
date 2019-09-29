@@ -14,9 +14,9 @@ view: session_facts {
         , t2s.first_purchased as first_ordered
         , max(t2s.timestamp) as end_at
         , sum(case when t2s.event = 'order_completed' then t2s.order_value else 0 end) as order_value
-        , count(case when t2s.event_source = 'tracks' then 1 else null end) as tracks_count
-        , count(case when t2s.event_source = 'pages' then 1 else null end) as pages_count
-        , count(case when t2s.event = "signed_up" then event_id else null end) as count_signed_up
+        , count(case when t2s.event_source = 'tracks' then 1 else null end) as number_of_track_events
+        , count(case when t2s.event_source = 'pages' then 1 else null end) as number_of_page_events
+        , count(case when t2s.event = "signed_up" then event_id else null end) as number_of_signed_up_events
         , count(case when t2s.event in ("Search", "Hashtag", "Category", "New", "Sale", "Brand") then event_id else null end) as count_product_discovery
         , count(case when t2s.event = 'Product' then event_id else null end) as count_product_viewed
         , count(case when t2s.event = 'product_list_viewed' then event_id else null end) as count_product_list_viewed
@@ -40,51 +40,51 @@ view: session_facts {
 
   dimension: first_referrer {
     sql: ${TABLE}.first_referrer ;;
-    group_label: "First"
+    group_label: "Attribution"
     type: string
   }
 
   dimension: first_referrer_domain {
     sql: NET.REG_DOMAIN(${first_referrer}) ;;
-    group_label: "First"
+    group_label: "Attribution"
     type: string
   }
 
   dimension: first_referral_name {
     sql: split(${first_referrer_domain}, ".")[OFFSET(0)]  ;;
-    group_label: "First"
+    group_label: "Attribution"
     type: string
   }
 
   dimension: first_campaign {
     type:  string
     sql: ${TABLE}.first_campaign ;;
-    group_label: "First"
+    group_label: "Attribution"
   }
 
   dimension: first_source {
     type:  string
     sql: ${TABLE}.first_source ;;
     drill_fields: [first_campaign, first_medium]
-    group_label: "First"
+    group_label: "Attribution"
   }
 
   dimension: first_medium {
     type:  string
     sql: ${TABLE}.first_medium ;;
-    group_label: "First"
+    group_label: "Attribution"
   }
 
   dimension: first_content {
     type:  string
     sql: ${TABLE}.first_content ;;
-    group_label: "First"
+    group_label: "Attribution"
   }
 
   dimension: first_term {
     type:  string
     sql: ${TABLE}.first_term ;;
-    group_label: "First"
+    group_label: "Attribution"
   }
 
   dimension: is_pre_purchase {
@@ -100,46 +100,21 @@ view: session_facts {
     sql: ${TABLE}.end_at ;;
   }
 
-  dimension: tracks_count {
-    type: number
-    sql: ${TABLE}.tracks_count ;;
-    group_label: "Event Counts"
-  }
-
-  dimension: pages_count {
-    type:  number
-    sql: ${TABLE}.pages_count ;;
-    group_label: "Event Counts"
-  }
-
-  dimension: total_events {
-    type: number
-    sql: ${tracks_count} + ${pages_count} ;;
-    group_label: "Event Counts"
-  }
-
   dimension: referrer {
     type: number
     sql: ${TABLE}.referrer ;;
   }
 
-  dimension: tracks_count_tier {
+  dimension: number_of_track_events_tier {
     type: tier
-    sql: ${tracks_count} ;;
-    tiers: [
-      1,
-      5,
-      10,
-      20,
-      30,
-      60
-    ]
+    sql: ${number_of_track_events} ;;
+    tiers: [1, 5, 10, 20, 30, 60]
   }
 
 
   dimension: is_bounced_session {
     sql:
-      CASE WHEN ${total_events} = 1 THEN 'Bounced Session'
+      CASE WHEN ${number_of_events} = 1 THEN 'Bounced Session'
       ELSE 'Not Bounced Session' END
        ;;
     group_label: "Session Flags"
@@ -150,22 +125,35 @@ view: session_facts {
     sql: timestamp_diff(TIMESTAMP(${end_time}), TIMESTAMP(${sessions.start_time}), minute) ;;
   }
 
-  dimension: session_duration_minutes_tiered {
+  dimension: session_duration_minutes_tier {
     type: tier
     sql: ${session_duration_minutes} ;;
-    tiers: [
-      1,
-      5,
-      10,
-      20,
-      30,
-      60
-    ]
+    tiers: [1, 5, 10, 20, 30, 60]
   }
 
-  dimension: signed_up {
+
+
+  dimension: number_of_track_events {
+    type: number
+    sql: ${TABLE}.number_of_track_events ;;
+    group_label: "Event Counts"
+  }
+
+  dimension: number_of_page_events {
     type:  number
-    sql: ${TABLE}.count_signed_up ;;
+    sql: ${TABLE}.number_of_page_events ;;
+    group_label: "Event Counts"
+  }
+
+  dimension: number_of_events {
+    type: number
+    sql: ${number_of_track_events} + ${number_of_page_events} ;;
+    group_label: "Event Counts"
+  }
+
+  dimension: number_of_signed_up_events {
+    type:  number
+    sql: ${TABLE}.number_of_signed_up_events ;;
     group_label: "Event Counts"
   }
 
@@ -243,13 +231,13 @@ view: session_facts {
 
   measure: total_pages {
     type: sum
-    sql: ${pages_count} ;;
+    sql: ${number_of_page_events} ;;
     value_format_name: "decimal_0"
   }
 
-  measure: pages_per_session {
+  measure: avg_page_events {
     type: average
-    sql: ${pages_count} ;;
+    sql: ${number_of_page_events} ;;
     value_format_name: "decimal_1"
     group_label: "Session Facts"
   }
@@ -259,56 +247,36 @@ view: session_facts {
     value_format_name: decimal_1
     sql: ${session_duration_minutes};;
     group_label: "Session Facts"
-
-#     filters: {
-#       field: session_duration_minutes
-#       value: "> 0"
-#     }
   }
 
-  measure: avg_tracks_per_session {
+  measure: avg_track_events {
     type: average
     value_format_name: decimal_1
-    sql: ${tracks_count}::float ;;
+    sql: ${number_of_track_events}::float ;;
     group_label: "Session Facts"
   }
 
-  measure: average_events_per_session {
+  measure: avg_events {
     type: average
-    sql: ${total_events} ;;
+    sql: ${number_of_events} ;;
     value_format_name: decimal_1
     group_label: "Session Facts"
   }
 
-  measure: cumulative_session_duration {
+  measure: total_session_duration {
     type: sum
     sql: ${session_duration_minutes} ;;
-    value_format_name: decimal_2
+    value_format_name: decimal_0
     group_label: "Session Facts"
   }
 
-  measure: average_session_duration_per_user {
+  measure: session_duration_per_unique_visitor {
     type: number
-    sql: ${cumulative_session_duration} / ${sessions.count_visitors} ;;
+    sql: ${total_session_duration} / ${sessions.unique_visitor_count} ;;
     value_format_name: decimal_2
   }
 
-  measure: total_signed_up {
-    type: count_distinct
-    sql: ${sessions.looker_visitor_id} ;;
-    filters: {
-      field: signed_up
-       value: ">0"
-    }
-  }
-
-  measure: signup_conversion {
-    type: number
-    sql: ${total_signed_up} / ${sessions.count_visitors};;
-    value_format_name: percent_2
-  }
-
-  measure: pre_purchase_users {
+  measure: unique_pre_purchase_visitor_count {
     description: "Count of distinct users who have not made purchase yet"
     type: count_distinct
     sql: ${sessions.looker_visitor_id} ;;
@@ -317,6 +285,23 @@ view: session_facts {
       value: "yes"
     }
   }
+
+  measure: unique_signed_up_visitor {
+    type: count_distinct
+    sql: ${sessions.looker_visitor_id} ;;
+    filters: {
+      field: number_of_signed_up_events
+       value: ">0"
+    }
+  }
+
+  measure: unique_visitor_signup_conversion {
+    type: number
+    sql: ${unique_signed_up_visitor} / ${sessions.unique_visitor_count};;
+    value_format_name: percent_2
+  }
+
+
 
 
 ######################################
@@ -370,7 +355,7 @@ view: session_facts {
 
   measure: product_discovery_viewed_conversion_rate {
     type: number
-    sql: ${total_product_discovery_viewed_users} / ${sessions.count_visitors} ;;
+    sql: ${total_product_discovery_viewed_users} / ${sessions.unique_visitor_count} ;;
     value_format_name: percent_0
     group_label: "Product Discovery"
     drill_fields: [product_viewed_details*]
@@ -415,7 +400,7 @@ view: session_facts {
 
   measure: product_list_viewed_conversion_rate {
     type: number
-    sql: ${total_product_list_viewed_users} / ${sessions.count_visitors} ;;
+    sql: ${total_product_list_viewed_users} / ${sessions.unique_visitor_count} ;;
     value_format_name: percent_0
     group_label: "Product List Viewed"
     drill_fields: [product_viewed_details*]
@@ -440,7 +425,7 @@ view: session_facts {
 
   measure: products_viewed_per_user {
     type: number
-    sql: ${products_viewed_total} / ${sessions.count_visitors} ;;
+    sql: ${products_viewed_total} / ${sessions.unique_visitor_count} ;;
     value_format_name: decimal_2
     group_label: "Product Viewed"
   }
@@ -476,7 +461,7 @@ view: session_facts {
 
   measure: product_viewed_conversion_rate {
     type: number
-    sql: ${total_product_viewed_users} / ${sessions.count_visitors} ;;
+    sql: ${total_product_viewed_users} / ${sessions.unique_visitor_count} ;;
     value_format_name: percent_0
     group_label: "Product Viewed"
     drill_fields: [product_viewed_details*]
@@ -484,7 +469,7 @@ view: session_facts {
 
   measure: product_viewed_activation_rate {
     type: number
-    sql: ${total_product_viewed_activated_user} / ${sessions.count_visitors} ;;
+    sql: ${total_product_viewed_activated_user} / ${sessions.unique_visitor_count} ;;
     value_format_name: percent_0
     group_label: "Product Viewed"
     drill_fields: [product_viewed_details*]
@@ -527,7 +512,7 @@ view: session_facts {
 
   measure: outlinked_conversion_rate {
     type: number
-    sql: ${total_outlinked_users} / NULLIF(${sessions.count_visitors}, 0) ;;
+    sql: ${total_outlinked_users} / NULLIF(${sessions.unique_visitor_count}, 0) ;;
     value_format_name: percent_2
     group_label: "Outlinked"
   }
@@ -569,7 +554,7 @@ view: session_facts {
 
   measure: concierge_conversion_rate {
     type: number
-    sql: ${total_concierge_clicked_users} / ${sessions.count_visitors} ;;
+    sql: ${total_concierge_clicked_users} / ${sessions.unique_visitor_count} ;;
     value_format_name: percent_2
     group_label: "Concierge"
   }
@@ -613,7 +598,7 @@ view: session_facts {
 
   measure: added_to_wishlist_conversion_rate {
     type: number
-    sql: ${total_added_to_wishlist_users} / ${sessions.count_visitors} ;;
+    sql: ${total_added_to_wishlist_users} / ${sessions.unique_visitor_count} ;;
     value_format_name: percent_2
     group_label: "Wishlist"
   }
@@ -673,7 +658,7 @@ view: session_facts {
 
   measure: order_completed_conversion_rate {
     type: number
-    sql: ${total_order_completed_users} / ${sessions.count_visitors} ;;
+    sql: ${total_order_completed_users} / ${sessions.unique_visitor_count} ;;
     value_format_name: percent_2
     group_label: "Order Completed"
     drill_fields: [order_completed_details*]
@@ -681,7 +666,7 @@ view: session_facts {
 
   measure: order_completed_session_conversion_rate {
     type: number
-    sql: ${total_order_completed_sessions} / ${sessions.count_sessions} ;;
+    sql: ${total_order_completed_sessions} / ${sessions.count} ;;
     value_format_name: percent_2
     group_label: "Order Completed"
     drill_fields: [order_completed_details*]
@@ -697,7 +682,7 @@ view: session_facts {
 
   measure: bounce_rate {
     type: number
-    sql: ${count_bounced_sessions} / ${sessions.count_sessions} ;;
+    sql: ${count_bounced_sessions} / ${sessions.count} ;;
     value_format_name: percent_2
     drill_fields: [campaign_details*]
     group_label: "Session Facts"
@@ -705,7 +690,7 @@ view: session_facts {
 
 
   set: campaign_details {
-    fields: [first_source, sessions.count_sessions, bounce_rate, pages_per_session, avg_session_duration_minutes, product_viewed_conversion_rate]
+    fields: [first_source, sessions.count, bounce_rate, avg_page_events, avg_session_duration_minutes, product_viewed_conversion_rate]
   }
 
   set: product_viewed_details {

@@ -18,6 +18,16 @@ explore: event_facts {
     -order_items.catch_product_id
   ]
 
+  join: page_facts {
+    view_label: "0_Events"
+    type: left_outer
+    sql_on: event_facts.event_id = page_facts.event_id and
+      event_facts.timestamp = page_facts.timestamp and
+      event_facts.looker_visitor_id = page_facts.looker_visitor_id
+       ;;
+    relationship: one_to_one
+  }
+
   join: pages {
     view_label: "1_Page Events"
     type: left_outer
@@ -34,17 +44,7 @@ explore: event_facts {
       and event_facts.anonymous_id = tracks.anonymous_id
        ;;
     relationship: one_to_one
-#     fields: []
-  }
-
-  join: page_facts {
-    view_label: "0_Events"
-    type: left_outer
-    sql_on: event_facts.event_id = page_facts.event_id and
-      event_facts.timestamp = page_facts.timestamp and
-      event_facts.looker_visitor_id = page_facts.looker_visitor_id
-       ;;
-    relationship: one_to_one
+    fields: []
   }
 
   join: sessions {
@@ -171,6 +171,8 @@ explore: event_facts {
   }
 }
 
+
+
 explore: order_items {
   label: "Orders"
   persist_with: orders_datagroup
@@ -218,7 +220,6 @@ explore: order_items {
     type: left_outer
     sql_on: ${order_items.vendor_product_id} = ${product_maps.affiliate_product_id} and ${order_items.vendor_slug} = ${product_maps.vendor};;
     relationship: many_to_one
-#     fields: []
   }
 
   join: product_facts {
@@ -243,23 +244,7 @@ explore: order_items {
   }
 }
 
-explore: product_list_viewed {
-  view_label: "Products Viewed in List"
-  label: "Product List"
-  join: products_viewed_in_list {
-    view_label: "Products Viewed in List"
-    sql_on: ${product_list_viewed.id} = ${products_viewed_in_list.list_viewed_id} ;;
-    relationship: one_to_many
-  }
-}
 
-explore: event_list {
-  hidden: yes
-}
-
-explore: utm_values {
-  hidden: yes
-}
 
 explore: product_events {
   join: product_facts {
@@ -325,6 +310,7 @@ explore: product_events {
   }
 }
 
+
 explore: product_facts {
   join: product_maps {
     type: left_outer
@@ -336,7 +322,6 @@ explore: product_facts {
     type: left_outer
     sql_on: ${product_facts.id} = ${products_categories.product_id} and ${products_categories._fivetran_deleted} = false ;;
     relationship: many_to_many
-#     fields: []
   }
 
   join: category_normalized {
@@ -346,7 +331,8 @@ explore: product_facts {
 
   }
 }
-#
+
+
 explore: sv_cashbacks {
   label: "Cashback"
   join: catch_users {
@@ -367,7 +353,8 @@ explore: sv_cashbacks {
     relationship: one_to_many
   }
 }
-#
+
+
 explore: user_facts {
   join: users {
     type: left_outer
@@ -382,6 +369,27 @@ explore: user_facts {
   }
 }
 
-# explore: email_activity {}
 
-explore: customer_service_log {}
+
+explore: product_list_viewed {
+  view_label: "Products Viewed in List"
+  label: "Product List"
+  hidden: yes
+  join: products_viewed_in_list {
+    view_label: "Products Viewed in List"
+    sql_on: ${product_list_viewed.id} = ${products_viewed_in_list.list_viewed_id} ;;
+    relationship: one_to_many
+  }
+}
+
+explore: customer_service_log {
+  hidden: yes
+}
+
+explore: event_list {
+  hidden: yes
+}
+
+explore: utm_values {
+  hidden: yes
+}

@@ -105,6 +105,7 @@ view: mapped_events {
     type: time
     timeframes: [time, date, week, month]
     sql: ${TABLE}.received ;;
+    hidden: yes
   }
 
   dimension: event {

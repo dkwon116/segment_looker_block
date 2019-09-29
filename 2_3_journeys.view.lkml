@@ -31,7 +31,8 @@ view:journeys {
           and lag(t.journey_type) over (partition by t.session_id order by t.event_sequence)='Search'
           and (lag(t.journey_prop,2) over (partition by t.session_id order by t.event_sequence)<>t.journey_prop or lag(t.journey_prop,2) over (partition by t.session_id order by t.event_sequence) is null) then 1
         else null
-      end as journey_is_search
+      end as is_search
+      ,IF(t.journey_type IN ('Brand', 'Category', 'Product Search', 'Daily', 'Hashtag', 'Sale', 'New'), true, false) as is_discovery
       ,t.first_journey_event_sequence
       ,ifnull(lead(t.first_journey_event_sequence) over (partition by t.session_id order by t.event_sequence)-1,t.last_session_event_sequence) as last_journey_event_sequence
     from t
@@ -68,9 +69,14 @@ view:journeys {
     sql: ${TABLE}.journey_type ;;
   }
 
-  dimension: journey_is_search {
+  dimension: is_search {
     type: yesno
-    sql: ${TABLE}.journey_is_search ;;
+    sql: ${TABLE}.is_search ;;
+  }
+
+  dimension: is_discovery {
+    type: yesno
+    sql: ${TABLE}.is_discovery ;;
   }
 
   dimension: first_journey_event_sequence {
@@ -94,4 +100,42 @@ view:journeys {
     sql: ${TABLE}.timestamp ;;
   }
 
+  measure: count {
+    type: count
+  }
+
+  measure: unique_visitor_count {
+    type: count_distinct
+    sql: ${looker_visitor_id} ;;
+  }
+
+  measure: unique_discovery_journey_count {
+    type: count_distinct
+    sql: ${journey_id} ;;
+
+    filters: {
+      field: is_discovery
+      value: "yes"
+    }
+  }
+
+  measure: unique_discovery_journey_visitor_count {
+    type: count_distinct
+    sql: ${unique_visitor_count} ;;
+
+    filters: {
+      field: is_discovery
+      value: "yes"
+    }
+  }
+
+  measure: unique_search_journey_count {
+    type: count_distinct
+    sql: ${journey_id} ;;
+
+    filters: {
+      field: is_search
+      value: "yes"
+    }
+  }
 }
