@@ -46,7 +46,7 @@ view:journeys {
     type: string
     primary_key: yes
     hidden: yes
-    sql: ${TABLE}.event_id ;;
+    sql: ${TABLE}.journey_id ;;
   }
 
   dimension: session_id {
@@ -109,9 +109,8 @@ view:journeys {
     sql: ${looker_visitor_id} ;;
   }
 
-  measure: unique_discovery_journey_count {
-    type: count_distinct
-    sql: ${journey_id} ;;
+  measure: discovery_journey_count {
+    type: count
 
     filters: {
       field: is_discovery
@@ -121,7 +120,7 @@ view:journeys {
 
   measure: unique_discovery_journey_visitor_count {
     type: count_distinct
-    sql: ${unique_visitor_count} ;;
+    sql: ${looker_visitor_id} ;;
 
     filters: {
       field: is_discovery
@@ -129,9 +128,8 @@ view:journeys {
     }
   }
 
-  measure: unique_search_journey_count {
-    type: count_distinct
-    sql: ${journey_id} ;;
+  measure: search_journey_count {
+    type: count
 
     filters: {
       field: is_search

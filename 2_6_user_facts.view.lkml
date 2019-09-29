@@ -17,11 +17,11 @@ view: user_facts {
             , last_value(sf.first_campaign IGNORE NULLS) over(partition by s.looker_visitor_id order by sf.session_id rows between unbounded preceding and unbounded following) as last_campaign
             , last_value(sf.first_content IGNORE NULLS) over(partition by s.looker_visitor_id order by sf.session_id rows between unbounded preceding and unbounded following) as last_content
             , last_value(sf.first_term IGNORE NULLS) over(partition by s.looker_visitor_id order by sf.session_id rows between unbounded preceding and unbounded following) as last_term
-            , first_value(sf.first_source IGNORE NULLS) over(partition by s.looker_visitor_id order by sf.count_signed_up desc rows between unbounded preceding and unbounded following) as signup_source
-            , first_value(sf.first_medium IGNORE NULLS) over(partition by s.looker_visitor_id order by sf.count_signed_up desc rows between unbounded preceding and unbounded following) as signup_medium
-            , first_value(sf.first_campaign IGNORE NULLS) over(partition by s.looker_visitor_id order by sf.count_signed_up desc rows between unbounded preceding and unbounded following) as signup_campaign
-            , first_value(sf.first_content IGNORE NULLS) over(partition by s.looker_visitor_id order by sf.count_signed_up desc rows between unbounded preceding and unbounded following) as signup_content
-            , first_value(sf.first_term IGNORE NULLS) over(partition by s.looker_visitor_id order by sf.count_signed_up desc rows between unbounded preceding and unbounded following) as signup_term
+            , first_value(sf.first_source IGNORE NULLS) over(partition by s.looker_visitor_id order by sf.number_of_signed_up_events desc rows between unbounded preceding and unbounded following) as signup_source
+            , first_value(sf.first_medium IGNORE NULLS) over(partition by s.looker_visitor_id order by sf.number_of_signed_up_events desc rows between unbounded preceding and unbounded following) as signup_medium
+            , first_value(sf.first_campaign IGNORE NULLS) over(partition by s.looker_visitor_id order by sf.number_of_signed_up_events desc rows between unbounded preceding and unbounded following) as signup_campaign
+            , first_value(sf.first_content IGNORE NULLS) over(partition by s.looker_visitor_id order by sf.number_of_signed_up_events desc rows between unbounded preceding and unbounded following) as signup_content
+            , first_value(sf.first_term IGNORE NULLS) over(partition by s.looker_visitor_id order by sf.number_of_signed_up_events desc rows between unbounded preceding and unbounded following) as signup_term
           FROM ${sessions.SQL_TABLE_NAME} as s
           LEFT JOIN ${session_facts.SQL_TABLE_NAME} as sf
           ON s.session_id = sf.session_id) as source
