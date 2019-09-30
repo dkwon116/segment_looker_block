@@ -13,7 +13,8 @@ view: session_facts {
         , t2s.first_term as first_term
         , t2s.first_purchased as first_ordered
         , max(t2s.timestamp) as end_at
-        , sum(case when t2s.event = 'order_completed' then t2s.order_value else 0 end) as order_value
+
+        -- event facts
         , count(case when t2s.event_source = 'tracks' then 1 else null end) as number_of_track_events
         , count(case when t2s.event_source = 'pages' then 1 else null end) as number_of_page_events
         , count(case when t2s.event = "signed_up" then event_id else null end) as number_of_signed_up_events
@@ -23,10 +24,21 @@ view: session_facts {
         , count(case when t2s.event = 'outlink_sent' then event_id else null end) as count_outlinked
         , count(case when t2s.event = 'concierge_clicked' then event_id else null end) as count_concierge_clicked
         , count(case when t2s.event = 'product_added_to_wishlist' then event_id else null end) as count_added_to_wishlist
+
+        -- order_facts
         , count(case when t2s.event = 'order_completed' then event_id else null end) as count_order_completed
+        , sum(case when t2s.event = 'order_completed' then t2s.order_value else 0 end) as order_value
+
+        -- journey facts
+        , count(distinct j.journey_id) as number_of_journeys
+        , count(distinct case when j.is_discovery = true then j.journey_id else null end) as number_of_discovery_journeys
+        , count(distinct case when j.is_search = true then j.journey_id else null end) as number_of_search_journeys
+
       from ${sessions.SQL_TABLE_NAME} as s
         inner join ${event_facts.SQL_TABLE_NAME} as t2s
           on s.session_id = t2s.session_id
+        inner join ${journeys.SQL_TABLE_NAME} as j
+          on s.session_id = j.session_id and t2s.journey_id = j.journey_id
       group by 1,2,3,4,5,6,7,8
        ;;
   }

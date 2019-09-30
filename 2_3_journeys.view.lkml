@@ -26,13 +26,13 @@ view:journeys {
       ,t.timestamp
       ,IF(t.journey_type IN ('Brand','Category','Product Search'),t.journey_prop,NULL) AS journey_prop
       ,case
-        when t.journey_type='Product Search' then 1
+        when t.journey_type='Product Search' then true
         when t.journey_type IN ('Brand','Category')
           and lag(t.journey_type) over (partition by t.session_id order by t.event_sequence)='Search'
-          and (lag(t.journey_prop,2) over (partition by t.session_id order by t.event_sequence)<>t.journey_prop or lag(t.journey_prop,2) over (partition by t.session_id order by t.event_sequence) is null) then 1
+          and (lag(t.journey_prop,2) over (partition by t.session_id order by t.event_sequence)<>t.journey_prop or lag(t.journey_prop,2) over (partition by t.session_id order by t.event_sequence) is null) then true
         else null
       end as is_search
-      ,IF(t.journey_type IN ('Brand', 'Category', 'Product Search', 'Daily', 'Hashtag', 'Sale', 'New'), true, false) as is_discovery
+      ,IF(t.journey_type IN ('Brand', 'Category', 'Product Search', 'Hashtag', 'Sale', 'New'), true, false) as is_discovery
       ,t.first_journey_event_sequence
       ,ifnull(lead(t.first_journey_event_sequence) over (partition by t.session_id order by t.event_sequence)-1,t.last_session_event_sequence) as last_journey_event_sequence
     from t

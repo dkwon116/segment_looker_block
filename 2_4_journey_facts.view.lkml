@@ -1,3 +1,7 @@
+# duration of journey
+# number of product viewed / list viewed / outlinked / added_to_wishlist
+
+
 view: journey_facts {
   derived_table: {
     sql_trigger_value: select count(*) from ${event_facts.SQL_TABLE_NAME} ;;

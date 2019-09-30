@@ -209,7 +209,7 @@ view: catch_users {
   dimension: terms_accepted {
     type: yesno
     sql: ${TABLE}.terms_accepted ;;
-    hidden: yes
+#     hidden: yes
   }
 
   dimension_group: updated {
