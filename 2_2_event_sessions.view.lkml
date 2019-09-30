@@ -17,7 +17,7 @@ view:event_sessions {
         ,IF(e.event_source='pages' AND e.event NOT IN ('Product', 'Signup', 'Login'),
                 e.event,
                 IFNULL(LAST_VALUE(IF(e.event_source='pages' AND e.event NOT IN ('Product', 'Signup', 'Login'), e.event, NULL) IGNORE NULLS) OVER (PARTITION BY s.session_id ORDER BY e.timestamp ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING), 'Direct')) as journey_type
-        ,IF(e.event_source='pages' AND e.event IN ('Brand', 'Category', 'Product Search', 'Daily', 'Hashtag'),REGEXP_EXTRACT(e.page_path,"^/.*/(.*)$"),null) AS journey_prop
+        ,IF(e.event_source='pages' AND e.event IN ('Brand', 'Category', 'Product Search', 'Hashtag'),REGEXP_EXTRACT(e.page_path,"^/.*/(.*)$"),null) AS journey_prop
       from ${mapped_events.SQL_TABLE_NAME} as e
       left join ${sessions.SQL_TABLE_NAME} as s
         on e.looker_visitor_id = s.looker_visitor_id
