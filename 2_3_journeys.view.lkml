@@ -30,7 +30,7 @@ view:journeys {
         when t.journey_type IN ('Brand','Category')
           and lag(t.journey_type) over (partition by t.session_id order by t.event_sequence)='Search'
           and (lag(t.journey_prop,2) over (partition by t.session_id order by t.event_sequence)<>t.journey_prop or lag(t.journey_prop,2) over (partition by t.session_id order by t.event_sequence) is null) then true
-        else null
+        else false
       end as is_search
       ,IF(t.journey_type IN ('Brand', 'Category', 'Product Search', 'Hashtag', 'Sale', 'New'), true, false) as is_discovery
       ,t.first_journey_event_sequence
