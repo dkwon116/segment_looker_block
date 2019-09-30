@@ -24,7 +24,7 @@ view:journeys {
       ,t.looker_visitor_id
       ,t.journey_type
       ,t.timestamp
-      ,IF(t.journey_type IN ('Brand','Category','Product Search'),t.journey_prop,NULL) AS journey_prop
+      ,t.journey_prop
       ,case
         when t.journey_type='Product Search' then true
         when t.journey_type IN ('Brand','Category')
