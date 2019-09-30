@@ -6,147 +6,438 @@ view: journey_facts {
   derived_table: {
     sql_trigger_value: select count(*) from ${event_facts.SQL_TABLE_NAME} ;;
     sql:
-    select
-      t.anonymous_id
-      ,t.session_id
-      ,concat(t.session_id, ' - ', cast(row_number() over(partition by t.session_id order by t.first_timestamp) AS string)) AS journey_id
-      ,row_number() over (partition by t.session_id order by t.first_timestamp) AS journey_sequence
-      ,case
-        when t.journey_type='Product Search' then 1
-        when t.journey_type IN ('Brand','Category')
-          and lag(t.journey_type) over (partition by t.session_id order by t.first_timestamp)='Search'
-          and (lag(t.journey_prop,2) over (partition by t.session_id order by t.first_timestamp)<>t.journey_prop or lag(t.journey_prop,2) over (partition by t.session_id order by t.first_timestamp) is null) then 1
-        else null
-      end as journey_issearch
-      ,t.journey_type
-      ,t.journey_prop
-      ,if(lead(t.first_timestamp) over (partition by t.session_id order by t.first_timestamp) IS NULL
-        ,timestamp_diff(t.last_timestamp, t.first_timestamp,second)
-        ,timestamp_diff(lead(t.first_timestamp) over (partition by t.session_id order by t.first_timestamp), t.first_timestamp,second))
-        as journey_time_second
-      ,t.first_timestamp AS timestamp
-      ,t.first_track_sequence_number AS track_sequence_number
-      --,t.first_timestamp
-      --,t.last_timestamp
-      --,t.first_track_sequence_number
-      --,t.last_track_sequence_number
-      ,t.product_viewed
-      ,t.product_list_viewed
-      ,t.outlink_clicked
-      ,t.outlink_sent
-      ,t.product_added_to_wishlist
-    from(
       select
-      DISTINCT
-        t.anonymous_id
-        ,t.session_id
-        ,t.journey_type
-        ,first_value(t.journey_prop) over (partition by t.session_id,t.chunk_set order by t.timestamp rows between unbounded preceding and unbounded following) AS journey_prop
-        ,first_value(t.timestamp) over (partition by t.session_id,t.chunk_set order by t.timestamp rows between unbounded preceding and unbounded following) AS first_timestamp
-        ,last_value(t.timestamp) over (partition by t.session_id,t.chunk_set order by t.timestamp rows between unbounded preceding and unbounded following) AS last_timestamp
-        ,first_value(t.track_sequence_number) over (partition by t.session_id,t.chunk_set order by t.timestamp rows between unbounded preceding and unbounded following) AS first_track_sequence_number
-        --,last_value(t.track_sequence_number) over (partition by t.session_id,t.chunk_set order by t.timestamp rows between unbounded preceding and unbounded following) AS last_track_sequence_number
-        ,sum(case when t.event='product_viewed' THEN 1 ELSE 0 END) over (partition by t.session_id,t.chunk_set rows between unbounded preceding and unbounded following) AS product_viewed
-        ,sum(case when t.event='product_list_viewed' THEN 1 ELSE 0 END) over (partition by t.session_id,t.chunk_set rows between unbounded preceding and unbounded following) AS product_list_viewed
-        ,sum(case when t.event='outlink_clicked' THEN 1 ELSE 0 END) over (partition by t.session_id,t.chunk_set rows between unbounded preceding and unbounded following) AS outlink_clicked
-        ,sum(case when t.event='outlink_sent' THEN 1 ELSE 0 END) over (partition by t.session_id,t.chunk_set rows between unbounded preceding and unbounded following) AS outlink_sent
-        ,sum(case when t.event='product_added_to_wishlist' THEN 1 ELSE 0 END) over (partition by t.session_id,t.chunk_set rows between unbounded preceding and unbounded following) AS product_added_to_wishlist
-      from(
-        select
-          *
-          ,last_value(t.chunk_start ignore nulls) over (partition by t.session_id order by t.timestamp rows between unbounded preceding and current row) as chunk_set
-        from(
-          select
-            -- mark chunk start when journey type changes or journey prop of same type changes
-            e.anonymous_id
-            ,e.session_id
-            ,e.timestamp
-            ,e.track_sequence_number
-            ,e.journey_type
-            ,e.journey_prop
-            ,e.event
-            ,case
-              when lag(e.journey_type) over (partition by e.session_id order by e.timestamp) is null then e.track_sequence_number
-              when lag(e.journey_type) over (partition by e.session_id order by e.timestamp)<>e.journey_type then e.track_sequence_number
-              when lag(e.journey_type) over (partition by e.session_id order by e.timestamp)=e.journey_type
-                and last_value(IF(e.event IN ('Brand','Category','Product Search'),e.journey_prop,NULL) ignore nulls) over (partition by e.session_id order by e.timestamp rows between unbounded preceding and 1 preceding)<>e.journey_prop
-                and e.event IN ('Brand','Category','Product Search') then e.track_sequence_number
-              else null
-            end as chunk_start
-          from ${event_facts.SQL_TABLE_NAME} e
+        j.journey_id
+        ,j.session_id
+        ,j.journey_type
+        ,j.is_discovery
+        ,j.is_search
+        --,j.journey_prop
+        ,min(e.timestamp) as start_at
+        ,max(e.timestamp) as end_at
+        ,timestamp_diff(max(e.timestamp), min(e.timestamp), second) as journey_duration_seconds
 
-        )t
-      )t
-    )t
+          -- event facts
+        , count(case when e.event_source = 'tracks' then 1 else null end) as number_of_track_events
+        , count(case when e.event_source = 'pages' then 1 else null end) as number_of_page_events
+        , count(case when e.event = "signed_up" then event_id else null end) as number_of_signed_up_events
+        -- , count(case when e.event in ("Search", "Hashtag", "Category", "New", "Sale", "Brand") then event_id else null end) as count_product_discovery
+        , count(case when e.event = 'Product' then event_id else null end) as count_product_viewed
+        , count(distinct case when e.event = 'Product' then REGEXP_EXTRACT(e.page_path,"^/.*/(.*)$") else null end) as unique_count_product_viewed
+        , count(case when e.event = 'product_list_viewed' then event_id else null end) as count_product_list_viewed
+        , count(distinct case when e.event = 'product_list_viewed' then REGEXP_EXTRACT(e.page_path,"^/.*/(.*)$") else null end) as unique_count_product_list_viewed
+        , count(case when e.event = 'outlink_sent' then event_id else null end) as count_outlinked
+        , count(case when e.event = 'concierge_clicked' then event_id else null end) as count_concierge_clicked
+        , count(case when e.event = 'product_added_to_wishlist' then event_id else null end) as count_added_to_wishlist
+
+         -- order_facts
+        --, count(case when e.event = 'order_completed' then event_id else null end) as count_order_completed
+        --, sum(case when e.event = 'order_completed' then e.order_value else 0 end) as order_value
+
+      from ${event_facts.SQL_TABLE_NAME} e
+        inner join ${journeys.SQL_TABLE_NAME} as j
+          on j.journey_id=e.journey_id
+
+      group by 1,2,3,4,5
 ;;
   }
 
   # ----- Dimensions -----
+
   dimension: journey_id  {
     primary_key: yes
     sql: ${TABLE}.journey_id;;
   }
 
-  dimension: anonymous_id {
-    type: string
-    sql: ${TABLE}.anonymous_id ;;
-  }
-
-  dimension: session_id {
-    type: string
-    sql: ${TABLE}.session_id ;;
-  }
-
-  dimension: journey_sequence {
-    type: number
-    sql: ${TABLE}.journey_sequence ;;
-  }
-
-  dimension: journey_issearch {
-    type: yesno
-    sql: ${TABLE}.journey_issearch ;;
-  }
-
-  dimension: journey_type {
-    type: string
-    sql: ${TABLE}.journey_type ;;
-  }
-
-  dimension: journey_time_second {
-    type: number
-    sql: ${TABLE}.journey_time_second ;;
-  }
-
-  dimension_group: timestamp {
+  dimension_group: start {
     type: time
-    timeframes: [time, hour, date, week, month]
-    sql: ${TABLE}.timestamp ;;
+    timeframes: [time, date, week, month, raw]
+    sql: ${TABLE}.start_at ;;
   }
 
-  dimension: track_sequence_number {
-    type: number
-    sql: ${TABLE}.track_sequence_number ;;
+  dimension_group: end {
+    type: time
+    timeframes: [time, date, week, month, raw]
+    sql: ${TABLE}.end_at ;;
   }
 
-  dimension: product_viewed {
+  dimension: journey_duration_seconds {
     type: number
-    sql: ${TABLE}.product_viewed ;;
+    sql: ${TABLE}.journey_duration_seconds ;;
   }
-  dimension: product_list_viewed {
-    type: number
-    sql: ${TABLE}.product_list_viewed ;;
+
+  dimension: journey_duration_seconds_tier {
+    type: tier
+    sql: ${TABLE}.journey_duration_seconds ;;
+    tiers: [1, 5, 10, 20, 30, 60]
   }
-  dimension: outlink_clicked {
+
+  dimension: number_of_track_events {
     type: number
-    sql: ${TABLE}.outlink_clicked ;;
+    sql: ${TABLE}.number_of_track_events ;;
+    group_label: "Event Counts"
   }
-  dimension: outlink_sent {
-    type: number
-    sql: ${TABLE}.outlink_sent ;;
+
+  dimension: number_of_track_events_tier {
+    type: tier
+    sql: ${number_of_track_events} ;;
+    tiers: [1, 5, 10, 20, 30, 60]
   }
-  dimension: product_added_to_wishlist {
+
+  dimension: number_of_page_events {
+    type:  number
+    sql: ${TABLE}.number_of_page_events ;;
+    group_label: "Event Counts"
+  }
+
+  dimension: number_of_events {
     type: number
-    sql: ${TABLE}.product_added_to_wishlist ;;
+    sql: ${number_of_track_events} + ${number_of_page_events} ;;
+    group_label: "Event Counts"
+  }
+
+  dimension: number_of_signed_up_events {
+    type:  number
+    sql: ${TABLE}.number_of_signed_up_events ;;
+    group_label: "Event Counts"
+  }
+
+  dimension: product_discovery {
+    type: number
+    sql: ${TABLE}.count_product_discovery ;;
+    group_label: "Event Counts"
+    description: "Viewed Search, Category, Brand, Hashtag, New, Sale Product List"
+  }
+
+  dimension: products_viewed {
+    type: number
+    sql: ${TABLE}.count_product_viewed ;;
+    group_label: "Event Counts"
+  }
+
+  dimension: product_lists_viewed {
+    type: number
+    sql: ${TABLE}.count_product_list_viewed ;;
+    group_label: "Event Counts"
+  }
+
+  dimension: outlinked {
+    type: number
+    sql: ${TABLE}.count_outlinked ;;
+    group_label: "Event Counts"
+  }
+
+  dimension: concierge_clicked {
+    type: number
+    sql: ${TABLE}.count_concierge_clicked ;;
+    group_label: "Event Counts"
+  }
+
+  dimension: added_to_wishlist {
+    type: number
+    sql: ${TABLE}.count_added_to_wishlist ;;
+    group_label: "Event Counts"
+  }
+
+  # ----- Measures -----
+
+  measure: total_pages {
+    type: sum
+    sql: ${number_of_page_events} ;;
+    value_format_name: "decimal_0"
+  }
+
+  measure: avg_page_events {
+    type: average
+    sql: ${number_of_page_events} ;;
+    value_format_name: "decimal_1"
+    group_label: "Journey Facts"
+  }
+
+  measure: total_journey_duration {
+    type: sum
+    sql: ${journey_duration_seconds} ;;
+    value_format_name: decimal_0
+    group_label: "Journey Facts"
+  }
+
+  measure: avg_journey_duration_minutes {
+    type: average
+    value_format_name: decimal_1
+    sql: ${journey_duration_seconds};;
+    group_label: "Journey Facts"
+  }
+
+  measure: avg_track_events {
+    type: average
+    value_format_name: decimal_1
+    sql: ${number_of_track_events}::float ;;
+    group_label: "Journey Facts"
+  }
+
+  measure: avg_events {
+    type: average
+    sql: ${number_of_events} ;;
+    value_format_name: decimal_1
+    group_label: "Journey Facts"
+  }
+
+  measure: journey_duration_per_unique_visitor {
+    type: number
+    sql: ${total_journey_duration} / ${journeys.unique_visitor_count} ;;
+    value_format_name: decimal_2
+  }
+
+  measure: total_discovery_journey_duration {
+    type: sum
+    sql: ${journey_duration_seconds} ;;
+    group_label: "Product Discovery"
+    group_item_label: "Total Duration"
+
+    filters: {
+      field: journeys.is_discovery
+      value: "true"
+    }
+  }
+
+  measure: avg_discovery_journey_duration {
+    type: average
+    sql: ${journey_duration_seconds} ;;
+    group_label: "Product Discovery"
+    group_item_label: "Avg Duration"
+
+    filters: {
+      field: journeys.is_discovery
+      value: "true"
+    }
+  }
+
+  measure: discovery_journey_duration_per_discovery_journey_user {
+    type: number
+    sql: ${total_discovery_journey_duration} / NULLIF(${journeys.unique_discovery_journey_visitor_count}, 0) ;;
+    value_format_name: decimal_0
+    group_label: "Product Discovery"
+    group_item_label: "Journey Duration per Discovery User"
+  }
+
+
+
+
+######################################
+#   Product list measures
+
+  measure: product_list_viewed_total {
+    type: sum
+    sql: ${product_lists_viewed} ;;
+    group_label: "Product List Viewed"
+#     drill_fields: []
+  }
+
+  measure: product_list_viewed_per_journey {
+    type: average
+    sql: ${product_lists_viewed} ;;
+    value_format_name:decimal_2
+    group_label: "Product List Viewed"
+  }
+
+  measure: total_product_list_viewed_users {
+    type: count_distinct
+    sql: ${journeys.looker_visitor_id} ;;
+    group_label: "Product List Viewed"
+
+    filters: {
+      field: product_lists_viewed
+      value: ">0"
+    }
+  }
+
+  measure: product_list_viewed_per_converted_user {
+    type: number
+    sql: ${product_list_viewed_total} / NULLIF(${total_product_list_viewed_users}, 0);;
+    value_format_name:decimal_2
+    group_label: "Product List Viewed"
+  }
+
+  measure: product_list_viewed_conversion_rate {
+    type: number
+    sql: ${total_product_list_viewed_users} / ${journeys.unique_visitor_count} ;;
+    value_format_name: percent_0
+    group_label: "Product List Viewed"
+  }
+
+
+######################################
+#   Product viewed measures
+  measure: products_viewed_total {
+    type: sum
+    sql: ${products_viewed} ;;
+    group_label: "Product Viewed"
+  }
+
+  measure: products_viewed_per_journey {
+    type: average
+    sql: ${products_viewed} ;;
+    value_format_name:decimal_2
+    group_label: "Product Viewed"
+  }
+
+  measure: products_viewed_per_user {
+    type: number
+    sql: ${products_viewed_total} / ${journeys.unique_visitor_count} ;;
+    value_format_name: decimal_2
+    group_label: "Product Viewed"
+  }
+
+  measure: total_product_viewed_users {
+    type: count_distinct
+    sql: ${journeys.looker_visitor_id} ;;
+    group_label: "Product Viewed"
+
+    filters: {
+      field: products_viewed
+      value: ">0"
+    }
+  }
+
+  measure: total_product_viewed_activated_user {
+    type: count_distinct
+    sql: ${journeys.looker_visitor_id} ;;
+    group_label: "Product Viewed"
+
+    filters: {
+      field: products_viewed
+      value: ">4"
+    }
+  }
+
+  measure: products_viewed_per_converted_user {
+    type: number
+    sql: ${products_viewed_total} / NULLIF(${total_product_viewed_users}, 0);;
+    value_format_name:decimal_2
+    group_label: "Product Viewed"
+  }
+
+  measure: product_viewed_conversion_rate {
+    type: number
+    sql: ${total_product_viewed_users} / ${journeys.unique_visitor_count} ;;
+    value_format_name: percent_0
+    group_label: "Product Viewed"
+  }
+
+  measure: product_viewed_activation_rate {
+    type: number
+    sql: ${total_product_viewed_activated_user} / ${journeys.unique_visitor_count} ;;
+    value_format_name: percent_0
+    group_label: "Product Viewed"
+  }
+
+
+######################################
+#   measures for outlink
+  measure: outlinked_total {
+    type: sum
+    sql: ${outlinked} ;;
+    group_label: "Outlinked"
+  }
+
+  measure: outlinked_per_journey {
+    type: average
+    sql: ${outlinked} ;;
+    value_format_name:decimal_2
+    group_label: "Outlinked"
+  }
+
+  measure: total_outlinked_users {
+    type: count_distinct
+    sql: ${journeys.looker_visitor_id} ;;
+    group_label: "Outlinked"
+
+    filters: {
+      field: outlinked
+      value: ">0"
+    }
+  }
+
+  measure: outlinked_per_converted_user {
+    type: number
+    sql: ${outlinked_total} / NULLIF(${total_outlinked_users}, 0) ;;
+    value_format_name:decimal_2
+    group_label: "Outlinked"
+  }
+
+  measure: outlinked_conversion_rate {
+    type: number
+    sql: ${total_outlinked_users} / NULLIF(${journeys.unique_visitor_count}, 0) ;;
+    value_format_name: percent_2
+    group_label: "Outlinked"
+  }
+
+
+######################################
+#   measures for concierge
+  measure: concierge_clicked_total {
+    type: sum
+    sql: ${concierge_clicked} ;;
+    group_label: "Concierge"
+  }
+
+  measure: concierge_per_journey {
+    type: average
+    sql: ${concierge_clicked} ;;
+    value_format_name:decimal_2
+    group_label: "Concierge"
+  }
+
+  measure: total_concierge_clicked_users {
+    type: count_distinct
+    sql: ${journeys.looker_visitor_id} ;;
+    group_label: "Concierge"
+
+    filters: {
+      field: concierge_clicked
+      value: ">0"
+    }
+  }
+
+  measure: concierge_conversion_rate {
+    type: number
+    sql: ${total_concierge_clicked_users} / ${journeys.unique_visitor_count} ;;
+    value_format_name: percent_2
+    group_label: "Concierge"
+  }
+
+
+######################################
+#   measures for wishlist
+  measure: added_to_wishlist_total {
+    type: sum
+    sql: ${added_to_wishlist} ;;
+    group_label: "Wishlist"
+  }
+
+  measure: added_to_wishlist_per_journey {
+    type: average
+    sql: ${added_to_wishlist} ;;
+    value_format_name:decimal_2
+    group_label: "Wishlist"
+  }
+
+  measure: total_added_to_wishlist_users {
+    type: count_distinct
+    sql: ${journeys.looker_visitor_id} ;;
+    group_label: "Wishlist"
+
+    filters: {
+      field: added_to_wishlist
+      value: ">0"
+    }
+  }
+
+  measure: added_to_wishlist_conversion_rate {
+    type: number
+    sql: ${total_added_to_wishlist_users} / ${journeys.unique_visitor_count} ;;
+    value_format_name: percent_2
+    group_label: "Wishlist"
   }
 
 

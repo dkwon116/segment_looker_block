@@ -68,6 +68,13 @@ explore: event_facts {
     relationship: many_to_one
   }
 
+  join: journey_facts {
+    view_label: "0_Journeys"
+    type: left_outer
+    sql_on: ${journeys.journey_id} = ${journey_facts.journey_id} ;;
+    relationship: one_to_one
+  }
+
   join: page_aliases_mapping {
     view_label: "3_Users"
     type: left_outer

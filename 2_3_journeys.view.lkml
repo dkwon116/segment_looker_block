@@ -23,7 +23,7 @@ view:journeys {
       ,t.anonymous_id
       ,t.looker_visitor_id
       ,t.journey_type
-      ,t.timestamp
+      ,t.timestamp as journey_start_at
       ,t.journey_prop
       ,case
         when t.journey_type='Product Search' then true
@@ -77,7 +77,7 @@ view:journeys {
   dimension: is_discovery {
     type: yesno
     sql: ${TABLE}.is_discovery ;;
-  }
+}
 
   dimension: first_journey_event_sequence {
     type: number
@@ -94,10 +94,10 @@ view:journeys {
     sql: ${TABLE}.journey_prop ;;
   }
 
-  dimension_group: timestamp {
+  dimension_group: start {
     type: time
     timeframes: [time, hour, date, week, month]
-    sql: ${TABLE}.timestamp ;;
+    sql: ${TABLE}.journey_start_at ;;
   }
 
   measure: count {
@@ -136,4 +136,22 @@ view:journeys {
       value: "yes"
     }
   }
+
+  measure: discovery_journeys_per_discovery_journey_user {
+    type: number
+    sql: ${discovery_journey_count} / NULLIF(${unique_discovery_journey_visitor_count}, 0);;
+    value_format_name:decimal_2
+    group_label: "Product Discovery"
+  }
+
+  measure: discovery_journey_visitor_per_unique_visitor {
+    type: number
+    sql: ${unique_discovery_journey_visitor_count} / ${unique_visitor_count} ;;
+    value_format_name: percent_0
+    group_label: "Product Discovery"
+  }
+
+
+
+
 }
