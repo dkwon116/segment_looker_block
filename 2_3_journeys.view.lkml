@@ -9,8 +9,8 @@ view:journeys {
           when lag(e.journey_type) over (partition by e.session_id order by e.event_sequence) is null then e.event_sequence
           when lag(e.journey_type) over (partition by e.session_id order by e.event_sequence)<>e.journey_type then e.event_sequence
           when lag(e.journey_type) over (partition by e.session_id order by e.event_sequence)=e.journey_type
-            and last_value(IF(e.journey_type IN ('Brand','Category','Product Search'),e.journey_prop,NULL) ignore nulls) over (partition by e.session_id order by e.event_sequence rows between unbounded preceding and 1 preceding)<>e.journey_prop
-            and e.journey_type IN ('Brand','Category','Product Search') then e.event_sequence
+            and last_value(IF(e.journey_type IN ('Brand', 'Category', 'Product Search', 'Hashtag'),e.journey_prop,NULL) ignore nulls) over (partition by e.session_id order by e.event_sequence rows between unbounded preceding and 1 preceding)<>e.journey_prop
+            and e.journey_type IN ('Brand', 'Category', 'Product Search', 'Hashtag') then e.event_sequence
           else null
         end as first_journey_event_sequence
         ,last_value(e.event_sequence) over (partition by e.session_id order by e.event_sequence rows between unbounded preceding and unbounded following) as last_session_event_sequence
