@@ -94,12 +94,6 @@ view:journeys {
     sql: ${TABLE}.journey_prop ;;
   }
 
-  dimension_group: start {
-    type: time
-    timeframes: [time, hour, date, week, month]
-    sql: ${TABLE}.journey_start_at ;;
-  }
-
   measure: count {
     type: count
   }

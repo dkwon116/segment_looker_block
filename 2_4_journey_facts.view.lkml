@@ -104,7 +104,7 @@ view: journey_facts {
     description: "Viewed Search, Category, Brand, Hashtag, New, Sale Product List"
   }
 
-  dimension: products_viewed {
+  dimension: product_viewed {
     type: number
     sql: ${TABLE}.count_product_viewed ;;
     group_label: "Event Counts"
@@ -156,7 +156,7 @@ view: journey_facts {
     group_label: "Journey Facts"
   }
 
-  measure: avg_journey_duration_minutes {
+  measure: avg_journey_duration {
     type: average
     value_format_name: decimal_1
     sql: ${journey_duration_seconds};;
@@ -191,7 +191,7 @@ view: journey_facts {
 
     filters: {
       field: journeys.is_discovery
-      value: "true"
+      value: "yes"
     }
   }
 
@@ -203,7 +203,7 @@ view: journey_facts {
 
     filters: {
       field: journeys.is_discovery
-      value: "true"
+      value: "yes"
     }
   }
 
@@ -263,24 +263,45 @@ view: journey_facts {
 
 ######################################
 #   Product viewed measures
-  measure: products_viewed_total {
+  measure: product_viewed_journey_count {
+    type: count
+    group_label: "Product Viewed"
+    filters: {
+      field: product_viewed
+      value: ">0"
+    }
+  }
+
+  measure: product_viewed_total {
     type: sum
-    sql: ${products_viewed} ;;
+    sql: ${product_viewed} ;;
     group_label: "Product Viewed"
   }
 
-  measure: products_viewed_per_journey {
+  measure: product_viewed_per_journey {
     type: average
-    sql: ${products_viewed} ;;
+    sql: ${product_viewed} ;;
     value_format_name:decimal_2
     group_label: "Product Viewed"
   }
 
-  measure: products_viewed_per_user {
+  measure: product_viewed_per_product_viewed_journey {
+    type: average
+    sql: ${product_viewed} ;;
+    value_format_name:decimal_2
+    group_label: "Product Viewed"
+    filters: {
+      field: product_viewed
+      value: ">0"
+    }
+  }
+
+  measure: product_viewed_per_user {
     type: number
-    sql: ${products_viewed_total} / ${journeys.unique_visitor_count} ;;
+    sql: ${product_viewed_total} / ${journeys.unique_visitor_count} ;;
     value_format_name: decimal_2
     group_label: "Product Viewed"
+
   }
 
   measure: total_product_viewed_users {
@@ -289,7 +310,7 @@ view: journey_facts {
     group_label: "Product Viewed"
 
     filters: {
-      field: products_viewed
+      field: product_viewed
       value: ">0"
     }
   }
@@ -300,14 +321,14 @@ view: journey_facts {
     group_label: "Product Viewed"
 
     filters: {
-      field: products_viewed
+      field: product_viewed
       value: ">4"
     }
   }
 
-  measure: products_viewed_per_converted_user {
+  measure: product_viewed_per_converted_user {
     type: number
-    sql: ${products_viewed_total} / NULLIF(${total_product_viewed_users}, 0);;
+    sql: ${product_viewed_total} / NULLIF(${total_product_viewed_users}, 0);;
     value_format_name:decimal_2
     group_label: "Product Viewed"
   }
@@ -315,6 +336,13 @@ view: journey_facts {
   measure: product_viewed_conversion_rate {
     type: number
     sql: ${total_product_viewed_users} / ${journeys.unique_visitor_count} ;;
+    value_format_name: percent_0
+    group_label: "Product Viewed"
+  }
+
+  measure: product_viewed_conversion_rate_per_journey {
+    type: number
+    sql: ${product_viewed_journey_count} / ${journeys.count} ;;
     value_format_name: percent_0
     group_label: "Product Viewed"
   }
@@ -329,6 +357,15 @@ view: journey_facts {
 
 ######################################
 #   measures for outlink
+  measure: outlinked_journey_count {
+    type: count
+    group_label: "Outlinked"
+    filters: {
+      field: outlinked
+      value: ">0"
+    }
+  }
+
   measure: outlinked_total {
     type: sum
     sql: ${outlinked} ;;
@@ -370,6 +407,15 @@ view: journey_facts {
 
 ######################################
 #   measures for concierge
+  measure: concierge_journey_count {
+    type: count
+    group_label: "Concierge"
+    filters: {
+      field: concierge_clicked
+      value: ">0"
+    }
+  }
+
   measure: concierge_clicked_total {
     type: sum
     sql: ${concierge_clicked} ;;
@@ -404,6 +450,15 @@ view: journey_facts {
 
 ######################################
 #   measures for wishlist
+  measure: added_to_wishlist_journey_count {
+    type: count
+    group_label: "Wishlist"
+    filters: {
+      field: added_to_wishlist
+      value: ">0"
+    }
+  }
+
   measure: added_to_wishlist_total {
     type: sum
     sql: ${added_to_wishlist} ;;
