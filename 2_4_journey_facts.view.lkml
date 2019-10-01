@@ -12,7 +12,7 @@ view: journey_facts {
         ,j.journey_type
         ,j.is_discovery
         ,j.is_search
-        --,j.journey_prop
+        ,j.journey_prop
         ,min(e.timestamp) as start_at
         ,max(e.timestamp) as end_at
         ,timestamp_diff(max(e.timestamp), min(e.timestamp), second) as journey_duration_seconds
@@ -21,7 +21,6 @@ view: journey_facts {
         , count(case when e.event_source = 'tracks' then 1 else null end) as number_of_track_events
         , count(case when e.event_source = 'pages' then 1 else null end) as number_of_page_events
         , count(case when e.event = "signed_up" then event_id else null end) as number_of_signed_up_events
-        -- , count(case when e.event in ("Search", "Hashtag", "Category", "New", "Sale", "Brand") then event_id else null end) as count_product_discovery
         , count(case when e.event = 'Product' then event_id else null end) as count_product_viewed
         , count(distinct case when e.event = 'Product' then REGEXP_EXTRACT(e.page_path,"^/.*/(.*)$") else null end) as unique_count_product_viewed
         , count(case when e.event = 'product_list_viewed' then event_id else null end) as count_product_list_viewed
@@ -30,15 +29,11 @@ view: journey_facts {
         , count(case when e.event = 'concierge_clicked' then event_id else null end) as count_concierge_clicked
         , count(case when e.event = 'product_added_to_wishlist' then event_id else null end) as count_added_to_wishlist
 
-         -- order_facts
-        --, count(case when e.event = 'order_completed' then event_id else null end) as count_order_completed
-        --, sum(case when e.event = 'order_completed' then e.order_value else 0 end) as order_value
-
       from ${event_facts.SQL_TABLE_NAME} e
         inner join ${journeys.SQL_TABLE_NAME} as j
           on j.journey_id=e.journey_id
 
-      group by 1,2,3,4,5
+      group by 1,2,3,4,5,6
 ;;
   }
 
