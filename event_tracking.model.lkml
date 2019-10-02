@@ -148,6 +148,16 @@ explore: event_facts {
     relationship: one_to_one
   }
 
+  join: product_clicked {
+    view_label: "T_Product Clicked"
+    type: left_outer
+    sql_on: event_facts.event_id = concat(cast(${product_clicked.timestamp_raw} AS string), ${product_clicked.anonymous_id}, '-t')
+      and event_facts.timestamp = product_clicked.timestamp
+      and event_facts.anonymous_id = product_clicked.anonymous_id
+       ;;
+    relationship: one_to_one
+  }
+
   join: orders {
     view_label: "Orders"
     type: left_outer
