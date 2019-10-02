@@ -227,4 +227,15 @@ view: product_clicked {
     sql: ${TABLE}.uuid_ts ;;
   }
 
+
+  measure: count {
+    type: count
+    drill_fields: [id, context_campaign_name, context_library_name, name, product_id, price, timestamp_raw]
+  }
+
+  measure: count_visitors {
+    type: count_distinct
+    sql: ${event_facts.looker_visitor_id} ;;
+  }
+
 }
