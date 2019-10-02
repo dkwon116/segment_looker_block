@@ -29,7 +29,7 @@ view:journeys {
       ,t.journey_type
       ,t.timestamp as journey_start_at
       ,t.journey_prop
-      ,if(t.journey_prop is null,null,decodeurl(t.journey_prop)) as journey_prop_decoded
+      ,if(t.journey_prop is null,null,lower(decodeurl(t.journey_prop))) as journey_prop_decoded
       ,case
         when t.journey_type='Product Search' then true
         when t.journey_type IN ('Brand','Category')
