@@ -37,8 +37,9 @@ view: page_aliases_mapping {
           distinct anonymous_id as alias
           ,coalesce(
             last_value(user_id ignore nulls) over(partition by anonymous_id order by timestamp rows between unbounded preceding and unbounded following)
-            ,last_value(anonymous_id ignore nulls) over(partition by anonymous_id order by timestamp rows between unbounded preceding and unbounded following))
-            as looker_visitor_id
+            --,last_value(anonymous_id ignore nulls) over(partition by anonymous_id order by timestamp rows between unbounded preceding and unbounded following)
+            ,anonymous_id
+            ) as looker_visitor_id
 
 
         from all_mappings
