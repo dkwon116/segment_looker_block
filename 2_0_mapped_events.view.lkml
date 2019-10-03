@@ -6,7 +6,9 @@ view: mapped_events {
     sql: select *
         ,timestamp_diff(timestamp, lag(timestamp) over(partition by looker_visitor_id order by timestamp), minute) as idle_time_minutes
       from (
-        select CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') as event_id
+        select
+          --CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') as event_id
+          t.id as event_id
           ,t.anonymous_id
           ,coalesce(a2v.looker_visitor_id,a2v.alias) as looker_visitor_id
           ,t.timestamp
@@ -31,7 +33,9 @@ view: mapped_events {
 
         union all
 
-        select CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-p') as event_id
+        select
+          --CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-p') as event_id
+          t.id as event_id
           ,t.anonymous_id
           ,coalesce(a2v.looker_visitor_id,a2v.alias) as looker_visitor_id
           ,t.timestamp
@@ -54,7 +58,9 @@ view: mapped_events {
 
         union all
 
-        select CONCAT(cast(t.transaction_at as string), t.user_id, '-r') as event_id
+        select
+          --CONCAT(cast(t.transaction_at as string), t.user_id, '-r') as event_id
+          t.order_id as event_id
           ,t.user_id as anonymous_id
           ,coalesce(a2v.looker_visitor_id,a2v.alias) as looker_visitor_id
           ,t.transaction_at as timestamp
@@ -84,6 +90,8 @@ view: mapped_events {
   }
 
   dimension: event_id {
+    primary_key: yes
+    type: string
     sql: ${TABLE}.event_id ;;
   }
 

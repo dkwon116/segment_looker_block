@@ -65,11 +65,11 @@ view: tracks {
     sql: ${TABLE}.timestamp ;;
   }
 
-  dimension: event_id {
-    type: string
-    sql: CONCAT(cast(${received_raw} AS string), ${anonymous_id}) ;;
-    hidden: yes
-  }
+#  dimension: event_id {
+#    type: string
+#    sql: CONCAT(cast(${received_raw} AS string), ${anonymous_id}) ;;
+#    hidden: yes
+#  }
 
   measure: count_track {
     type: count
