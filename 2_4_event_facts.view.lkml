@@ -51,7 +51,7 @@ view: event_facts {
       left join javascript.outlink_sent_view as os
         on t.looker_visitor_id = os.user_id
         --and t.event_id = CONCAT(cast(os.timestamp AS string), os.anonymous_id, '-t')
-        and t.event_id=outlink_sent_view.id
+        and t.event_id=os.id
        ;;
   }
 
