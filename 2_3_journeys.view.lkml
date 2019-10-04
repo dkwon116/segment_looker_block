@@ -146,6 +146,11 @@ view:journeys {
       field: is_search
       value: "yes"
     }
+
+    filters: {
+      field: journey_type
+      value: "Search"
+    }
   }
 
   measure: discovery_journeys_per_discovery_journey_user {
