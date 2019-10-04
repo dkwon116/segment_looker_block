@@ -105,6 +105,13 @@ explore: event_facts {
     relationship: one_to_one
   }
 
+  join: categories {
+    view_label: "Categories"
+    type: left_outer
+    sql_on: ${journeys.journey_prop} = ${categories.id} ;;
+    relationship: one_to_one
+  }
+
   join: page_aliases_mapping {
     view_label: "3_Users"
     type: left_outer

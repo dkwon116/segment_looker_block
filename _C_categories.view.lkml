@@ -156,13 +156,19 @@ view: categories {
   dimension: name_en {
     type: string
     sql: ${TABLE}.name_en ;;
-    hidden: yes
+#     hidden: yes
   }
 
   dimension: name_kr {
     type: string
     sql: ${TABLE}.name_kr ;;
-    hidden: yes
+#     hidden: yes
+  }
+
+  dimension: ful_name {
+    type: string
+    sql: ${TABLE}.full_name ;;
+    group_label: "Category"
   }
 
   dimension: note {
