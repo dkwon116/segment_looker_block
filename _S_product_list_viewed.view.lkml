@@ -7,10 +7,10 @@ view: product_list_viewed {
     sql: ${TABLE}.id ;;
   }
 
-  dimension: event_id {
-    type: string
-    sql: CONCAT(cast(${TABLE}.timestamp AS string), ${TABLE}.anonymous_id, '-t') ;;
-  }
+#  dimension: event_id {
+#    type: string
+#    sql: CONCAT(cast(${TABLE}.timestamp AS string), ${TABLE}.anonymous_id, '-t') ;;
+#  }
 
   dimension: anonymous_id {
     type: string

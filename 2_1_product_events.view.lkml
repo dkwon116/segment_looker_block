@@ -59,7 +59,8 @@ view: product_events {
           , me.timestamp
         from javascript.product_viewed_view as t
         inner join ${mapped_events.SQL_TABLE_NAME} as me
-        on CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') = me.event_id
+        --on CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') = me.event_id
+          on t.id=me.event_id
         left join ${track_facts.SQL_TABLE_NAME} as tf
           on me.event_id = tf.event_id
 
@@ -78,7 +79,8 @@ view: product_events {
           , me.timestamp
         from ${products_viewed_in_list.SQL_TABLE_NAME} as t
         inner join ${mapped_events.SQL_TABLE_NAME} as me
-          on CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') = me.event_id
+        --on CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') = me.event_id
+          on t.id=me.event_id
         left join ${track_facts.SQL_TABLE_NAME} as tf
           on me.event_id = tf.event_id
 
@@ -97,7 +99,8 @@ view: product_events {
           , me.timestamp
         from javascript.product_added_to_wishlist_view as t
         inner join ${mapped_events.SQL_TABLE_NAME} as me
-          on CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') = me.event_id
+        --on CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') = me.event_id
+          on t.id=me.event_id
         left join ${track_facts.SQL_TABLE_NAME} as tf
           on me.event_id = tf.event_id
 
@@ -112,7 +115,8 @@ view: product_events {
           , me.timestamp
         from ${order_items.SQL_TABLE_NAME} as t
         inner join ${mapped_events.SQL_TABLE_NAME} as me
-          on CONCAT(cast(t.transaction_at as string), t.user_id, '-r') = me.event_id
+        --on CONCAT(cast(t.transaction_at as string), t.user_id, '-r') = me.event_id
+          on t.order_id=me.event_id
         left join ${product_maps.SQL_TABLE_NAME} as pm
           ON t.vendor_product_id = pm.affiliate_product_id
         where t.order_type = "P" and pm.id is not null

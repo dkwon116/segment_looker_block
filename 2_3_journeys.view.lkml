@@ -2,6 +2,10 @@ view:journeys {
   derived_table: {
     sql_trigger_value: select count(*) from ${sessions.SQL_TABLE_NAME} ;;
     sql:
+    CREATE TEMP FUNCTION decodeurl(a STRING)
+    RETURNS STRING
+    LANGUAGE js AS "return decodeURI(a)";
+
     with t as(
       -- mark start and end of journey creating first & last
       select
@@ -25,6 +29,7 @@ view:journeys {
       ,t.journey_type
       ,t.timestamp as journey_start_at
       ,t.journey_prop
+      ,if(t.journey_prop is null,null,lower(decodeurl(t.journey_prop))) as journey_prop_decoded
       ,case
         when t.journey_type='Product Search' then true
         when t.journey_type IN ('Brand','Category')
@@ -92,6 +97,11 @@ view:journeys {
   dimension: journey_prop {
     type: string
     sql: ${TABLE}.journey_prop ;;
+  }
+
+  dimension: journey_prop_decoded {
+    type: string
+    sql: ${TABLE}.journey_prop_decoded ;;
   }
 
   measure: count {

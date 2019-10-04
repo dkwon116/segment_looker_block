@@ -21,31 +21,54 @@ explore: event_facts {
   join: page_facts {
     view_label: "0_Events"
     type: left_outer
-    sql_on: event_facts.event_id = page_facts.event_id and
-      event_facts.timestamp = page_facts.timestamp and
-      event_facts.looker_visitor_id = page_facts.looker_visitor_id
-       ;;
+    sql_on:event_facts.event_id = page_facts.event_id;;
     relationship: one_to_one
   }
+
+#  join: page_facts {
+#    view_label: "0_Events"
+#    type: left_outer
+#    sql_on:
+#      event_facts.event_id = page_facts.event_id and
+#      event_facts.timestamp = page_facts.timestamp and
+#      event_facts.looker_visitor_id = page_facts.looker_visitor_id
+#       ;;
+#    relationship: one_to_one
+#  }
 
   join: pages {
     view_label: "1_Page Events"
     type: left_outer
-    sql_on: event_facts.timestamp = pages.timestamp
-      and event_facts.anonymous_id = pages.anonymous_id
-       ;;
+    sql_on: event_facts.event_id = pages.id;;
     relationship: one_to_one
   }
+
+#  join: pages {
+#    view_label: "1_Page Events"
+#    type: left_outer
+#    sql_on: event_facts.timestamp = pages.timestamp
+#      and event_facts.anonymous_id = pages.anonymous_id
+#       ;;
+#    relationship: one_to_one
+#  }
 
   join: tracks {
     view_label: "1_Track Events"
     type: left_outer
-    sql_on: event_facts.timestamp = tracks.timestamp
-      and event_facts.anonymous_id = tracks.anonymous_id
-       ;;
+    sql_on: event_facts.event_id = tracks.id;;
     relationship: one_to_one
     fields: []
   }
+
+#  join: tracks {
+#    view_label: "1_Track Events"
+#    type: left_outer
+#    sql_on: event_facts.timestamp = tracks.timestamp
+#      and event_facts.anonymous_id = tracks.anonymous_id
+#       ;;
+#    relationship: one_to_one
+#    fields: []
+#  }
 
   join: sessions {
     view_label: "0_Sessions"
@@ -104,32 +127,56 @@ explore: event_facts {
   join: concierge_clicked_view {
     view_label: "T_Concierge Clicked"
     type: left_outer
-    sql_on: event_facts.event_id = concat(cast(${concierge_clicked_view.timestamp_raw} AS string), ${concierge_clicked_view.anonymous_id}, '-t')
-      and event_facts.timestamp = concierge_clicked_view.timestamp
-      and event_facts.anonymous_id = concierge_clicked_view.anonymous_id
+    sql_on: event_facts.event_id = concierge_clicked_view.id
        ;;
     relationship: one_to_one
   }
+
+#   join: concierge_clicked_view {
+#     view_label: "T_Concierge Clicked"
+#     type: left_outer
+#     sql_on: event_facts.event_id = concat(cast(${concierge_clicked_view.timestamp_raw} AS string), ${concierge_clicked_view.anonymous_id}, '-t')
+#       and event_facts.timestamp = concierge_clicked_view.timestamp
+#       and event_facts.anonymous_id = concierge_clicked_view.anonymous_id
+#        ;;
+#     relationship: one_to_one
+#   }
 
   join: outlink_sent {
     view_label: "T_Outlinked"
     type: left_outer
-    sql_on: event_facts.event_id = concat(cast(${outlink_sent.timestamp_raw} AS string), ${outlink_sent.anonymous_id}, '-t')
-      and event_facts.timestamp = outlink_sent.timestamp
-      and event_facts.anonymous_id = outlink_sent.anonymous_id
+    sql_on: event_facts.event_id = outlink_sent.id
        ;;
     relationship: one_to_one
   }
+#
+#   join: outlink_sent {
+#     view_label: "T_Outlinked"
+#     type: left_outer
+#     sql_on: event_facts.event_id = concat(cast(${outlink_sent.timestamp_raw} AS string), ${outlink_sent.anonymous_id}, '-t')
+#       and event_facts.timestamp = outlink_sent.timestamp
+#       and event_facts.anonymous_id = outlink_sent.anonymous_id
+#        ;;
+#     relationship: one_to_one
+#   }
 
   join: product_list_viewed {
     view_label: "T_Product List Viewed"
     type: left_outer
-    sql_on: event_facts.event_id = concat(cast(${product_list_viewed.timestamp_raw} AS string), ${product_list_viewed.anonymous_id}, '-t')
-      and event_facts.timestamp = product_list_viewed.timestamp
-      and event_facts.anonymous_id = product_list_viewed.anonymous_id
+    sql_on: event_facts.event_id = product_list_viewed.id
        ;;
     relationship: one_to_one
   }
+#
+#   join: product_list_viewed {
+#     view_label: "T_Product List Viewed"
+#     type: left_outer
+#     sql_on: event_facts.event_id = concat(cast(${product_list_viewed.timestamp_raw} AS string), ${product_list_viewed.anonymous_id}, '-t')
+#       and event_facts.timestamp = product_list_viewed.timestamp
+#       and event_facts.anonymous_id = product_list_viewed.anonymous_id
+#        ;;
+#     relationship: one_to_one
+#   }
 
   join: products_viewed_in_list {
     view_label: "T_Product List Viewed"
@@ -141,21 +188,54 @@ explore: event_facts {
   join: product_viewed {
     view_label: "T_Product Viewed"
     type: left_outer
-    sql_on: event_facts.event_id = concat(cast(${product_viewed.timestamp_raw} AS string), ${product_viewed.anonymous_id}, '-t')
-      and event_facts.timestamp = product_viewed.timestamp
-      and event_facts.anonymous_id = product_viewed.anonymous_id
+    sql_on: event_facts.event_id = product_viewed.id
        ;;
     relationship: one_to_one
   }
 
+#   join: product_viewed {
+#     view_label: "T_Product Viewed"
+#     type: left_outer
+#     sql_on: event_facts.event_id = concat(cast(${product_viewed.timestamp_raw} AS string), ${product_viewed.anonymous_id}, '-t')
+#       and event_facts.timestamp = product_viewed.timestamp
+#       and event_facts.anonymous_id = product_viewed.anonymous_id
+#        ;;
+#     relationship: one_to_one
+#   }
+
+  join: product_clicked {
+    view_label: "T_Product Clicked"
+    type: left_outer
+    sql_on: event_facts.event_id = product_clicked.id
+       ;;
+    relationship: one_to_one
+  }
+
+#   join: product_clicked {
+#     view_label: "T_Product Clicked"
+#     type: left_outer
+#     sql_on: event_facts.event_id = concat(cast(${product_clicked.timestamp_raw} AS string), ${product_clicked.anonymous_id}, '-t')
+#       and event_facts.timestamp = product_clicked.timestamp
+#       and event_facts.anonymous_id = product_clicked.anonymous_id
+#        ;;
+#     relationship: one_to_one
+#   }
+
   join: orders {
     view_label: "Orders"
     type: left_outer
-    sql_on: ${event_facts.event_id} = concat(cast(${orders.transaction_at_raw} AS string), ${orders.user_id}, '-r')
-    and ${event_facts.timestamp_time} = ${orders.transaction_at_time}
-    and ${event_facts.looker_visitor_id} = ${orders.user_id};;
+    sql_on: ${event_facts.event_id} = ${orders.order_id};;
     relationship: one_to_one
   }
+#
+#   join: orders {
+#     view_label: "Orders"
+#     type: left_outer
+#     sql_on: ${event_facts.event_id} = concat(cast(${orders.transaction_at_raw} AS string), ${orders.user_id}, '-r')
+#           and ${event_facts.timestamp_time} = ${orders.transaction_at_time}
+#           and ${event_facts.looker_visitor_id} = ${orders.user_id};;
+#     relationship: one_to_one
+#   }
 
   join: order_items {
     view_label: "Order_Products"
@@ -197,11 +277,17 @@ explore: order_items {
   }
 
   join: event_facts {
-    sql_on: ${orders.user_id} = ${event_facts.looker_visitor_id}
-    and CONCAT(${orders.transaction_at_raw}, ${orders.user_id}, "-r") = ${event_facts.event_id};;
+    sql_on: ${orders.order_id} = ${event_facts.event_id};;
     type: left_outer
     relationship: one_to_one
   }
+#
+#   join: event_facts {
+#     sql_on: ${orders.user_id} = ${event_facts.looker_visitor_id}
+#       and CONCAT(${orders.transaction_at_raw}, ${orders.user_id}, "-r") = ${event_facts.event_id};;
+#     type: left_outer
+#     relationship: one_to_one
+#   }
 
   join: catch_users {
     view_label: "Users"
@@ -275,21 +361,38 @@ explore: product_events {
   }
 
   join: product_viewed {
-    sql_on: ${product_events.event_id} = concat(cast(${product_viewed.timestamp_raw} AS string), ${product_viewed.anonymous_id}, '-t') ;;
+    sql_on: ${product_events.event_id} = ${product_viewed.id} ;;
     relationship: one_to_one
   }
+#
+#   join: product_viewed {
+#     sql_on: ${product_events.event_id} = concat(cast(${product_viewed.timestamp_raw} AS string), ${product_viewed.anonymous_id}, '-t') ;;
+#     relationship: one_to_one
+#   }
 
   join: products_viewed_in_list {
-    sql_on: ${product_events.event_id} = concat(cast(${products_viewed_in_list.timestamp_raw} AS string), ${products_viewed_in_list.anonymous_id}, '-t')
+    sql_on: ${product_events.event_id}= ${products_viewed_in_list.list_viewed_id}
       and ${product_events.product_id} = ${products_viewed_in_list.product_id};;
     relationship: one_to_one
   }
+#
+#   join: products_viewed_in_list {
+#     sql_on: ${product_events.event_id} = concat(cast(${products_viewed_in_list.timestamp_raw} AS string), ${products_viewed_in_list.anonymous_id}, '-t')
+#       and ${product_events.product_id} = ${products_viewed_in_list.product_id};;
+#     relationship: one_to_one
+#   }
 
   join: order_items {
-    sql_on: ${product_events.event_id} = CONCAT(cast(${order_items.transaction_at_raw} as string), ${order_items.user_id}, '-r')
+    sql_on: ${product_events.event_id} = ${order_items.order_id}
       and ${product_maps.affiliate_product_id} = ${order_items.vendor_product_id};;
     relationship: one_to_one
   }
+
+#
+#   join: order_items {
+#     sql_on: ${product_events.event_id} = CONCAT(cast(${order_items.transaction_at_raw} as string), ${order_items.user_id}, '-r')
+#       and ${product_maps.affiliate_product_id} = ${order_items.vendor_product_id};;
+#     relationship: one_to_one
 
   join: event_facts {
     sql_on: ${product_events.event_id} = ${event_facts.event_id} ;;

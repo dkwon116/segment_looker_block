@@ -16,7 +16,8 @@ view: order_facts {
         , SUM(c.amount) as total_cashback
       from ${orders.SQL_TABLE_NAME} as o
       LEFT JOIN ${event_sessions.SQL_TABLE_NAME} as es
-      ON CONCAT(cast(o.transaction_at as string), o.user_id, '-r') = es.event_id
+      --ON CONCAT(cast(o.transaction_at as string), o.user_id, '-r') = es.event_id
+        on o.order_id=es.event_id
       LEFT JOIN ${cashbacks.SQL_TABLE_NAME} as c
         ON o.order_id = c.order_id
       GROUP BY 1, 2, 3, 4, 5, 6, 7, 8

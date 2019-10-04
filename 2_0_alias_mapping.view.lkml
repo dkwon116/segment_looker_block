@@ -34,17 +34,26 @@ view: page_aliases_mapping {
         from mysql_smile_ventures.users
       )
         select
-          distinct anonymous_id as alias,
-          coalesce(first_value(user_id)
-              over(
-                partition by anonymous_id
-                order by timestamp desc
-                rows between unbounded preceding and unbounded following), user_id, anonymous_id) as looker_visitor_id
+          distinct anonymous_id as alias
+          ,coalesce(
+            last_value(user_id ignore nulls) over(partition by anonymous_id order by timestamp rows between unbounded preceding and unbounded following)
+            --,last_value(anonymous_id ignore nulls) over(partition by anonymous_id order by timestamp rows between unbounded preceding and unbounded following)
+            ,anonymous_id
+            ) as looker_visitor_id
+
 
         from all_mappings
         where anonymous_id IS NOT NULL
        ;;
   }
+#
+#           ,coalesce(first_value(user_id)
+#               over(
+#                 partition by anonymous_id
+#                 order by timestamp desc
+#                 rows between unbounded preceding and unbounded following), user_id, anonymous_id) as looker_visitor_id
+
+
 
   # Anonymous ID
   dimension: alias {
