@@ -98,6 +98,13 @@ explore: event_facts {
     relationship: one_to_one
   }
 
+  join: brands {
+    view_label: "Brands"
+    type: left_outer
+    sql_on: ${journeys.journey_prop} = ${brands.id} ;;
+    relationship: one_to_one
+  }
+
   join: page_aliases_mapping {
     view_label: "3_Users"
     type: left_outer

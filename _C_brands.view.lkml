@@ -65,13 +65,15 @@ view: brands {
   dimension: name_en {
     type: string
     sql: ${TABLE}.name_en ;;
-    hidden: yes
+    group_label: "Brand"
+#     hidden: yes
   }
 
   dimension: name_kr {
     type: string
     sql: ${TABLE}.name_kr ;;
-    hidden: yes
+    group_label: "Brand"
+#     hidden: yes
   }
 
   dimension: note {
