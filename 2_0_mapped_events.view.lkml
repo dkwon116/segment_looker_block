@@ -85,6 +85,7 @@ view: mapped_events {
 
   dimension: event_id {
     sql: ${TABLE}.event_id ;;
+    primary_key: yes
   }
 
   dimension: looker_visitor_id {

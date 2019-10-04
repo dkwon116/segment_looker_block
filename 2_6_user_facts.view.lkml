@@ -56,7 +56,7 @@ view: user_facts {
         , cu.gender as gender
         , cu.created_at as signed_up_date
         , sr.custom_fields_random_index as random_idx
-        , IF(au.user_id IN (SELECT oi.user_id FROM ${order_items.SQL_TABLE_NAME} as oi  WHERE oi.quantity >= 3), "Reseller", "Customer") as user_type
+        , IF(au.user_id IN (SELECT oi.user_id FROM ${order_items.SQL_TABLE_NAME} as oi  WHERE oi.quantity >= 3), "VIP", "Customer") as user_type
         , IF(DATE(cu.created_at) < DATE(2018,11,20), "Giveaway", "Beta") as joined_at
         , COALESCE(MIN(s.session_start_at), cu.created_at) as first_date
         , MAX(s.session_start_at) as last_date
