@@ -506,6 +506,13 @@ explore: product_list_viewed {
   }
 }
 
+explore: event_sessions {
+  join: event_facts {
+    sql_on: ${event_sessions.event_id}=${event_facts.event_id};;
+    relationship: one_to_one
+  }
+}
+
 explore: customer_service_log {
   hidden: yes
 }
