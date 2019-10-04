@@ -149,7 +149,7 @@ view:journeys {
 
     filters: {
       field: journey_type
-      value: "Search"
+      value: "-Search"
     }
   }
 
