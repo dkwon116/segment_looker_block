@@ -110,6 +110,12 @@ view: journey_facts {
     group_label: "Event Counts"
   }
 
+  dimension: unique_product_viewed {
+    type: number
+    sql: ${TABLE}.unique_count_product_viewed ;;
+    group_label: "Event Counts"
+  }
+
   dimension: product_lists_viewed {
     type: number
     sql: ${TABLE}.count_product_list_viewed ;;
@@ -301,7 +307,17 @@ view: journey_facts {
     sql: ${product_viewed_total} / ${journeys.unique_visitor_count} ;;
     value_format_name: decimal_2
     group_label: "Product Viewed"
+  }
 
+  measure: unique_product_viewed_per_product_viewed_journey {
+    type: average
+    sql: ${unique_product_viewed} ;;
+    value_format_name:decimal_2
+    group_label: "Product Viewed"
+    filters: {
+      field: product_viewed
+      value: ">0"
+    }
   }
 
   measure: total_product_viewed_users {
