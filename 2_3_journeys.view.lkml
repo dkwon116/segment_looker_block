@@ -32,18 +32,18 @@ view:journeys {
       ,t.journey_prop
       ,if(t.journey_prop is null,null,lower(decodeurl(t.journey_prop))) as journey_prop_decoded
       ,case
-        when t.journey_type='Product Search' then true
+        when t.journey_type='Product Search'
+          then true
         when t.journey_type in ('Brand','Category')
           and lag(t.journey_type) over (partition by t.session_id order by t.event_sequence)='Search'
-          and (lag(t.journey_prop,2) over (partition by t.session_id order by t.event_sequence)<>t.journey_prop or lag(t.journey_prop,2) over (partition by t.session_id order by t.event_sequence) is null)
+          and (lag(t.journey_prop,2) over (partition by t.session_id order by t.event_sequence)<>t.journey_prop
+            or lag(t.journey_prop,2) over (partition by t.session_id order by t.event_sequence) is null)
           then true
         when t.journey_type='Search'
-          and not(
-            lag(t.journey_type,2) over (partition by t.session_id order by t.event_sequence)='Search'
-            and lag(t.journey_type) over (partition by t.session_id order by t.event_sequence) in ('Brand', 'Category', 'Product Search')
-            and lag(t.journey_type) over (partition by t.session_id order by t.event_sequence)=lead(t.journey_type) over (partition by t.session_id order by t.event_sequence)
-            and lag(t.journey_prop) over (partition by t.session_id order by t.event_sequence)=lead(t.journey_prop) over (partition by t.session_id order by t.event_sequence)
-          ) then true
+          and lead(t.journey_type) over (partition by t.session_id order by t.event_sequence) in ('Brand', 'Category', 'Product Search')
+          and (lag(t.journey_prop) over (partition by t.session_id order by t.event_sequence)<>lead(t.journey_prop) over (partition by t.session_id order by t.event_sequence)
+            or lag(t.journey_prop) over (partition by t.session_id order by t.event_sequence) is null)
+          then true
         else false
       end as is_search
       ,IF(t.journey_type IN ('Brand', 'Category', 'Product Search', 'Hashtag', 'Sale', 'New'), true, false) as is_discovery
@@ -51,6 +51,23 @@ view:journeys {
       ,ifnull(lead(t.first_journey_event_sequence) over (partition by t.session_id order by t.event_sequence)-1,t.last_session_event_sequence) as last_journey_event_sequence
     from t
     where t.first_journey_event_sequence is not null
+
+--lag(t.journey_type,2) over (partition by t.session_id order by t.event_sequence)='Search'
+--and lag(t.journey_type) over (partition by t.session_id order by t.event_sequence) in ('Brand', 'Category', 'Product Search')
+--and lag(t.journey_type) over (partition by t.session_id order by t.event_sequence)=lead(t.journey_type) over (partition by t.session_id order by t.event_sequence)
+--and lag(t.journey_prop) over (partition by t.session_id order by t.event_sequence)=lead(t.journey_prop) over (partition by t.session_id order by t.event_sequence)
+
+
+--not(
+--            (lead(t.journey_type) over (partition by t.session_id order by t.event_sequence) not in ('Brand', 'Category', 'Product Search'))
+--            or
+--            (
+--              lag(t.journey_type) over (partition by t.session_id order by t.event_sequence) in ('Brand', 'Category', 'Product Search')
+--              and lag(t.journey_type) over (partition by t.session_id order by t.event_sequence)=lead(t.journey_type) over (partition by t.session_id order by t.event_sequence)
+--              and lag(t.journey_prop) over (partition by t.session_id order by t.event_sequence)<>lead(t.journey_prop) over (partition by t.session_id order by t.event_sequence)
+--              )
+--          ) then true
+
 
       ;;
   }
