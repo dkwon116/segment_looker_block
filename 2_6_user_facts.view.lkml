@@ -251,6 +251,24 @@ view: user_facts {
     suggest_dimension: utm_values.campaign_source
   }
 
+  dimension: first_source_sanitized {
+    type: string
+    sql: CASE
+      WHEN ${first_source} IS NULL OR ${first_source} IN ("transactional", "email", "sms", "newsletter", "sendgrid", "sweet", "kakao") THEN
+        (CASE
+          WHEN ${first_referrer} LIKE "%google%" THEN "Google - Direct"
+          WHEN ${first_referrer} LIKE "%naver%" THEN "Naver - Direct"
+          WHEN ${first_referrer} LIKE "%facebook%" THEN "Facebook - Direct"
+          WHEN ${first_referrer} LIKE "%instagram%" THEN "Instagram - Direct"
+          ELSE "Other - Direct" END)
+      WHEN ${first_source} in ("facebook", "Facebook", "facebook-network") THEN "facebook"
+      ELSE ${first_source} END
+      ;;
+    group_label: "Acquisition"
+    suggest_explore: utm_values
+    suggest_dimension: utm_values.campaign_source
+  }
+
   dimension: first_medium {
     type: string
     sql: ${TABLE}.first_medium ;;
