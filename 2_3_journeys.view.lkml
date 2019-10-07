@@ -35,12 +35,14 @@ view:journeys {
         when t.journey_type='Product Search' then true
         when t.journey_type in ('Brand','Category')
           and lag(t.journey_type) over (partition by t.session_id order by t.event_sequence)='Search'
-          and (lag(t.journey_prop,2) over (partition by t.session_id order by t.event_sequence)<>t.journey_prop or lag(t.journey_prop,2) over (partition by t.session_id order by t.event_sequence) is null) then true
+          and (lag(t.journey_prop,2) over (partition by t.session_id order by t.event_sequence)<>t.journey_prop or lag(t.journey_prop,2) over (partition by t.session_id order by t.event_sequence) is null)
+          then true
         when t.journey_type='Search'
           and not(
-            lag(t.journey_prop,2) over (partition by t.session_id order by t.event_sequence)='Search'
+            lag(t.journey_type,2) over (partition by t.session_id order by t.event_sequence)='Search'
             and lag(t.journey_type) over (partition by t.session_id order by t.event_sequence) in ('Brand', 'Category', 'Product Search')
-            and lead(t.journey_type) over (partition by t.session_id order by t.event_sequence) not in ('Brand', 'Category', 'Product Search')
+            and lag(t.journey_type) over (partition by t.session_id order by t.event_sequence)=lead(t.journey_type) over (partition by t.session_id order by t.event_sequence)
+            and lag(t.journey_prop) over (partition by t.session_id order by t.event_sequence)=lead(t.journey_prop) over (partition by t.session_id order by t.event_sequence)
           ) then true
         else false
       end as is_search
@@ -149,7 +151,7 @@ view:journeys {
 
     filters: {
       field: journey_type
-      value: "-Search"
+      value: "Brand, Category, Product Search"
     }
   }
 
