@@ -80,7 +80,7 @@ view: product_events {
         from ${products_viewed_in_list.SQL_TABLE_NAME} as t
         inner join ${mapped_events.SQL_TABLE_NAME} as me
         --on CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') = me.event_id
-          on t.id=me.event_id
+          on t.list_viewed_id=me.event_id
         left join ${track_facts.SQL_TABLE_NAME} as tf
           on me.event_id = tf.event_id
 

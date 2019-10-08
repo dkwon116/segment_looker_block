@@ -140,6 +140,12 @@ view: journey_facts {
     group_label: "Event Counts"
   }
 
+  dimension: number_of_engagements {
+    type: number
+    sql: ${TABLE}.count_product_viewed + ${TABLE}.count_outlinked + ${TABLE}.count_concierge_clicked + ${TABLE}.count_added_to_wishlist ;;
+    group_label: "Event Counts"
+  }
+
   # ----- Measures -----
 
   measure: total_pages {
@@ -221,10 +227,55 @@ view: journey_facts {
     group_item_label: "Journey Duration per Discovery User"
   }
 
-
-
-
 ######################################
+
+#   Engagement measures
+
+  measure: engaged_journey_count {
+    type: count
+    group_label: "Engagements"
+    filters: {
+      field: number_of_engagements
+      value: ">0"
+    }
+  }
+
+  measure: engaged_total {
+    type: sum
+    sql: ${number_of_engagements} ;;
+    group_label: "Engagements"
+  }
+
+  measure: engaged_per_journey {
+    type: average
+    sql: ${number_of_engagements} ;;
+    value_format_name:decimal_2
+    group_label: "Engagements"
+  }
+
+  measure: engaged_per_engaged_journey {
+    type: average
+    sql: ${number_of_engagements} ;;
+    value_format_name:decimal_2
+    group_label: "Engagements"
+    filters: {
+      field: number_of_engagements
+      value: ">0"
+    }
+  }
+
+  measure: engaged_conversion_rate_per_journey {
+    type: number
+    sql: ${engaged_journey_count} / ${journeys.count} ;;
+    value_format_name: percent_0
+    group_label: "Engagements"
+  }
+
+
+
+
+
+
 #   Product list measures
 
   measure: product_list_viewed_total {
