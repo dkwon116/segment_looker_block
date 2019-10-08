@@ -249,7 +249,7 @@ view: orders {
     value_format_name: decimal_0
     filters: {
       field: user_facts.user_type
-      value: "Reseller"
+      value: "VIP"
     }
   }
 

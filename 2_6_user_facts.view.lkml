@@ -165,7 +165,7 @@ view: user_facts {
 
   dimension_group: last_visited {
     type: time
-    timeframes: [time, date, week, month]
+    timeframes: [time, date, week, month, year]
     sql: ${TABLE}.last_date ;;
   }
 
