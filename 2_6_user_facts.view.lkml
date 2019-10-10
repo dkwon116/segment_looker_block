@@ -59,6 +59,7 @@ view: user_facts {
         , IF(au.user_id IN (SELECT oi.user_id FROM ${order_items.SQL_TABLE_NAME} as oi  WHERE oi.quantity >= 3), "VIP", "Customer") as user_type
         , IF(DATE(cu.created_at) < DATE(2018,11,20), "Giveaway", "Beta") as joined_at
         , COALESCE(MIN(s.session_start_at), cu.created_at) as first_date
+        , ARRAY_TO_STRING(ARRAY_AGG(distinct o2.vendor ignore nulls), "-") as purchased_vendors
         , MAX(s.session_start_at) as last_date
         , COUNT(s.session_id) as number_of_sessions
         , MIN(o.transaction_at) as first_purchased
@@ -79,6 +80,8 @@ view: user_facts {
         ON s.session_id = sf.session_id
       LEFT JOIN ${order_facts.SQL_TABLE_NAME} as o
         ON s.session_id = o.session_id
+      LEFT JOIN ${orders.SQL_TABLE_NAME} as o2
+        ON o.order_id = o2.order_id
       LEFT JOIN google_sheets.user_type as ut
         ON cu.id = ut.user_id
       LEFT JOIN sendgrid.recipients_view as sr
@@ -155,6 +158,11 @@ view: user_facts {
   dimension: joined_at {
     type: string
     sql: ${TABLE}.joined_at ;;
+  }
+
+  dimension: purchased_vendor {
+    type: string
+    sql: ${TABLE}.purchased_vendors ;;
   }
 
   dimension_group: first_visited {
