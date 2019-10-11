@@ -3,8 +3,21 @@ view: session_facts {
 #     information about session
     # Rebuilds after track_facts rebuilds
     sql_trigger_value: select COUNT(*) from ${event_facts.SQL_TABLE_NAME} ;;
-    sql: select
+    sql:
+
+      select
+        t.*
+        ,last_value(t.first_source ignore nulls) over (partition by t.looker_visitor_id order by t.end_at rows between unbounded preceding and current row) as last_source
+        ,last_value(t.first_medium ignore nulls) over (partition by t.looker_visitor_id order by t.end_at rows between unbounded preceding and current row) as last_medium
+        ,last_value(t.first_campaign ignore nulls) over (partition by t.looker_visitor_id order by t.end_at rows between unbounded preceding and current row) as last_campaign
+        ,last_value(t.first_content ignore nulls) over (partition by t.looker_visitor_id order by t.end_at rows between unbounded preceding and current row) as last_content
+        ,last_value(t.first_term ignore nulls) over (partition by t.looker_visitor_id order by t.end_at rows between unbounded preceding and current row) as last_term
+        ,last_value(if(coalesce(t.first_source,t.first_medium,t.first_campaign,t.first_content,t.first_term) is null,null,t.end_at) ignore nulls) over (partition by t.looker_visitor_id order by t.end_at rows between unbounded preceding and current row) as last_end_at
+        ,timestamp_diff(end_at,last_value(if(coalesce(t.first_source,t.first_medium,t.first_campaign,t.first_content,t.first_term) is null,null,t.end_at) ignore nulls) over (partition by t.looker_visitor_id order by t.end_at rows between unbounded preceding and current row),hour) as last_diff_hours
+      from(
+      select
           s.session_id
+        , s.looker_visitor_id
         , t2s.first_referrer
         , t2s.first_source as first_source
         , t2s.first_medium as first_medium
@@ -41,7 +54,8 @@ view: session_facts {
           on s.session_id = t2s.session_id
         inner join ${journeys.SQL_TABLE_NAME} as j
           on s.session_id = j.session_id and t2s.journey_id = j.journey_id
-      group by 1,2,3,4,5,6,7,8
+      group by 1,2,3,4,5,6,7,8,9
+      ) t
        ;;
   }
 
@@ -99,6 +113,42 @@ view: session_facts {
     type:  string
     sql: ${TABLE}.first_term ;;
     group_label: "Attribution"
+  }
+
+  dimension: last_campaign {
+    type:  string
+    sql: ${TABLE}.last_campaign ;;
+    group_label: "Attribution"
+  }
+
+  dimension: last_source {
+    type:  string
+    sql: ${TABLE}.last_source ;;
+    drill_fields: [first_campaign, first_medium]
+    group_label: "Attribution"
+  }
+
+  dimension: last_medium {
+    type:  string
+    sql: ${TABLE}.last_medium ;;
+    group_label: "Attribution"
+  }
+
+  dimension: last_content {
+    type:  string
+    sql: ${TABLE}.last_content ;;
+    group_label: "Attribution"
+  }
+
+  dimension: last_term {
+    type:  string
+    sql: ${TABLE}.last_term ;;
+    group_label: "Attribution"
+  }
+
+  dimension: last_diff_hours {
+    type: number
+    sql: ${TABLE}.last_diff_hours ;;
   }
 
   dimension: is_pre_purchase {
