@@ -179,7 +179,7 @@ view: user_facts {
 
   dimension_group: signed_up {
     type: time
-    timeframes: [time, date, week, month, raw]
+    timeframes: [time, date, week, month, quarter, raw]
     sql: ${TABLE}.signed_up_date ;;
   }
 
@@ -203,7 +203,7 @@ view: user_facts {
 
   dimension_group: first_purchased {
     type: time
-    timeframes: [time, date, week, day_of_week, month, day_of_month, raw]
+    timeframes: [time, date, week, day_of_week, month, quarter, day_of_month, raw]
     sql: ${TABLE}.first_purchased ;;
   }
 

@@ -301,12 +301,12 @@ view: order_facts {
 
   dimension: since_first_visit {
     type: number
-    sql: date_diff(DATE(${transaction_at_raw}), ${user_facts.first_visited_date}, MONTH) ;;
+    sql: date_diff(DATE(${transaction_at_raw}), ${user_facts.first_visited_raw}, MONTH) ;;
   }
 
   dimension: since_first_purchase {
     type: number
-    sql: date_diff(DATE(${transaction_at_raw}), ${user_facts.first_purchased_date}, MONTH) ;;
+    sql: date_diff(DATE(${transaction_at_raw}), DATE(${user_facts.first_purchased_raw}), MONTH) ;;
   }
 
   dimension_group: since_signup {

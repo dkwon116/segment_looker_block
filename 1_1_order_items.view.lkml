@@ -100,7 +100,7 @@ view: order_items {
   dimension_group: process_at {
     type: time
     sql: ${TABLE}.process_at ;;
-    timeframes: [time, date, month, year]
+    timeframes: [time, date, month, year, raw]
   }
 
   dimension_group: transaction_at {
@@ -165,6 +165,12 @@ view: order_items {
     tiers: [500,1000,2000,3000,4000,5000]
     style: integer
     sql: ${item_value} ;;
+  }
+
+  dimension_group: time_to_confirm {
+    type: duration
+    sql_start: ${transaction_at_raw} ;;
+    sql_end: ${process_at_raw} ;;
   }
 
   measure: total_sales {
