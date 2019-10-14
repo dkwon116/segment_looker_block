@@ -1,6 +1,7 @@
 view: order_items {
   derived_table: {
-    sql_trigger_value: select count(*) from data_data_api_db.affiliate_order_item ;;
+#     sql_trigger_value: select count(*) from data_data_api_db.affiliate_order_item ;;
+    datagroup_trigger: orders_datagroup
     sql:
         -- group by single order item. order_id and sku_id should be unique
         WITH raw_order_items as (

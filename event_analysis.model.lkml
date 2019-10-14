@@ -3,6 +3,11 @@ connection: "datawarehouse_db"
 include: "*.view.lkml"                       # include all views in this project
 # include: "my_dashboard.dashboard.lookml"   # include a LookML dashboard called my_dashboard
 
+datagroup: orders_datagroup {
+  sql_trigger: SELECT count(*) FROM data_data_api_db.affiliate_order_item ;;
+  max_cache_age: "5 minutes"
+}
+
 explore: funnel_explorer {
   join: users {
     relationship: many_to_one

@@ -1,6 +1,7 @@
 view: orders {
   derived_table: {
-    sql_trigger_value: select count(*) from ${order_items.SQL_TABLE_NAME} ;;
+#     sql_trigger_value: select count(*) from ${order_items.SQL_TABLE_NAME} ;;
+    datagroup_trigger: orders_datagroup
     sql: WITH affiliate_commission as (
           SELECT
             pe.order_id

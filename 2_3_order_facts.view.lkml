@@ -1,6 +1,7 @@
 view: order_facts {
   derived_table: {
-    sql_trigger_value: select count(*) from ${orders.SQL_TABLE_NAME} ;;
+#     sql_trigger_value: select count(*) from ${orders.SQL_TABLE_NAME} ;;
+    datagroup_trigger: orders_datagroup
     sql: SELECT
         o.order_id
         , o.user_id
