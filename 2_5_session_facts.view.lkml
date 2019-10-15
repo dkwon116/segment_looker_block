@@ -397,6 +397,17 @@ view: session_facts {
     }
   }
 
+  measure: total_product_discovery_viewed_sessions {
+    type: count_distinct
+    sql: ${sessions.session_id} ;;
+    group_label: "Product Discovery"
+
+    filters: {
+      field: product_discovery
+      value: ">0"
+    }
+  }
+
   measure: product_discovery_session_durations {
     type: average
     sql: ${session_duration_minutes} ;;
@@ -455,6 +466,17 @@ view: session_facts {
     }
   }
 
+  measure: total_product_list_viewed_sessions {
+    type: count_distinct
+    sql: ${sessions.session_id} ;;
+    group_label: "Product List Viewed"
+
+    filters: {
+      field: product_lists_viewed
+      value: ">0"
+    }
+  }
+
   measure: product_list_viewed_per_converted_user {
     type: number
     sql: ${product_list_viewed_total} / NULLIF(${total_product_list_viewed_users}, 0);;
@@ -497,6 +519,17 @@ view: session_facts {
   measure: total_product_viewed_users {
     type: count_distinct
     sql: ${sessions.looker_visitor_id} ;;
+    group_label: "Product Viewed"
+
+    filters: {
+      field: products_viewed
+      value: ">0"
+    }
+  }
+
+  measure: total_product_viewed_sessions {
+    type: count_distinct
+    sql: ${sessions.session_id} ;;
     group_label: "Product Viewed"
 
     filters: {
@@ -567,6 +600,17 @@ view: session_facts {
     }
   }
 
+  measure: total_outlinked_sessions {
+    type: count_distinct
+    sql: ${sessions.session_id} ;;
+    group_label: "Outlinked"
+
+    filters: {
+      field: outlinked
+      value: ">0"
+    }
+  }
+
   measure: outlinked_per_converted_user {
     type: number
     sql: ${outlinked_total} / NULLIF(${total_outlinked_users}, 0) ;;
@@ -616,6 +660,17 @@ view: session_facts {
     }
   }
 
+  measure: total_concierge_clicked_sessions {
+    type: count_distinct
+    sql: ${sessions.session_id} ;;
+    group_label: "Concierge"
+
+    filters: {
+      field: concierge_clicked
+      value: ">0"
+    }
+  }
+
   measure: concierge_conversion_rate {
     type: number
     sql: ${total_concierge_clicked_users} / ${sessions.unique_visitor_count} ;;
@@ -652,6 +707,17 @@ view: session_facts {
   measure: total_added_to_wishlist_users {
     type: count_distinct
     sql: ${sessions.looker_visitor_id} ;;
+    group_label: "Wishlist"
+
+    filters: {
+      field: added_to_wishlist
+      value: ">0"
+    }
+  }
+
+  measure: total_added_to_wishlist_sessions {
+    type: count_distinct
+    sql: ${sessions.session_id} ;;
     group_label: "Wishlist"
 
     filters: {
