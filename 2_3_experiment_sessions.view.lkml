@@ -9,7 +9,6 @@ view: experiment_sessions {
         ,coalesce(exp.variant_id,exp.variation_id) as variant_id
       from ${event_sessions.SQL_TABLE_NAME} e
       join ${experiment.SQL_TABLE_NAME} exp on exp.id=e.event_id
-      where e.event='experiment_viewed'
       ;;
   }
 
