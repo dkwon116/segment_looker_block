@@ -87,6 +87,12 @@ where (idle_time_minutes > 30 or idle_time_minutes is null)
     group_item_label: "Number of Sessions"
   }
 
+  measure: unique_count {
+    type: count_distinct
+    group_label: "Session Facts"
+    group_item_label: "Number of Unique Sessions"
+  }
+
   measure: repeat_count {
     type: count
     drill_fields: [session_detail*]
