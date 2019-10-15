@@ -87,8 +87,9 @@ where (idle_time_minutes > 30 or idle_time_minutes is null)
     group_item_label: "Number of Sessions"
   }
 
-  measure: unique_count {
+  measure: unique_session_count {
     type: count_distinct
+    sql: ${session_id} ;;
     group_label: "Session Facts"
     group_item_label: "Number of Unique Sessions"
   }

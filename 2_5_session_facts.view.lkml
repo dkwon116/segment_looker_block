@@ -492,6 +492,14 @@ view: session_facts {
     drill_fields: [product_viewed_details*]
   }
 
+  measure: product_list_viewed_conversion_rate_per_session {
+    type: number
+    sql: ${total_product_list_viewed_sessions} / ${sessions.unique_session_count} ;;
+    value_format_name: percent_0
+    group_label: "Product List Viewed"
+    drill_fields: [product_viewed_details*]
+  }
+
 
 ######################################
 #   Product viewed measures
@@ -564,6 +572,14 @@ view: session_facts {
     drill_fields: [product_viewed_details*]
   }
 
+  measure: product_viewed_conversion_rate_per_session {
+    type: number
+    sql: ${total_product_viewed_sessions} / ${sessions.unique_session_count} ;;
+    value_format_name: percent_0
+    group_label: "Product Viewed"
+    drill_fields: [product_viewed_details*]
+  }
+
   measure: product_viewed_activation_rate {
     type: number
     sql: ${total_product_viewed_activated_user} / ${sessions.unique_visitor_count} ;;
@@ -625,6 +641,13 @@ view: session_facts {
     group_label: "Outlinked"
   }
 
+  measure: outlinked_conversion_rate_per_session {
+    type: number
+    sql: ${total_outlinked_sessions} / NULLIF(${sessions.unique_session_count}, 0) ;;
+    value_format_name: percent_2
+    group_label: "Outlinked"
+  }
+
   measure: outlinked_user_value {
     type: number
     sql: ${total_order_value} / nullif(${total_outlinked_users}, 0) ;;
@@ -674,6 +697,13 @@ view: session_facts {
   measure: concierge_conversion_rate {
     type: number
     sql: ${total_concierge_clicked_users} / ${sessions.unique_visitor_count} ;;
+    value_format_name: percent_2
+    group_label: "Concierge"
+  }
+
+  measure: concierge_conversion_rate_per_session {
+    type: number
+    sql: ${total_concierge_clicked_sessions} / ${sessions.unique_session_count} ;;
     value_format_name: percent_2
     group_label: "Concierge"
   }
@@ -729,6 +759,13 @@ view: session_facts {
   measure: added_to_wishlist_conversion_rate {
     type: number
     sql: ${total_added_to_wishlist_users} / ${sessions.unique_visitor_count} ;;
+    value_format_name: percent_2
+    group_label: "Wishlist"
+  }
+
+  measure: added_to_wishlist_conversion_rate_per_session {
+    type: number
+    sql: ${total_added_to_wishlist_sessions} / ${sessions.unique_session_count} ;;
     value_format_name: percent_2
     group_label: "Wishlist"
   }
@@ -794,9 +831,9 @@ view: session_facts {
     drill_fields: [order_completed_details*]
   }
 
-  measure: order_completed_session_conversion_rate {
+  measure: order_completed_conversion_rate_per_session {
     type: number
-    sql: ${total_order_completed_sessions} / ${sessions.count} ;;
+    sql: ${total_order_completed_sessions} / ${sessions.unique_session_count} ;;
     value_format_name: percent_2
     group_label: "Order Completed"
     drill_fields: [order_completed_details*]
