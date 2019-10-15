@@ -7,7 +7,7 @@ include: "*.view"
 
 datagroup: orders_datagroup {
   sql_trigger: SELECT count(*) FROM data_data_api_db.affiliate_order_item ;;
-  max_cache_age: "15 minutes"
+  max_cache_age: "5 minutes"
 }
 
 explore: event_facts {
