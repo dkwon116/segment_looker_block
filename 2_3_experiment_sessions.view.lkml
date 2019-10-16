@@ -16,21 +16,28 @@ view: experiment_sessions {
   dimension: session_id {
     type: string
     sql: ${TABLE}.session_id ;;
+    hidden: yes
   }
 
   dimension: looker_visitor_id {
     type: string
     sql: ${TABLE}.looker_visitor_id ;;
+    hidden: yes
   }
 
   dimension: experiment_id {
     type: string
     sql: ${TABLE}.experiment_id ;;
+    group_label: "Experiment"
   }
 
   dimension: variant_id {
     type: string
     sql: ${TABLE}.variant_id ;;
+    group_label: "Experiment"
+    label: "Experiment Variant Id"
   }
+
+
 
 }

@@ -303,7 +303,7 @@ dimension_group: since_first_purchase {
 # ----- Measures -----
 
 
-measure: is_signedup_session_count {
+measure: user_session_count {
   type: count
   group_label: "Session Facts"
   filters: {
@@ -312,7 +312,7 @@ measure: is_signedup_session_count {
   }
 }
 
-measure: is_not_signedup_session_count {
+measure: guest_session_count {
   type: count
   group_label: "Session Facts"
   filters: {
@@ -321,7 +321,7 @@ measure: is_not_signedup_session_count {
   }
 }
 
-  measure: is_not_signedup_unique_visitor_count {
+  measure: unique_guest_count {
     type: count_distinct
     sql: ${sessions.looker_visitor_id} ;;
     filters: {
@@ -330,7 +330,7 @@ measure: is_not_signedup_session_count {
     }
   }
 
-  measure: is_signedup_unique_visitor_count {
+  measure: unique_user_count {
     type: count_distinct
     sql: ${sessions.looker_visitor_id} ;;
     filters: {
@@ -403,18 +403,21 @@ measure: unique_signed_up_visitor {
     field: number_of_signed_up_events
     value: ">0"
   }
+  group_label: "Signup"
 }
 
 measure: unique_visitor_signup_conversion {
   type: number
   sql: ${unique_signed_up_visitor} / ${sessions.unique_visitor_count};;
   value_format_name: percent_2
+  group_label: "Signup"
 }
 
-measure: unique_visitor_signup_conversion_by_not_signedup {
+measure: unique_guest_signup_conversion {
   type: number
-  sql: ${unique_signed_up_visitor} / NULLIF(${is_not_signedup_unique_visitor_count},0);;
+  sql: ${unique_signed_up_visitor} / NULLIF(${unique_guest_count},0);;
   value_format_name: percent_2
+  group_label: "Signup"
 }
 
 
