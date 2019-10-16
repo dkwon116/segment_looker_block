@@ -154,12 +154,7 @@ dimension: last_diff_hours {
   sql: ${TABLE}.last_diff_hours ;;
 }
 
-dimension: is_pre_purchase {
-  type: yesno
-  sql: IF(${TABLE}.first_ordered IS NULL, true,
-    IF(${sessions.start_raw} <= ${TABLE}.first_ordered, true, false))  ;;
-  group_label: "Session Flags"
-}
+
 
 dimension_group: end {
   type: time
@@ -192,6 +187,13 @@ dimension: is_user_at_session {
   type: yesno
   sql: ${TABLE}.is_user_at_session ;;
 }
+
+  dimension: is_pre_purchase {
+    type: yesno
+    sql: IF(${TABLE}.first_ordered IS NULL, true,
+      IF(${sessions.start_raw} <= ${TABLE}.first_ordered, true, false))  ;;
+    group_label: "Session Flags"
+  }
 
 dimension: session_duration_minutes {
   type: number
