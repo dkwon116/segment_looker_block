@@ -94,7 +94,7 @@ explore: event_facts {
   join: experiment_facts {
     view_label: "0_Sessions"
     type: left_outer
-    sql_on: ${experiment_sessions.experiment_id}_id} =  ${experiment_facts.experiment_id};;
+    sql_on: ${experiment_sessions.experiment_id} =  ${experiment_facts.experiment_id};;
     relationship: many_to_one
   }
 
