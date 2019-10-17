@@ -9,10 +9,7 @@ view: journey_facts {
       select
         j.journey_id
         ,j.session_id
-        ,j.journey_type
-        ,j.is_discovery
-        ,j.is_search
-        ,j.journey_prop
+        ,j.looker_visitor_id
         ,min(e.timestamp) as start_at
         ,max(e.timestamp) as end_at
         ,timestamp_diff(max(e.timestamp), min(e.timestamp), second) as journey_duration_seconds
@@ -33,7 +30,7 @@ view: journey_facts {
         inner join ${journeys.SQL_TABLE_NAME} as j
           on j.journey_id=e.journey_id
 
-      group by 1,2,3,4,5,6
+      group by 1,2,3
 ;;
   }
 
@@ -42,6 +39,18 @@ view: journey_facts {
   dimension: journey_id  {
     primary_key: yes
     sql: ${TABLE}.journey_id;;
+  }
+
+  dimension: session_id {
+    type: string
+    sql: ${TABLE}.session_id ;;
+    hidden: yes
+  }
+
+  dimension: looker_visitor_id {
+    type: string
+    sql: ${TABLE}.looker_visitor_id ;;
+    hidden: yes
   }
 
   dimension_group: start {

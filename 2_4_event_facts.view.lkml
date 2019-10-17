@@ -25,12 +25,12 @@ view: event_facts {
         , o.total as order_value
         , es.event_sequence as event_sequence
         , es.source_sequence as source_sequence
-        , s.referrer as first_referrer
-        , s.campaign_source as first_source
-        , s.campaign_medium as first_medium
-        , s.campaign_name as first_campaign
-        , s.campaign_content as first_content
-        , s.campaign_term as first_term
+        , s.first_referrer
+        , s.first_source
+        , s.first_medium
+        , s.first_campaign
+        , s.first_content
+        , s.first_term
         , s.user_agent as user_agent
       from ${mapped_events.SQL_TABLE_NAME} as t
       left join ${event_sessions.SQL_TABLE_NAME} as es
