@@ -3,18 +3,15 @@ view: event_facts {
     # Rebuilds after sessions rebuilds
     sql_trigger_value: select count(*) from ${sessions.SQL_TABLE_NAME} ;;
     sql:
-    select
+      select
         t.event_id
         , j.journey_id
         , es.session_id
-
         , t.anonymous_id
         , t.looker_visitor_id
         , t.timestamp
-
         , t.event
         , t.event_source
-
         , t.referrer as referrer
         , t.campaign_source as campaign_source
         , t.campaign_medium as campaign_medium
@@ -24,19 +21,18 @@ view: event_facts {
         , t.ip as ip
         , t.page_url as url
         , t.page_path
-
         , coalesce(o.vendor, os.retailer) as vendor
         , o.total as order_value
         , es.event_sequence as event_sequence
         , es.source_sequence as source_sequence
-        , first_value(t.referrer) over (partition by es.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_referrer
-        , first_value(t.campaign_source) over (partition by es.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_source
-        , first_value(t.campaign_medium) over (partition by es.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_medium
-        , first_value(t.campaign_name) over (partition by es.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_campaign
-        , first_value(t.campaign_content) over (partition by es.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_content
-        , first_value(t.campaign_term) over (partition by es.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as first_term
-        , first_value(t.user_agent) over (partition by es.session_id order by t.timestamp rows between unbounded preceding and unbounded following) as user_agent
-        , first_value(o.transaction_at IGNORE NULLS) over (partition by t.looker_visitor_id order by o.order_sequence_number rows between unbounded preceding and unbounded following) as first_purchased
+        , first_value(t.referrer) over (w) as first_referrer
+        , first_value(t.campaign_source) over (w) as first_source
+        , first_value(t.campaign_medium) over (w) as first_medium
+        , first_value(t.campaign_name) over (w) as first_campaign
+        , first_value(t.campaign_content) over (w) as first_content
+        , first_value(t.campaign_term) over (w) as first_term
+        , first_value(t.user_agent) over (w) as user_agent
+        , first_value(o.transaction_at IGNORE NULLS) over (wo) as first_purchased
       from ${mapped_events.SQL_TABLE_NAME} as t
       left join ${event_sessions.SQL_TABLE_NAME} as es
         on t.event_id = es.event_id
@@ -46,12 +42,12 @@ view: event_facts {
         and es.event_sequence between j.first_journey_event_sequence and j.last_journey_event_sequence
       left join ${orders.SQL_TABLE_NAME} as o
         on t.looker_visitor_id = o.user_id
-        --and t.event_id = CONCAT(cast(o.transaction_at as string), o.user_id, '-r')
         and t.event_id=o.order_id
       left join javascript.outlink_sent_view as os
         on t.looker_visitor_id = os.user_id
-        --and t.event_id = CONCAT(cast(os.timestamp AS string), os.anonymous_id, '-t')
         and t.event_id=os.id
+      window w as (partition by es.session_id order by t.timestamp rows between unbounded preceding and unbounded following)
+        ,wo as (partition by t.looker_visitor_id order by o.order_sequence_number rows between unbounded preceding and unbounded following)
        ;;
   }
 

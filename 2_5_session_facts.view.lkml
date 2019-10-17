@@ -4,20 +4,19 @@ view: session_facts {
   # Rebuilds after track_facts rebuilds
   sql_trigger_value: select COUNT(*) from ${event_facts.SQL_TABLE_NAME} ;;
   sql:
-
+    select
+      t.*
+      ,last_value(t.first_source ignore nulls) over (w) as last_source
+      ,last_value(t.first_medium ignore nulls) over (w) as last_medium
+      ,last_value(t.first_campaign ignore nulls) over (w) as last_campaign
+      ,last_value(t.first_content ignore nulls) over (w) as last_content
+      ,last_value(t.first_term ignore nulls) over (w) as last_term
+      ,last_value(if(coalesce(t.first_source,t.first_medium,t.first_campaign,t.first_content,t.first_term) is null,null,t.end_at) ignore nulls) over (w) as last_end_at
+      ,timestamp_diff(t.end_at,last_value(if(coalesce(t.first_source,t.first_medium,t.first_campaign,t.first_content,t.first_term) is null,null,t.end_at) ignore nulls) over (w),hour) as last_diff_hours
+      ,if(u.created_at is null or u.created_at>t.session_start_at,false,true) as is_user_at_session
+    from(
       select
-        t.*
-        ,last_value(t.first_source ignore nulls) over (partition by t.looker_visitor_id order by t.end_at rows between unbounded preceding and current row) as last_source
-        ,last_value(t.first_medium ignore nulls) over (partition by t.looker_visitor_id order by t.end_at rows between unbounded preceding and current row) as last_medium
-        ,last_value(t.first_campaign ignore nulls) over (partition by t.looker_visitor_id order by t.end_at rows between unbounded preceding and current row) as last_campaign
-        ,last_value(t.first_content ignore nulls) over (partition by t.looker_visitor_id order by t.end_at rows between unbounded preceding and current row) as last_content
-        ,last_value(t.first_term ignore nulls) over (partition by t.looker_visitor_id order by t.end_at rows between unbounded preceding and current row) as last_term
-        ,last_value(if(coalesce(t.first_source,t.first_medium,t.first_campaign,t.first_content,t.first_term) is null,null,t.end_at) ignore nulls) over (partition by t.looker_visitor_id order by t.end_at rows between unbounded preceding and current row) as last_end_at
-        ,timestamp_diff(t.end_at,last_value(if(coalesce(t.first_source,t.first_medium,t.first_campaign,t.first_content,t.first_term) is null,null,t.end_at) ignore nulls) over (partition by t.looker_visitor_id order by t.end_at rows between unbounded preceding and current row),hour) as last_diff_hours
-        ,if(u.created_at is null or u.created_at>t.session_start_at,false,true) as is_user_at_session
-      from(
-      select
-          s.session_id
+        s.session_id
         , s.looker_visitor_id
         , t2s.first_referrer
         , t2s.first_source as first_source
@@ -52,13 +51,14 @@ view: session_facts {
         , count(distinct case when j.is_search = true then j.journey_id else null end) as number_of_search_journeys
 
       from ${sessions.SQL_TABLE_NAME} as s
-        inner join ${event_facts.SQL_TABLE_NAME} as t2s
-          on s.session_id = t2s.session_id
-        inner join ${journeys.SQL_TABLE_NAME} as j
-          on s.session_id = j.session_id and t2s.journey_id = j.journey_id
+      inner join ${event_facts.SQL_TABLE_NAME} as t2s
+        on s.session_id = t2s.session_id
+      inner join ${journeys.SQL_TABLE_NAME} as j
+        on s.session_id = j.session_id and t2s.journey_id = j.journey_id
       group by 1,2,3,4,5,6,7,8,9,10
-      ) t
-      left join ${catch_users.SQL_TABLE_NAME} u on u.id=t.looker_visitor_id
+    ) t
+    left join ${catch_users.SQL_TABLE_NAME} u on u.id=t.looker_visitor_id
+    window w as (partition by t.looker_visitor_id order by t.end_at rows between unbounded preceding and current row)
        ;;
 }
 
