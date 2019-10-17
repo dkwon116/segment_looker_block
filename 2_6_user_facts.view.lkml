@@ -25,10 +25,11 @@ view: user_facts {
             , first_value(s.first_term IGNORE NULLS) over(ws) as signup_term
           FROM ${sessions.SQL_TABLE_NAME} as s
           LEFT JOIN ${session_facts.SQL_TABLE_NAME} as sf
-          ON s.session_id = sf.session_id) as source
+          ON s.session_id = sf.session_id as source
           window w as (partition by s.looker_visitor_id order by sf.session_id rows between unbounded preceding and unbounded following)
-          ,ws as (partition by s.looker_visitor_id order by sf.number_of_signed_up_events desc rows between unbounded preceding and unbounded following)
-        group by 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17
+            ,ws as (partition by s.looker_visitor_id order by sf.number_of_signed_up_events desc rows between unbounded preceding and unbounded following)
+          group by 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17
+
       ), all_users as (
         SELECT
           s.looker_visitor_id as user_id
