@@ -10,6 +10,7 @@ view: sessions {
         ,timestamp as session_start_at
         ,row_number() over(w) as session_sequence_number
         ,lead(timestamp) over(w) as next_session_start_at
+
         ,referrer as first_referrer
         ,campaign_source as first_source
         ,campaign_medium as first_medium
@@ -26,6 +27,10 @@ view: sessions {
         ,last_value(campaign_term ignore nulls) over (w) as last_term
         ,last_value(if(coalesce(campaign_source,campaign_medium,campaign_name,campaign_content,campaign_term) is null,null,timestamp) ignore nulls) over (w) as last_start_at
         ,timestamp_diff(timestamp,last_value(if(coalesce(campaign_source,campaign_medium,campaign_name,campaign_content,campaign_term) is null,null,timestamp) ignore nulls) over (w),hour) as last_diff_hours
+
+        --,if(u.created_at is null or u.created_at>t.session_start_at,false,true) as is_user_at_session
+        ,null as is_user_at_session
+        ,null as is_pre_purchase_at_session
 
       from ${mapped_events.SQL_TABLE_NAME}
       where (idle_time_minutes > 30 or idle_time_minutes is null)
@@ -99,6 +104,128 @@ view: sessions {
        ;;
   }
 
+
+  dimension: first_referrer {
+    sql: ${TABLE}.first_referrer ;;
+    group_label: "Attribution"
+    type: string
+  }
+
+  dimension: first_referrer_domain {
+    sql: NET.REG_DOMAIN(${first_referrer}) ;;
+    group_label: "Attribution"
+    type: string
+  }
+
+  dimension: first_referral_name {
+    sql: split(${first_referrer_domain}, ".")[OFFSET(0)]  ;;
+    group_label: "Attribution"
+    type: string
+  }
+
+  dimension: first_campaign {
+    type:  string
+    sql: ${TABLE}.first_campaign ;;
+    group_label: "Attribution"
+  }
+
+  dimension: first_source {
+    type:  string
+    sql: ${TABLE}.first_source ;;
+    drill_fields: [first_campaign, first_medium]
+    group_label: "Attribution"
+  }
+
+  dimension: first_medium {
+    type:  string
+    sql: ${TABLE}.first_medium ;;
+    group_label: "Attribution"
+  }
+
+  dimension: first_content {
+    type:  string
+    sql: ${TABLE}.first_content ;;
+    group_label: "Attribution"
+  }
+
+  dimension: first_term {
+    type:  string
+    sql: ${TABLE}.first_term ;;
+    group_label: "Attribution"
+  }
+
+  dimension: last_referrer {
+    sql: ${TABLE}.last_referrer ;;
+    group_label: "Attribution"
+    type: string
+  }
+
+  dimension: last_referrer_domain {
+    sql: NET.REG_DOMAIN(${last_referrer}) ;;
+    group_label: "Attribution"
+    type: string
+  }
+
+  dimension: last_referral_name {
+    sql: split(${last_referrer_domain}, ".")[OFFSET(0)]  ;;
+    group_label: "Attribution"
+    type: string
+  }
+
+  dimension: last_campaign {
+    type:  string
+    sql: ${TABLE}.last_campaign ;;
+    group_label: "Attribution"
+  }
+
+  dimension: last_source {
+    type:  string
+    sql: ${TABLE}.last_source ;;
+    drill_fields: [first_campaign, first_medium]
+    group_label: "Attribution"
+  }
+
+  dimension: last_medium {
+    type:  string
+    sql: ${TABLE}.last_medium ;;
+    group_label: "Attribution"
+  }
+
+  dimension: last_content {
+    type:  string
+    sql: ${TABLE}.last_content ;;
+    group_label: "Attribution"
+  }
+
+  dimension: last_term {
+    type:  string
+    sql: ${TABLE}.last_term ;;
+    group_label: "Attribution"
+  }
+
+  dimension: last_diff_hours {
+    type: number
+    sql: ${TABLE}.last_diff_hours ;;
+  }
+
+  dimension: is_user_at_session {
+    group_label: "Session Flags"
+    type: yesno
+    sql: ${TABLE}.is_user_at_session ;;
+  }
+
+  dimension: is_pre_purchase_at_session {
+    type: yesno
+    sql: ${TABLE}.is_pre_purchase_at_session ;;
+    group_label: "Session Flags"
+  }
+
+
+
+
+
+
+
   measure: count {
     type: count
     drill_fields: [session_detail*]
@@ -119,7 +246,6 @@ view: sessions {
     group_label: "Session Facts"
     group_item_label: "Number of Repeat Sessions"
 
-
     filters: {
       field: is_first_session
       value: "Repeat Session"
@@ -132,6 +258,56 @@ view: sessions {
     drill_fields: [user_detail*]
     label: "Number of Unique Visitors"
   }
+
+  measure: user_session_count {
+    type: count
+    group_label: "Session Facts"
+    filters: {
+      field: is_user_at_session
+      value: "yes"
+    }
+  }
+
+  measure: guest_session_count {
+    type: count
+    group_label: "Session Facts"
+    filters: {
+      field: is_user_at_session
+      value: "no"
+    }
+  }
+
+  measure: unique_guest_count {
+    type: count_distinct
+    sql: ${looker_visitor_id} ;;
+    filters: {
+      field: is_user_at_session
+      value: "no"
+    }
+  }
+
+  measure: unique_user_count {
+    type: count_distinct
+    sql: ${looker_visitor_id} ;;
+    filters: {
+      field: is_user_at_session
+      value: "yes"
+    }
+  }
+
+  measure: unique_pre_purchase_visitor_count {
+    description: "Count of distinct users who have not made purchase yet"
+    type: count_distinct
+    sql: ${looker_visitor_id} ;;
+    filters: {
+      field: is_pre_purchase_at_session
+      value: "yes"
+    }
+  }
+
+
+
+
 
   measure: unique_first_session_visitor_count {
     type: count_distinct

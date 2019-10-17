@@ -5,60 +5,40 @@ view: session_facts {
   sql_trigger_value: select COUNT(*) from ${event_facts.SQL_TABLE_NAME} ;;
   sql:
     select
-      t.*
-      ,last_value(t.first_source ignore nulls) over (w) as last_source
-      ,last_value(t.first_medium ignore nulls) over (w) as last_medium
-      ,last_value(t.first_campaign ignore nulls) over (w) as last_campaign
-      ,last_value(t.first_content ignore nulls) over (w) as last_content
-      ,last_value(t.first_term ignore nulls) over (w) as last_term
-      ,last_value(if(coalesce(t.first_source,t.first_medium,t.first_campaign,t.first_content,t.first_term) is null,null,t.end_at) ignore nulls) over (w) as last_end_at
-      ,timestamp_diff(t.end_at,last_value(if(coalesce(t.first_source,t.first_medium,t.first_campaign,t.first_content,t.first_term) is null,null,t.end_at) ignore nulls) over (w),hour) as last_diff_hours
-      ,if(u.created_at is null or u.created_at>t.session_start_at,false,true) as is_user_at_session
-    from(
-      select
-        s.session_id
-        , s.looker_visitor_id
-        , t2s.first_referrer
-        , t2s.first_source as first_source
-        , t2s.first_medium as first_medium
-        , t2s.first_campaign as first_campaign
-        , t2s.first_content as first_content
-        , t2s.first_term as first_term
-        , t2s.first_purchased as first_ordered
-        , s.session_start_at
-        , max(t2s.timestamp) as end_at
+      s.session_id
+      , s.looker_visitor_id
+      , s.session_start_at
+      , max(t2s.timestamp) as session_end_at
 
-        -- event facts
-        , count(case when t2s.event_source = 'tracks' then 1 else null end) as number_of_track_events
-        , count(case when t2s.event_source = 'pages' then 1 else null end) as number_of_page_events
-        , count(case when t2s.event = "signed_up" then event_id else null end) as number_of_signed_up_events
-        , count(case when t2s.event in ("Search","Product Search", "Hashtag", "Category", "New", "Sale", "Brand") then event_id else null end) as count_product_discovery
-        , count(case when t2s.event = 'Product' then event_id else null end) as count_product_viewed
-        , count(distinct case when t2s.event = 'Product' then REGEXP_EXTRACT(t2s.page_path,"^/.*/(.*)$") else null end) as unique_count_product_viewed
-        , count(case when t2s.event = 'product_list_viewed' then event_id else null end) as count_product_list_viewed
-        , count(distinct case when t2s.event = 'product_list_viewed' then REGEXP_EXTRACT(t2s.page_path,"^/.*/(.*)$") else null end) as unique_count_product_list_viewed
-        , count(case when t2s.event = 'outlink_sent' then event_id else null end) as count_outlinked
-        , count(case when t2s.event = 'concierge_clicked' then event_id else null end) as count_concierge_clicked
-        , count(case when t2s.event = 'product_added_to_wishlist' then event_id else null end) as count_added_to_wishlist
+      -- event facts
+      , count(case when t2s.event_source = 'tracks' then 1 else null end) as number_of_track_events
+      , count(case when t2s.event_source = 'pages' then 1 else null end) as number_of_page_events
+      , count(case when t2s.event = "signed_up" then event_id else null end) as number_of_signed_up_events
+      , count(case when t2s.event in ("Search","Product Search", "Hashtag", "Category", "New", "Sale", "Brand") then event_id else null end) as count_product_discovery
+      , count(case when t2s.event = 'Product' then event_id else null end) as count_product_viewed
+      , count(distinct case when t2s.event = 'Product' then REGEXP_EXTRACT(t2s.page_path,"^/.*/(.*)$") else null end) as unique_count_product_viewed
+      , count(case when t2s.event = 'product_list_viewed' then event_id else null end) as count_product_list_viewed
+      , count(distinct case when t2s.event = 'product_list_viewed' then REGEXP_EXTRACT(t2s.page_path,"^/.*/(.*)$") else null end) as unique_count_product_list_viewed
+      , count(case when t2s.event = 'outlink_sent' then event_id else null end) as count_outlinked
+      , count(case when t2s.event = 'concierge_clicked' then event_id else null end) as count_concierge_clicked
+      , count(case when t2s.event = 'product_added_to_wishlist' then event_id else null end) as count_added_to_wishlist
 
-        -- order_facts
-        , count(case when t2s.event = 'order_completed' then event_id else null end) as count_order_completed
-        , sum(case when t2s.event = 'order_completed' then t2s.order_value else 0 end) as order_value
+      -- order_facts
+      , count(case when t2s.event = 'order_completed' then event_id else null end) as count_order_completed
+      , sum(case when t2s.event = 'order_completed' then t2s.order_value else 0 end) as order_value
 
-        -- journey facts
-        , count(distinct j.journey_id) as number_of_journeys
-        , count(distinct case when j.is_discovery = true then j.journey_id else null end) as number_of_discovery_journeys
-        , count(distinct case when j.is_search = true then j.journey_id else null end) as number_of_search_journeys
+      -- journey facts
+      , count(distinct j.journey_id) as number_of_journeys
+      , count(distinct case when j.is_discovery = true then j.journey_id else null end) as number_of_discovery_journeys
+      , count(distinct case when j.is_search = true then j.journey_id else null end) as number_of_search_journeys
 
-      from ${sessions.SQL_TABLE_NAME} as s
-      inner join ${event_facts.SQL_TABLE_NAME} as t2s
-        on s.session_id = t2s.session_id
-      inner join ${journeys.SQL_TABLE_NAME} as j
-        on s.session_id = j.session_id and t2s.journey_id = j.journey_id
-      group by 1,2,3,4,5,6,7,8,9,10
-    ) t
-    left join ${catch_users.SQL_TABLE_NAME} u on u.id=t.looker_visitor_id
-    window w as (partition by t.looker_visitor_id order by t.end_at rows between unbounded preceding and current row)
+    from ${sessions.SQL_TABLE_NAME} as s
+    inner join ${event_facts.SQL_TABLE_NAME} as t2s
+      on s.session_id = t2s.session_id
+    inner join ${journeys.SQL_TABLE_NAME} as j
+      on s.session_id = j.session_id and t2s.journey_id = j.journey_id
+    group by 1,2,3
+
        ;;
 }
 
@@ -69,97 +49,10 @@ dimension: session_id {
   sql: ${TABLE}.session_id ;;
 }
 
-dimension: first_referrer {
-  sql: ${TABLE}.first_referrer ;;
-  group_label: "Attribution"
-  type: string
-}
-
-dimension: first_referrer_domain {
-  sql: NET.REG_DOMAIN(${first_referrer}) ;;
-  group_label: "Attribution"
-  type: string
-}
-
-dimension: first_referral_name {
-  sql: split(${first_referrer_domain}, ".")[OFFSET(0)]  ;;
-  group_label: "Attribution"
-  type: string
-}
-
-dimension: first_campaign {
-  type:  string
-  sql: ${TABLE}.first_campaign ;;
-  group_label: "Attribution"
-}
-
-dimension: first_source {
-  type:  string
-  sql: ${TABLE}.first_source ;;
-  drill_fields: [first_campaign, first_medium]
-  group_label: "Attribution"
-}
-
-dimension: first_medium {
-  type:  string
-  sql: ${TABLE}.first_medium ;;
-  group_label: "Attribution"
-}
-
-dimension: first_content {
-  type:  string
-  sql: ${TABLE}.first_content ;;
-  group_label: "Attribution"
-}
-
-dimension: first_term {
-  type:  string
-  sql: ${TABLE}.first_term ;;
-  group_label: "Attribution"
-}
-
-dimension: last_campaign {
-  type:  string
-  sql: ${TABLE}.last_campaign ;;
-  group_label: "Attribution"
-}
-
-dimension: last_source {
-  type:  string
-  sql: ${TABLE}.last_source ;;
-  drill_fields: [first_campaign, first_medium]
-  group_label: "Attribution"
-}
-
-dimension: last_medium {
-  type:  string
-  sql: ${TABLE}.last_medium ;;
-  group_label: "Attribution"
-}
-
-dimension: last_content {
-  type:  string
-  sql: ${TABLE}.last_content ;;
-  group_label: "Attribution"
-}
-
-dimension: last_term {
-  type:  string
-  sql: ${TABLE}.last_term ;;
-  group_label: "Attribution"
-}
-
-dimension: last_diff_hours {
-  type: number
-  sql: ${TABLE}.last_diff_hours ;;
-}
-
-
-
 dimension_group: end {
   type: time
   timeframes: [time, date, week, month, raw]
-  sql: ${TABLE}.end_at ;;
+  sql: ${TABLE}.session_end_at ;;
 }
 
 dimension: referrer {
@@ -172,7 +65,6 @@ dimension: number_of_track_events_tier {
   sql: ${number_of_track_events} ;;
   tiers: [1, 5, 10, 20, 30, 60]
 }
-
 
 dimension: is_bounced_session {
   sql:
@@ -313,41 +205,7 @@ dimension_group: since_first_purchase {
 # ----- Measures -----
 
 
-measure: user_session_count {
-  type: count
-  group_label: "Session Facts"
-  filters: {
-    field: is_user_at_session
-    value: "yes"
-  }
-}
 
-measure: guest_session_count {
-  type: count
-  group_label: "Session Facts"
-  filters: {
-    field: is_user_at_session
-    value: "no"
-  }
-}
-
-  measure: unique_guest_count {
-    type: count_distinct
-    sql: ${sessions.looker_visitor_id} ;;
-    filters: {
-      field: is_user_at_session
-      value: "no"
-    }
-  }
-
-  measure: unique_user_count {
-    type: count_distinct
-    sql: ${sessions.looker_visitor_id} ;;
-    filters: {
-      field: is_user_at_session
-      value: "yes"
-    }
-  }
 
 measure: total_pages {
   type: sum
@@ -396,15 +254,7 @@ measure: session_duration_per_unique_visitor {
   value_format_name: decimal_2
 }
 
-measure: unique_pre_purchase_visitor_count {
-  description: "Count of distinct users who have not made purchase yet"
-  type: count_distinct
-  sql: ${sessions.looker_visitor_id} ;;
-  filters: {
-    field: is_pre_purchase
-    value: "yes"
-  }
-}
+
 
 measure: unique_signed_up_visitor {
   type: count_distinct
@@ -425,11 +275,10 @@ measure: unique_visitor_signup_conversion {
 
 measure: unique_guest_signup_conversion {
   type: number
-  sql: ${unique_signed_up_visitor} / NULLIF(${unique_guest_count},0);;
+  sql: ${unique_signed_up_visitor} / NULLIF(${sessions.unique_guest_count},0);;
   value_format_name: percent_2
   group_label: "Signup"
 }
-
 
 
 ######################################
@@ -939,11 +788,11 @@ measure: bounce_rate {
 
 
 set: campaign_details {
-  fields: [first_source, sessions.count, bounce_rate, avg_page_events, avg_session_duration_minutes, product_viewed_conversion_rate]
+  fields: [sessions.first_source, sessions.count, bounce_rate, avg_page_events, avg_session_duration_minutes, product_viewed_conversion_rate]
 }
 
 set: product_viewed_details {
-  fields: [first_source, product_viewed_activation_rate, products_viewed_per_session, product_viewed_conversion_rate]
+  fields: [sessions.first_source, product_viewed_activation_rate, products_viewed_per_session, product_viewed_conversion_rate]
 }
 
 set: order_completed_details {
