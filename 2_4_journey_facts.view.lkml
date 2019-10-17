@@ -278,6 +278,15 @@ view: journey_facts {
 
 #   Product list measures
 
+  measure: product_list_viewed_journey_count {
+    type: count
+    group_label: "Product List Viewed"
+    filters: {
+      field: product_lists_viewed
+      value: ">0"
+    }
+  }
+
   measure: product_list_viewed_total {
     type: sum
     sql: ${product_lists_viewed} ;;

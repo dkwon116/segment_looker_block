@@ -184,6 +184,14 @@ view: session_facts {
     group_label: "Session Flags"
   }
 
+  dimension: is_page_bounced_session {
+    sql:
+    CASE WHEN ${number_of_page_events} = 1 THEN 'Bounced Session'
+    ELSE 'Not Bounced Session' END
+    ;;
+    group_label: "Session Flags"
+  }
+
   dimension: session_duration_minutes {
     type: number
     sql: timestamp_diff(TIMESTAMP(${end_time}), TIMESTAMP(${sessions.start_time}), minute) ;;
@@ -718,6 +726,16 @@ view: session_facts {
     }
   }
 
+  measure: count_page_bounced_sessions {
+    type: count_distinct
+    sql: ${sessions.session_id} ;;
+
+    filters: {
+      field: is_page_bounced_session
+      value: "Bounced Session"
+    }
+  }
+
 ######################################
 #   measures for wishlist
   measure: added_to_wishlist_total {
@@ -850,6 +868,14 @@ view: session_facts {
   measure: bounce_rate {
     type: number
     sql: ${count_bounced_sessions} / ${sessions.count} ;;
+    value_format_name: percent_2
+    drill_fields: [campaign_details*]
+    group_label: "Session Facts"
+  }
+
+  measure: page_bounce_rate {
+    type: number
+    sql: ${count_page_bounced_sessions} / ${sessions.count} ;;
     value_format_name: percent_2
     drill_fields: [campaign_details*]
     group_label: "Session Facts"
