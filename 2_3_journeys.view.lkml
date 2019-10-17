@@ -10,19 +10,21 @@ view:journeys {
       -- mark start and end of journey creating first & last
       select
         case
-          when lag(e.journey_type) over (partition by e.session_id order by e.event_sequence) is null then e.event_sequence
-          when e.journey_type<>lag(e.journey_type) over (partition by e.session_id order by e.event_sequence) then e.event_sequence
+          when lag(e.journey_type) over (w) is null then e.event_sequence
+          when e.journey_type<>lag(e.journey_type) over (w) then e.event_sequence
           when e.journey_type in ('Brand', 'Category', 'Product Search', 'Hashtag')
-            and e.journey_type=lag(e.journey_type) over (partition by e.session_id order by e.event_sequence)
+            and e.journey_type=lag(e.journey_type) over (w)
             and e.journey_prop<>last_value(IF(e.journey_type in ('Brand', 'Category', 'Product Search', 'Hashtag'),e.journey_prop,NULL) ignore nulls) over (w1)
             then e.event_sequence
           else null
         end as first_journey_event_sequence
-        ,last_value(e.event_sequence) over (w) as last_session_event_sequence
+        ,last_value(e.event_sequence) over (we) as last_session_event_sequence
         ,*
       from ${event_sessions.SQL_TABLE_NAME} as e
-      window w as (partition by e.session_id order by e.event_sequence rows between unbounded preceding and unbounded following)
+      window
+      w as (partition by e.session_id order by e.event_sequence)
       ,w1 as (partition by e.session_id order by e.event_sequence rows between unbounded preceding and 1 preceding)
+      ,we as (partition by e.session_id order by e.event_sequence rows between unbounded preceding and unbounded following)
     )
     select
       concat(t.session_id, ' - ', cast(row_number() over(ws) AS string)) AS journey_id

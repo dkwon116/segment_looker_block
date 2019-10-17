@@ -2,14 +2,17 @@ view: page_facts {
   derived_table: {
 #     converting event to pageview durations and last page view to calculate sessions
     sql_trigger_value: select count(*) from ${mapped_events.SQL_TABLE_NAME} ;;
-    sql: SELECT
-       e.event_id AS event_id
-      ,e.looker_visitor_id
-      ,e.timestamp
-      ,CASE
-          WHEN timestamp_diff(LEAD(e.timestamp) OVER(PARTITION BY e.looker_visitor_id ORDER BY e.timestamp), e.timestamp, second) > 30*60 THEN NULL
-          ELSE timestamp_diff(LEAD(e.timestamp) OVER(PARTITION BY e.looker_visitor_id ORDER BY e.timestamp), e.timestamp, second) END AS lead_idle_time_condition
-FROM ${mapped_events.SQL_TABLE_NAME} AS e
+    sql:
+      SELECT
+        e.event_id AS event_id
+        ,e.looker_visitor_id
+        ,e.timestamp
+        ,CASE
+          WHEN timestamp_diff(LEAD(e.timestamp) OVER(w), e.timestamp, second) > 30*60 THEN NULL
+          ELSE timestamp_diff(LEAD(e.timestamp) OVER(w), e.timestamp, second)
+        END AS lead_idle_time_condition
+      FROM ${mapped_events.SQL_TABLE_NAME} AS e
+      window w as (PARTITION BY e.looker_visitor_id ORDER BY e.timestamp)
  ;;
   }
 
