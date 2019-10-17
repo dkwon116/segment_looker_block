@@ -25,18 +25,19 @@ view: event_facts {
         , o.total as order_value
         , es.event_sequence as event_sequence
         , es.source_sequence as source_sequence
-        , first_value(t.referrer) over (w) as first_referrer
-        , first_value(t.campaign_source) over (w) as first_source
-        , first_value(t.campaign_medium) over (w) as first_medium
-        , first_value(t.campaign_name) over (w) as first_campaign
-        , first_value(t.campaign_content) over (w) as first_content
-        , first_value(t.campaign_term) over (w) as first_term
-        , first_value(t.user_agent) over (w) as user_agent
-        , first_value(o.transaction_at IGNORE NULLS) over (wo) as first_purchased
+        , s.referrer as first_referrer
+        , s.campaign_source as first_source
+        , s.campaign_medium as first_medium
+        , s.campaign_name as first_campaign
+        , s.campaign_content as first_content
+        , s.campaign_term as first_term
+        , s.user_agent as user_agent
       from ${mapped_events.SQL_TABLE_NAME} as t
       left join ${event_sessions.SQL_TABLE_NAME} as es
         on t.event_id = es.event_id
         and t.looker_visitor_id = es.looker_visitor_id
+      left join ${sessions.SQL_TABLE_NAME} as s
+        on s.session_id = es.session_id
       left join ${journeys.SQL_TABLE_NAME} as j
         on j.session_id=es.session_id
         and es.event_sequence between j.first_journey_event_sequence and j.last_journey_event_sequence
@@ -78,12 +79,6 @@ view: event_facts {
     type: time
     timeframes: [time, hour, date, week, month]
     sql: ${TABLE}.timestamp ;;
-  }
-
-  dimension_group: first_purchased {
-    type: time
-    timeframes: [time, date, week, month]
-    sql: ${TABLE}.first_purchased ;;
   }
 
   dimension: first_referrer {
@@ -154,19 +149,6 @@ view: event_facts {
   dimension: anonymous_id {
     type: string
     sql: ${TABLE}.anonymous_id ;;
-  }
-
-  dimension: is_user_at_event {
-    group_label: "Event Flag"
-    type: yesno
-    sql: IF(${anonymous_id}=${looker_visitor_id}, false, true)  ;;
-  }
-
-  dimension: is_pre_purchase {
-    group_label: "Event Flag"
-    type: yesno
-    sql: IF(${first_purchased_time} IS NULL, true,
-    IF(${timestamp_time} <= ${first_purchased_time}, true, false))  ;;
   }
 
   dimension: sequence_number {

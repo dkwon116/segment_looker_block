@@ -10,6 +10,23 @@ view: sessions {
         ,timestamp as session_start_at
         ,row_number() over(w) as session_sequence_number
         ,lead(timestamp) over(w) as next_session_start_at
+        ,referrer as first_referrer
+        ,campaign_source as first_source
+        ,campaign_medium as first_medium
+        ,campaign_name as first_campaign
+        ,campaign_content as first_content
+        ,campaign_term as first_term
+        ,user_agent as user_agent
+
+        ,last_value(referrer ignore nulls) over (w) as last_referrer
+        ,last_value(campaign_source ignore nulls) over (w) as last_source
+        ,last_value(campaign_medium ignore nulls) over (w) as last_medium
+        ,last_value(campaign_name ignore nulls) over (w) as last_campaign
+        ,last_value(campaign_content ignore nulls) over (w) as last_content
+        ,last_value(campaign_term ignore nulls) over (w) as last_term
+        ,last_value(if(coalesce(campaign_source,campaign_medium,campaign_name,campaign_content,campaign_term) is null,null,timestamp) ignore nulls) over (w) as last_start_at
+        ,timestamp_diff(timestamp,last_value(if(coalesce(campaign_source,campaign_medium,campaign_name,campaign_content,campaign_term) is null,null,timestamp) ignore nulls) over (w),hour) as last_diff_hours
+
       from ${mapped_events.SQL_TABLE_NAME}
       where (idle_time_minutes > 30 or idle_time_minutes is null)
       window w as (partition by looker_visitor_id order by timestamp)
