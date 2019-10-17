@@ -91,6 +91,13 @@ explore: event_facts {
     relationship: many_to_one
   }
 
+  join: experiment_facts {
+    view_label: "0_Sessions"
+    type: left_outer
+    sql_on: ${experiment_sessions.experiment_id} =  ${experiment_facts.experiment_id};;
+    relationship: many_to_one
+  }
+
   join: journeys {
     view_label: "0_Journeys"
     type: left_outer

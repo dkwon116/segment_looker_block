@@ -10,20 +10,24 @@ view:journeys {
       -- mark start and end of journey creating first & last
       select
         case
-          when lag(e.journey_type) over (partition by e.session_id order by e.event_sequence) is null then e.event_sequence
-          when e.journey_type<>lag(e.journey_type) over (partition by e.session_id order by e.event_sequence) then e.event_sequence
+          when lag(e.journey_type) over (w) is null then e.event_sequence
+          when e.journey_type<>lag(e.journey_type) over (w) then e.event_sequence
           when e.journey_type in ('Brand', 'Category', 'Product Search', 'Hashtag')
-            and e.journey_type=lag(e.journey_type) over (partition by e.session_id order by e.event_sequence)
-            and e.journey_prop<>last_value(IF(e.journey_type in ('Brand', 'Category', 'Product Search', 'Hashtag'),e.journey_prop,NULL) ignore nulls) over (partition by e.session_id order by e.event_sequence rows between unbounded preceding and 1 preceding)
+            and e.journey_type=lag(e.journey_type) over (w)
+            and e.journey_prop<>last_value(IF(e.journey_type in ('Brand', 'Category', 'Product Search', 'Hashtag'),e.journey_prop,NULL) ignore nulls) over (w1)
             then e.event_sequence
           else null
         end as first_journey_event_sequence
-        ,last_value(e.event_sequence) over (partition by e.session_id order by e.event_sequence rows between unbounded preceding and unbounded following) as last_session_event_sequence
+        ,last_value(e.event_sequence) over (we) as last_session_event_sequence
         ,*
       from ${event_sessions.SQL_TABLE_NAME} as e
+      window
+      w as (partition by e.session_id order by e.event_sequence)
+      ,w1 as (partition by e.session_id order by e.event_sequence rows between unbounded preceding and 1 preceding)
+      ,we as (partition by e.session_id order by e.event_sequence rows between unbounded preceding and unbounded following)
     )
     select
-      concat(t.session_id, ' - ', cast(row_number() over(partition by t.session_id order by t.event_sequence) AS string)) AS journey_id
+      concat(t.session_id, ' - ', cast(row_number() over(ws) AS string)) AS journey_id
       ,t.session_id
       ,t.anonymous_id
       ,t.looker_visitor_id
@@ -35,40 +39,23 @@ view:journeys {
         when t.journey_type='Product Search'
           then true
         when t.journey_type in ('Brand','Category')
-          and lag(t.journey_type) over (partition by t.session_id order by t.event_sequence)='Search'
-          and (lag(t.journey_prop,2) over (partition by t.session_id order by t.event_sequence)<>t.journey_prop
-            or lag(t.journey_prop,2) over (partition by t.session_id order by t.event_sequence) is null)
+          and lag(t.journey_type) over (ws)='Search'
+          and (lag(t.journey_prop,2) over (ws)<>t.journey_prop
+            or lag(t.journey_prop,2) over (ws) is null)
           then true
         when t.journey_type='Search'
-          and lead(t.journey_type) over (partition by t.session_id order by t.event_sequence) in ('Brand', 'Category', 'Product Search')
-          and (lag(t.journey_prop) over (partition by t.session_id order by t.event_sequence)<>lead(t.journey_prop) over (partition by t.session_id order by t.event_sequence)
-            or lag(t.journey_prop) over (partition by t.session_id order by t.event_sequence) is null)
+          and lead(t.journey_type) over (ws) in ('Brand', 'Category', 'Product Search')
+          and (lag(t.journey_prop) over (ws)<>lead(t.journey_prop) over (ws)
+            or lag(t.journey_prop) over (ws) is null)
           then true
         else false
       end as is_search
       ,IF(t.journey_type IN ('Brand', 'Category', 'Product Search', 'Hashtag', 'Sale', 'New'), true, false) as is_discovery
       ,t.first_journey_event_sequence
-      ,ifnull(lead(t.first_journey_event_sequence) over (partition by t.session_id order by t.event_sequence)-1,t.last_session_event_sequence) as last_journey_event_sequence
+      ,ifnull(lead(t.first_journey_event_sequence) over (ws)-1,t.last_session_event_sequence) as last_journey_event_sequence
     from t
     where t.first_journey_event_sequence is not null
-
---lag(t.journey_type,2) over (partition by t.session_id order by t.event_sequence)='Search'
---and lag(t.journey_type) over (partition by t.session_id order by t.event_sequence) in ('Brand', 'Category', 'Product Search')
---and lag(t.journey_type) over (partition by t.session_id order by t.event_sequence)=lead(t.journey_type) over (partition by t.session_id order by t.event_sequence)
---and lag(t.journey_prop) over (partition by t.session_id order by t.event_sequence)=lead(t.journey_prop) over (partition by t.session_id order by t.event_sequence)
-
-
---not(
---            (lead(t.journey_type) over (partition by t.session_id order by t.event_sequence) not in ('Brand', 'Category', 'Product Search'))
---            or
---            (
---              lag(t.journey_type) over (partition by t.session_id order by t.event_sequence) in ('Brand', 'Category', 'Product Search')
---              and lag(t.journey_type) over (partition by t.session_id order by t.event_sequence)=lead(t.journey_type) over (partition by t.session_id order by t.event_sequence)
---              and lag(t.journey_prop) over (partition by t.session_id order by t.event_sequence)<>lead(t.journey_prop) over (partition by t.session_id order by t.event_sequence)
---              )
---          ) then true
-
-
+    window ws as (partition by t.session_id order by t.event_sequence)
       ;;
   }
 
