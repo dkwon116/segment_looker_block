@@ -18,16 +18,15 @@ view: user_facts {
     , last_value(s.last_campaign IGNORE NULLS) over(w) as last_campaign
     , last_value(s.last_content IGNORE NULLS) over(w) as last_content
     , last_value(s.last_term IGNORE NULLS) over(w) as last_term
-    , first_value(s.first_source IGNORE NULLS) over(ws) as signup_source
-    , first_value(s.first_medium IGNORE NULLS) over(ws) as signup_medium
-    , first_value(s.first_campaign IGNORE NULLS) over(ws) as signup_campaign
-    , first_value(s.first_content IGNORE NULLS) over(ws) as signup_content
-    , first_value(s.first_term IGNORE NULLS) over(ws) as signup_term
+    , first_value(if(sf.number_of_signed_up_events>0,s.first_source,null) IGNORE NULLS) over(w) as signup_source
+    , first_value(if(sf.number_of_signed_up_events>0,s.first_medium,null) IGNORE NULLS) over(w) as signup_medium
+    , first_value(if(sf.number_of_signed_up_events>0,s.first_campaign,null) IGNORE NULLS) over(w) as signup_campaign
+    , first_value(if(sf.number_of_signed_up_events>0,s.first_content,null) IGNORE NULLS) over(w) as signup_content
+    , first_value(if(sf.number_of_signed_up_events>0,s.first_term,null) IGNORE NULLS) over(w) as signup_term
   FROM ${sessions.SQL_TABLE_NAME} as s
   LEFT JOIN ${session_facts.SQL_TABLE_NAME} as sf
   ON s.session_id = sf.session_id
-  window w as (partition by s.looker_visitor_id order by sf.session_id rows between unbounded preceding and unbounded following)
-  ,ws as (partition by s.looker_visitor_id order by sf.number_of_signed_up_events desc rows between unbounded preceding and unbounded following)
+  window w as (partition by s.looker_visitor_id order by s.session_start_at rows between unbounded preceding and unbounded following)
 )
 , all_users as (
   SELECT

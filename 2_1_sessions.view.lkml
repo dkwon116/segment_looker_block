@@ -28,10 +28,6 @@ view: sessions {
         ,last_value(if(coalesce(campaign_source,campaign_medium,campaign_name,campaign_content,campaign_term) is null,null,timestamp) ignore nulls) over (w) as last_start_at
         ,timestamp_diff(timestamp,last_value(if(coalesce(campaign_source,campaign_medium,campaign_name,campaign_content,campaign_term) is null,null,timestamp) ignore nulls) over (w),hour) as last_diff_hours
 
-        --,if(u.created_at is null or u.created_at>t.session_start_at,false,true) as is_user_at_session
-        ,null as is_user_at_session
-        ,null as is_pre_purchase_at_session
-
       from ${mapped_events.SQL_TABLE_NAME}
       where (idle_time_minutes > 30 or idle_time_minutes is null)
       window w as (partition by looker_visitor_id order by timestamp)
@@ -208,17 +204,7 @@ view: sessions {
     sql: ${TABLE}.last_diff_hours ;;
   }
 
-  dimension: is_user_at_session {
-    group_label: "Session Flags"
-    type: yesno
-    sql: ${TABLE}.is_user_at_session ;;
-  }
 
-  dimension: is_pre_purchase_at_session {
-    type: yesno
-    sql: ${TABLE}.is_pre_purchase_at_session ;;
-    group_label: "Session Flags"
-  }
 
 
 
@@ -258,55 +244,6 @@ view: sessions {
     drill_fields: [user_detail*]
     label: "Number of Unique Visitors"
   }
-
-  measure: user_session_count {
-    type: count
-    group_label: "Session Facts"
-    filters: {
-      field: is_user_at_session
-      value: "yes"
-    }
-  }
-
-  measure: guest_session_count {
-    type: count
-    group_label: "Session Facts"
-    filters: {
-      field: is_user_at_session
-      value: "no"
-    }
-  }
-
-  measure: unique_guest_count {
-    type: count_distinct
-    sql: ${looker_visitor_id} ;;
-    filters: {
-      field: is_user_at_session
-      value: "no"
-    }
-  }
-
-  measure: unique_user_count {
-    type: count_distinct
-    sql: ${looker_visitor_id} ;;
-    filters: {
-      field: is_user_at_session
-      value: "yes"
-    }
-  }
-
-  measure: unique_pre_purchase_visitor_count {
-    description: "Count of distinct users who have not made purchase yet"
-    type: count_distinct
-    sql: ${looker_visitor_id} ;;
-    filters: {
-      field: is_pre_purchase_at_session
-      value: "yes"
-    }
-  }
-
-
-
 
 
   measure: unique_first_session_visitor_count {

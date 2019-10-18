@@ -7,6 +7,9 @@ view: session_facts {
     select
       s.session_id
       , s.looker_visitor_id
+      , if(f.first_signed_up is null or f.first_signed_up>s.session_start_at,true,false) as is_guest_at_session
+      , if(f.first_outlink_sent is null or f.first_outlink_sent>s.session_start_at,true,false) as is_pre_outlinked_at_session
+      , if(f.first_order_completed is null or f.first_order_completed>s.session_start_at,true,false) as is_pre_purchase_at_session
       , s.session_start_at
       , max(t2s.timestamp) as session_end_at
 
@@ -37,7 +40,9 @@ view: session_facts {
       on s.session_id = t2s.session_id
     inner join ${journeys.SQL_TABLE_NAME} as j
       on s.session_id = j.session_id and t2s.journey_id = j.journey_id
-    group by 1,2,3
+    left join ${first_events.SQL_TABLE_NAME} as f
+      on f.looker_visitor_id=s.looker_visitor_id
+    group by 1,2,3,4,5,6
 
        ;;
 }
@@ -181,6 +186,26 @@ dimension_group: since_first_purchase {
   sql_end: ${sessions.start_raw} ;;
 }
 
+  dimension: is_guest_at_session {
+    group_label: "Session Flags"
+    type: yesno
+    sql: ${TABLE}.is_guest_at_session ;;
+  }
+
+  dimension: is_pre_purchase_at_session {
+    type: yesno
+    sql: ${TABLE}.is_pre_purchase_at_session ;;
+    group_label: "Session Flags"
+  }
+
+  dimension: is_pre_outlinked_at_session {
+    type: yesno
+    sql: ${TABLE}.is_pre_outlinked_at_session ;;
+    group_label: "Session Flags"
+  }
+
+
+
 # ----- Measures -----
 
 
@@ -235,6 +260,42 @@ measure: session_duration_per_unique_visitor {
 
 
 
+  measure: user_session_count {
+    type: count
+    group_label: "Session Facts"
+    filters: {
+      field: is_guest_at_session
+      value: "no"
+    }
+  }
+
+  measure: guest_session_count {
+    type: count
+    group_label: "Session Facts"
+    filters: {
+      field: is_guest_at_session
+      value: "yes"
+    }
+  }
+
+  measure: unique_guest_count {
+    type: count_distinct
+    sql: ${sessions.looker_visitor_id} ;;
+    filters: {
+      field: is_guest_at_session
+      value: "yes"
+    }
+  }
+
+  measure: unique_user_count {
+    type: count_distinct
+    sql: ${sessions.looker_visitor_id} ;;
+    filters: {
+      field: is_guest_at_session
+      value: "no"
+    }
+  }
+
 measure: unique_signed_up_visitor {
   type: count_distinct
   sql: ${sessions.looker_visitor_id} ;;
@@ -252,9 +313,9 @@ measure: unique_visitor_signup_conversion {
   group_label: "Signup"
 }
 
-measure: unique_guest_signup_conversion {
+measure: unique_first_signedup_conversion {
   type: number
-  sql: ${unique_signed_up_visitor} / NULLIF(${sessions.unique_guest_count},0);;
+  sql: ${unique_signed_up_visitor} / NULLIF(${unique_guest_count},0);;
   value_format_name: percent_2
   group_label: "Signup"
 }
@@ -384,7 +445,7 @@ measure: product_list_viewed_conversion_rate {
   drill_fields: [product_viewed_details*]
 }
 
-measure: product_list_viewed_conversion_rate_per_session {
+measure: product_list_viewed_conversion_rate_by_session {
   type: number
   sql: ${total_product_list_viewed_sessions} / ${sessions.unique_session_count} ;;
   value_format_name: percent_0
@@ -464,7 +525,7 @@ measure: product_viewed_conversion_rate {
   drill_fields: [product_viewed_details*]
 }
 
-measure: product_viewed_conversion_rate_per_session {
+measure: product_viewed_conversion_rate_by_session {
   type: number
   sql: ${total_product_viewed_sessions} / ${sessions.unique_session_count} ;;
   value_format_name: percent_0
@@ -483,6 +544,46 @@ measure: product_viewed_activation_rate {
 
 ######################################
 #   measures for outlink
+  measure: pre_outlinked_session_count {
+    type: count
+    filters: {
+      field: is_pre_outlinked_at_session
+      value: "yes"
+    }
+    group_label: "Outlinked"
+  }
+
+  measure: post_outlinked_session_count {
+    type: count
+    filters: {
+      field: is_pre_outlinked_at_session
+      value: "no"
+    }
+    group_label: "Outlinked"
+  }
+
+  measure: unique_pre_outlinked_visitor_count {
+    description: "Count of distinct users who have not made outlink yet"
+    type: count_distinct
+    sql: ${sessions.looker_visitor_id} ;;
+    filters: {
+      field: is_pre_outlinked_at_session
+      value: "yes"
+    }
+    group_label: "Outlinked"
+  }
+
+  measure: unique_post_outlinked_visitor_count {
+    description: "Count of distinct users who have not made outlink yet"
+    type: count_distinct
+    sql: ${sessions.looker_visitor_id} ;;
+    filters: {
+      field: is_pre_outlinked_at_session
+      value: "no"
+    }
+    group_label: "Outlinked"
+  }
+
 measure: outlinked_total {
   type: sum
   sql: ${outlinked} ;;
@@ -507,6 +608,36 @@ measure: total_outlinked_users {
     value: ">0"
   }
 }
+
+  measure: total_first_outlinked_users {
+    type: count_distinct
+    sql: ${sessions.looker_visitor_id} ;;
+    group_label: "Outlinked"
+
+    filters: {
+      field: outlinked
+      value: ">0"
+    }
+    filters:{
+      field: is_pre_outlinked_at_session
+      value: "yes"
+    }
+  }
+
+  measure: total_repeat_outlinked_users {
+    type: count_distinct
+    sql: ${sessions.looker_visitor_id} ;;
+    group_label: "Outlinked"
+
+    filters: {
+      field: outlinked
+      value: ">0"
+    }
+    filters:{
+      field: is_pre_outlinked_at_session
+      value: "no"
+    }
+  }
 
 measure: total_outlinked_sessions {
   type: count_distinct
@@ -533,7 +664,21 @@ measure: outlinked_conversion_rate {
   group_label: "Outlinked"
 }
 
-measure: outlinked_conversion_rate_per_session {
+measure: first_outlinked_conversion_rate {
+  type: number
+  sql: ${total_first_outlinked_users} / NULLIF(${unique_pre_outlinked_visitor_count}, 0) ;;
+  value_format_name: percent_2
+  group_label: "Outlinked"
+}
+
+measure: repeat_outlinked_conversion_rate {
+  type: number
+  sql: ${total_repeat_outlinked_users} / NULLIF(${unique_post_outlinked_visitor_count}, 0) ;;
+  value_format_name: percent_2
+  group_label: "Outlinked"
+}
+
+measure: outlinked_conversion_rate_by_session {
   type: number
   sql: ${total_outlinked_sessions} / NULLIF(${sessions.unique_session_count}, 0) ;;
   value_format_name: percent_2
@@ -546,6 +691,8 @@ measure: outlinked_user_value {
   value_format_name: decimal_0
   group_label: "Outlinked"
 }
+
+
 
 
 ######################################
@@ -593,7 +740,7 @@ measure: concierge_conversion_rate {
   group_label: "Concierge"
 }
 
-measure: concierge_conversion_rate_per_session {
+measure: concierge_conversion_rate_by_session {
   type: number
   sql: ${total_concierge_clicked_sessions} / ${sessions.unique_session_count} ;;
   value_format_name: percent_2
@@ -655,7 +802,7 @@ measure: added_to_wishlist_conversion_rate {
   group_label: "Wishlist"
 }
 
-measure: added_to_wishlist_conversion_rate_per_session {
+measure: added_to_wishlist_conversion_rate_by_session {
   type: number
   sql: ${total_added_to_wishlist_sessions} / ${sessions.unique_session_count} ;;
   value_format_name: percent_2
@@ -664,7 +811,47 @@ measure: added_to_wishlist_conversion_rate_per_session {
 
 
 ######################################
-#   measures for outlink
+#   measures for order
+
+
+  measure: pre_purchase_session_count {
+    type: count
+    filters: {
+      field: is_pre_purchase_at_session
+      value: "yes"
+    }
+    group_label: "Order Completed"
+  }
+
+  measure: post_purchase_session_count {
+    type: count
+    filters: {
+      field: is_pre_purchase_at_session
+      value: "no"
+    }
+    group_label: "Order Completed"
+  }
+
+  measure: unique_pre_purchase_visitor_count {
+    description: "Count of distinct users who have not made purchase yet"
+    type: count_distinct
+    sql: ${sessions.looker_visitor_id} ;;
+    filters: {
+      field: is_pre_purchase_at_session
+      value: "yes"
+    }
+    group_label: "Order Completed"
+  }
+
+  measure: unique_post_purchase_visitor_count {
+    type: count_distinct
+    sql: ${sessions.looker_visitor_id} ;;
+    filters: {
+      field: is_pre_purchase_at_session
+      value: "no"
+    }
+    group_label: "Order Completed"
+  }
 
 measure: order_completed_total {
   type: sum
@@ -697,6 +884,36 @@ measure: total_order_completed_users {
   }
 }
 
+  measure: total_first_order_completed_users {
+    type: count_distinct
+    sql: ${sessions.looker_visitor_id} ;;
+    group_label: "Order Completed"
+
+    filters: {
+      field: order_completed
+      value: ">0"
+    }
+    filters : {
+      field: is_pre_purchase_at_session
+      value: "yes"
+    }
+  }
+
+  measure: total_repeat_order_completed_users {
+    type: count_distinct
+    sql: ${sessions.looker_visitor_id} ;;
+    group_label: "Order Completed"
+
+    filters: {
+      field: order_completed
+      value: ">0"
+    }
+    filters : {
+      field: is_pre_purchase_at_session
+      value: "no"
+    }
+  }
+
 measure: total_order_completed_sessions {
   type: count_distinct
   sql: ${sessions.session_id} ;;
@@ -723,7 +940,25 @@ measure: order_completed_conversion_rate {
   drill_fields: [order_completed_details*]
 }
 
-measure: order_completed_conversion_rate_per_session {
+  measure: first_order_completed_conversion_rate {
+    type: number
+    sql: ${total_first_order_completed_users} / ${unique_pre_purchase_visitor_count} ;;
+    value_format_name: percent_2
+    group_label: "Order Completed"
+    drill_fields: [order_completed_details*]
+  }
+
+  measure: repeat_order_completed_conversion_rate {
+    type: number
+    sql: ${total_repeat_order_completed_users} / ${unique_post_purchase_visitor_count} ;;
+    value_format_name: percent_2
+    group_label: "Order Completed"
+    drill_fields: [order_completed_details*]
+  }
+
+
+
+measure: order_completed_conversion_rate_by_session {
   type: number
   sql: ${total_order_completed_sessions} / ${sessions.unique_session_count} ;;
   value_format_name: percent_2
