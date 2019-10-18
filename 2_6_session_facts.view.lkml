@@ -206,6 +206,111 @@ dimension_group: since_first_purchase {
 
 
 
+  dimension: first_referrer {
+    sql: ${sessions.first_referrer} ;;
+    group_label: "Attribution"
+    type: string
+  }
+
+  dimension: first_referrer_domain {
+    sql: NET.REG_DOMAIN(${first_referrer}) ;;
+    group_label: "Attribution"
+    type: string
+  }
+
+  dimension: first_referral_name {
+    sql: split(${first_referrer_domain}, ".")[OFFSET(0)]  ;;
+    group_label: "Attribution"
+    type: string
+  }
+
+  dimension: first_campaign {
+    type:  string
+    sql: ${sessions.first_campaign} ;;
+    group_label: "Attribution"
+  }
+
+  dimension: first_source {
+    type:  string
+    sql: ${sessions.first_source} ;;
+    drill_fields: [first_campaign, first_medium]
+    group_label: "Attribution"
+  }
+
+  dimension: first_medium {
+    type:  string
+    sql: ${sessions.first_medium} ;;
+    group_label: "Attribution"
+  }
+
+  dimension: first_content {
+    type:  string
+    sql: ${sessions.first_content} ;;
+    group_label: "Attribution"
+  }
+
+  dimension: first_term {
+    type:  string
+    sql: ${sessions.first_term} ;;
+    group_label: "Attribution"
+  }
+
+  dimension: last_referrer {
+    sql: ${sessions.last_referrer} ;;
+    group_label: "Attribution"
+    type: string
+  }
+
+  dimension: last_referrer_domain {
+    sql: NET.REG_DOMAIN(${last_referrer}) ;;
+    group_label: "Attribution"
+    type: string
+  }
+
+  dimension: last_referral_name {
+    sql: split(${last_referrer_domain}, ".")[OFFSET(0)]  ;;
+    group_label: "Attribution"
+    type: string
+  }
+
+  dimension: last_campaign {
+    type:  string
+    sql: ${sessions.last_campaign} ;;
+    group_label: "Attribution"
+  }
+
+  dimension: last_source {
+    type:  string
+    sql: ${sessions.last_source} ;;
+    drill_fields: [first_campaign, first_medium]
+    group_label: "Attribution"
+  }
+
+  dimension: last_medium {
+    type:  string
+    sql: ${sessions.last_medium} ;;
+    group_label: "Attribution"
+  }
+
+  dimension: last_content {
+    type:  string
+    sql: ${sessions.last_content} ;;
+    group_label: "Attribution"
+  }
+
+  dimension: last_term {
+    type:  string
+    sql: ${sessions.last_term} ;;
+    group_label: "Attribution"
+  }
+
+  dimension: last_diff_hours {
+    type: number
+    sql: ${sessions.last_diff_hours} ;;
+  }
+
+
+
 # ----- Measures -----
 
 

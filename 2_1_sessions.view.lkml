@@ -105,24 +105,28 @@ view: sessions {
     sql: ${TABLE}.first_referrer ;;
     group_label: "Attribution"
     type: string
+    hidden: yes
   }
 
   dimension: first_referrer_domain {
     sql: NET.REG_DOMAIN(${first_referrer}) ;;
     group_label: "Attribution"
     type: string
+    hidden: yes
   }
 
   dimension: first_referral_name {
     sql: split(${first_referrer_domain}, ".")[OFFSET(0)]  ;;
     group_label: "Attribution"
     type: string
+    hidden: yes
   }
 
   dimension: first_campaign {
     type:  string
     sql: ${TABLE}.first_campaign ;;
     group_label: "Attribution"
+    hidden: yes
   }
 
   dimension: first_source {
@@ -130,48 +134,56 @@ view: sessions {
     sql: ${TABLE}.first_source ;;
     drill_fields: [first_campaign, first_medium]
     group_label: "Attribution"
+    hidden: yes
   }
 
   dimension: first_medium {
     type:  string
     sql: ${TABLE}.first_medium ;;
     group_label: "Attribution"
+    hidden: yes
   }
 
   dimension: first_content {
     type:  string
     sql: ${TABLE}.first_content ;;
     group_label: "Attribution"
+    hidden: yes
   }
 
   dimension: first_term {
     type:  string
     sql: ${TABLE}.first_term ;;
     group_label: "Attribution"
+    hidden: yes
   }
 
   dimension: last_referrer {
     sql: ${TABLE}.last_referrer ;;
     group_label: "Attribution"
     type: string
+    hidden: yes
   }
 
   dimension: last_referrer_domain {
     sql: NET.REG_DOMAIN(${last_referrer}) ;;
     group_label: "Attribution"
     type: string
+    hidden: yes
   }
 
   dimension: last_referral_name {
     sql: split(${last_referrer_domain}, ".")[OFFSET(0)]  ;;
     group_label: "Attribution"
     type: string
+    hidden: yes
   }
 
   dimension: last_campaign {
     type:  string
     sql: ${TABLE}.last_campaign ;;
     group_label: "Attribution"
+    hidden: yes
   }
 
   dimension: last_source {
@@ -179,29 +191,34 @@ view: sessions {
     sql: ${TABLE}.last_source ;;
     drill_fields: [first_campaign, first_medium]
     group_label: "Attribution"
+    hidden: yes
   }
 
   dimension: last_medium {
     type:  string
     sql: ${TABLE}.last_medium ;;
     group_label: "Attribution"
+    hidden: yes
   }
 
   dimension: last_content {
     type:  string
     sql: ${TABLE}.last_content ;;
     group_label: "Attribution"
+    hidden: yes
   }
 
   dimension: last_term {
     type:  string
     sql: ${TABLE}.last_term ;;
     group_label: "Attribution"
+    hidden: yes
   }
 
   dimension: last_diff_hours {
     type: number
     sql: ${TABLE}.last_diff_hours ;;
+    hidden: yes
   }
 
 
