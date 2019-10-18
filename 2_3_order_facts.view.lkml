@@ -302,7 +302,7 @@ view: order_facts {
 
   dimension: since_first_visit {
     type: number
-    sql: date_diff(DATE(${transaction_at_raw}), ${user_facts.first_visited_raw}, MONTH) ;;
+    sql: date_diff(DATE(${transaction_at_raw}), DATE(${user_facts.first_visited_raw}), MONTH) ;;
   }
 
   dimension: since_first_purchase {
