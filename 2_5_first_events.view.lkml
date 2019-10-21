@@ -17,8 +17,7 @@ view: first_events {
         ,max(if(e.event = "order_completed",e.timestamp,null)) as last_order_completed
         ,count(if(e.event = "order_completed",e.timestamp,null)) as number_of_order_completed
       from ${event_facts.SQL_TABLE_NAME} e
-      where e.event_source='tracks'
-      and e.event in ("signed_up","outlink_sent","product_added_to_wishlist","order_completed")
+      where e.event in ("signed_up","outlink_sent","product_added_to_wishlist","order_completed")
       group by 1
       ;;
   }

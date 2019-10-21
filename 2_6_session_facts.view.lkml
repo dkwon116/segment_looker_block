@@ -575,6 +575,13 @@ measure: products_viewed_per_session {
   drill_fields: [campaign_details*, product_viewed_details*]
 }
 
+  measure: products_viewed_per_product_viewed_session {
+    type: number
+    sql: ${products_viewed_total} / ${total_product_viewed_sessions} ;;
+    value_format_name:decimal_2
+    group_label: "Product Viewed"
+  }
+
 measure: products_viewed_per_user {
   type: number
   sql: ${products_viewed_total} / ${sessions.unique_visitor_count} ;;
@@ -695,6 +702,14 @@ measure: outlinked_total {
   group_label: "Outlinked"
 }
 
+  measure: outlinked_per_outlinked_session {
+    type: number
+    sql: ${outlinked_total} / ${total_outlinked_sessions} ;;
+    value_format_name:decimal_2
+    group_label: "Outlinked"
+    drill_fields: [campaign_details*, product_viewed_details*]
+  }
+
 measure: outlinked_per_session {
   type: average
   sql: ${outlinked} ;;
@@ -732,6 +747,36 @@ measure: total_outlinked_users {
   measure: total_repeat_outlinked_users {
     type: count_distinct
     sql: ${sessions.looker_visitor_id} ;;
+    group_label: "Outlinked"
+
+    filters: {
+      field: outlinked
+      value: ">0"
+    }
+    filters:{
+      field: is_pre_outlinked_at_session
+      value: "no"
+    }
+  }
+
+  measure: total_first_outlinked_sessions {
+    type: count_distinct
+    sql: ${sessions.session_id} ;;
+    group_label: "Outlinked"
+
+    filters: {
+      field: outlinked
+      value: ">0"
+    }
+    filters:{
+      field: is_pre_outlinked_at_session
+      value: "yes"
+    }
+  }
+
+  measure: total_repeat_outlinked_sessions {
+    type: count_distinct
+    sql: ${sessions.session_id} ;;
     group_label: "Outlinked"
 
     filters: {
@@ -783,6 +828,24 @@ measure: repeat_outlinked_conversion_rate {
   group_label: "Outlinked"
 }
 
+  measure: first_outlinked_conversion_rate_by_session {
+    type: number
+    sql: ${total_first_outlinked_sessions} / NULLIF(${pre_outlinked_session_count}, 0) ;;
+    value_format_name: percent_2
+    group_label: "Outlinked"
+  }
+
+  measure: repeat_outlinked_conversion_rate_by_session {
+    type: number
+    sql: ${total_repeat_outlinked_sessions} / NULLIF(${post_outlinked_session_count}, 0) ;;
+    value_format_name: percent_2
+    group_label: "Outlinked"
+  }
+
+
+
+
+
 measure: outlinked_conversion_rate_by_session {
   type: number
   sql: ${total_outlinked_sessions} / NULLIF(${sessions.unique_session_count}, 0) ;;
@@ -815,6 +878,14 @@ measure: concierge_per_session {
   group_label: "Concierge"
   drill_fields: [campaign_details*, product_viewed_details*]
 }
+
+  measure: concierge_per_concierge_session {
+    type: number
+    sql: ${concierge_clicked_total} / ${total_concierge_clicked_sessions} ;;
+    value_format_name:decimal_2
+    group_label: "Concierge"
+    drill_fields: [campaign_details*, product_viewed_details*]
+  }
 
 measure: total_concierge_clicked_users {
   type: count_distinct
@@ -877,6 +948,14 @@ measure: added_to_wishlist_per_session {
   group_label: "Wishlist"
   drill_fields: [campaign_details*, product_viewed_details*]
 }
+
+  measure: added_to_wishlist_per_added_to_wishlist_session {
+    type: number
+    sql: ${added_to_wishlist_total} / ${total_added_to_wishlist_sessions};;
+    value_format_name:decimal_2
+    group_label: "Wishlist"
+    drill_fields: [campaign_details*, product_viewed_details*]
+  }
 
 measure: total_added_to_wishlist_users {
   type: count_distinct
@@ -1019,6 +1098,36 @@ measure: total_order_completed_users {
     }
   }
 
+  measure: total_first_order_completed_sessions {
+    type: count_distinct
+    sql: ${sessions.session_id} ;;
+    group_label: "Order Completed"
+
+    filters: {
+      field: order_completed
+      value: ">0"
+    }
+    filters : {
+      field: is_pre_purchase_at_session
+      value: "yes"
+    }
+  }
+
+  measure: total_repeat_order_completed_sessions {
+    type: count_distinct
+    sql: ${sessions.session_id} ;;
+    group_label: "Order Completed"
+
+    filters: {
+      field: order_completed
+      value: ">0"
+    }
+    filters : {
+      field: is_pre_purchase_at_session
+      value: "no"
+    }
+  }
+
 measure: total_order_completed_sessions {
   type: count_distinct
   sql: ${sessions.session_id} ;;
@@ -1039,7 +1148,7 @@ measure: order_completed_per_converted_user {
 
 measure: order_completed_conversion_rate {
   type: number
-  sql: ${total_order_completed_users} / ${sessions.unique_visitor_count} ;;
+  sql: ${total_order_completed_users} / NULLIF(${sessions.unique_visitor_count},0) ;;
   value_format_name: percent_2
   group_label: "Order Completed"
   drill_fields: [order_completed_details*]
@@ -1047,7 +1156,7 @@ measure: order_completed_conversion_rate {
 
   measure: first_order_completed_conversion_rate {
     type: number
-    sql: ${total_first_order_completed_users} / ${unique_pre_purchase_visitor_count} ;;
+    sql: ${total_first_order_completed_users} / NULLIF(${unique_pre_purchase_visitor_count},0) ;;
     value_format_name: percent_2
     group_label: "Order Completed"
     drill_fields: [order_completed_details*]
@@ -1055,7 +1164,23 @@ measure: order_completed_conversion_rate {
 
   measure: repeat_order_completed_conversion_rate {
     type: number
-    sql: ${total_repeat_order_completed_users} / ${unique_post_purchase_visitor_count} ;;
+    sql: ${total_repeat_order_completed_users} / NULLIF(${unique_post_purchase_visitor_count},0) ;;
+    value_format_name: percent_2
+    group_label: "Order Completed"
+    drill_fields: [order_completed_details*]
+  }
+
+  measure: first_order_completed_conversion_rate_by_session {
+    type: number
+    sql: ${total_first_order_completed_sessions} / NULLIF(${pre_purchase_session_count},0) ;;
+    value_format_name: percent_2
+    group_label: "Order Completed"
+    drill_fields: [order_completed_details*]
+  }
+
+  measure: repeat_order_completed_conversion_rate_by_session {
+    type: number
+    sql: ${total_repeat_order_completed_sessions} / NULLIF(${post_purchase_session_count},0) ;;
     value_format_name: percent_2
     group_label: "Order Completed"
     drill_fields: [order_completed_details*]
@@ -1065,7 +1190,7 @@ measure: order_completed_conversion_rate {
 
 measure: order_completed_conversion_rate_by_session {
   type: number
-  sql: ${total_order_completed_sessions} / ${sessions.unique_session_count} ;;
+  sql: ${total_order_completed_sessions} / NULLIF(${sessions.unique_session_count},0) ;;
   value_format_name: percent_2
   group_label: "Order Completed"
   drill_fields: [order_completed_details*]
