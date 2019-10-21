@@ -4,7 +4,7 @@ view: experiment_facts {
     sql:
       select
         e.experiment_id
-        ,t.experiment_label
+        ,coalesce(t.experiment_label,e.experiment_name) as experiment_label
         ,count(distinct variant_id) as number_of_variant
         ,min(s.session_start_at) as experiment_start_at
         ,max(s.session_start_at) as experiment_end_at
@@ -25,12 +25,17 @@ view: experiment_facts {
     sql: ${TABLE}.experiment_id ;;
     group_label: "Experiment"
     hidden: yes
+
   }
 
   dimension: experiment_label {
     type: string
     sql: ${TABLE}.experiment_label ;;
     group_label: "Experiment"
+    link: {
+      label: "Go to {{value}} dashboard"
+      url: "https://smileventures.au.looker.com/dashboards/68?Experiment%20Label={{value | encode_url}}"
+    }
   }
 
   dimension_group: start {

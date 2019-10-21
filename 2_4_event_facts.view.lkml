@@ -300,7 +300,7 @@ view: event_facts {
   measure: events_per_visitor {
     label: "Number of Events per Visitor"
     type: number
-    sql: ${count} / ${unique_visitor_count} ;;
+    sql: ${count} / NULLIF(${unique_visitor_count},0) ;;
     value_format_name: decimal_1
     drill_fields: [event, looker_visitor_id, users.name, count]
   }

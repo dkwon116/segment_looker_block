@@ -7,6 +7,7 @@ view: experiment_sessions {
         ,e.looker_visitor_id
         ,exp.experiment_id
         ,coalesce(exp.variant_id,exp.variation_id) as variant_id
+        ,exp.experiment_name
       from ${event_sessions.SQL_TABLE_NAME} e
       join ${experiment.SQL_TABLE_NAME} exp on exp.id=e.event_id
       ;;
@@ -29,6 +30,10 @@ view: experiment_sessions {
     type: string
     sql: ${TABLE}.experiment_id ;;
     group_label: "Experiment"
+    link: {
+      label: "Go to dashboard"
+      url: "https://smileventures.au.looker.com/dashboards/68?Experiment%20ID={{value | encode_url}}"
+    }
   }
 
   dimension: variant_id {

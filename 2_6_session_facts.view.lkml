@@ -359,7 +359,7 @@ measure: total_session_duration {
 
 measure: session_duration_per_unique_visitor {
   type: number
-  sql: ${total_session_duration} / ${sessions.unique_visitor_count} ;;
+  sql: ${total_session_duration} / NULLIF(${sessions.unique_visitor_count},0) ;;
   value_format_name: decimal_2
 }
 
@@ -413,7 +413,7 @@ measure: unique_signed_up_visitor {
 
 measure: unique_visitor_signup_conversion {
   type: number
-  sql: ${unique_signed_up_visitor} / ${sessions.unique_visitor_count};;
+  sql: ${unique_signed_up_visitor} / NULLIF(${sessions.unique_visitor_count},0);;
   value_format_name: percent_2
   group_label: "Signup"
 }
@@ -488,7 +488,7 @@ measure: product_discovery_viewed_per_converted_user {
 
 measure: product_discovery_viewed_conversion_rate {
   type: number
-  sql: ${total_product_discovery_viewed_users} / ${sessions.unique_visitor_count} ;;
+  sql: ${total_product_discovery_viewed_users} / NULLIF(${sessions.unique_visitor_count},0) ;;
   value_format_name: percent_0
   group_label: "Product Discovery"
   drill_fields: [product_viewed_details*]
@@ -544,7 +544,7 @@ measure: product_list_viewed_per_converted_user {
 
 measure: product_list_viewed_conversion_rate {
   type: number
-  sql: ${total_product_list_viewed_users} / ${sessions.unique_visitor_count} ;;
+  sql: ${total_product_list_viewed_users} / NULLIF(${sessions.unique_visitor_count},0) ;;
   value_format_name: percent_0
   group_label: "Product List Viewed"
   drill_fields: [product_viewed_details*]
@@ -552,7 +552,7 @@ measure: product_list_viewed_conversion_rate {
 
 measure: product_list_viewed_conversion_rate_by_session {
   type: number
-  sql: ${total_product_list_viewed_sessions} / ${sessions.unique_session_count} ;;
+  sql: ${total_product_list_viewed_sessions} / NULLIF(${sessions.unique_session_count},0) ;;
   value_format_name: percent_0
   group_label: "Product List Viewed"
   drill_fields: [product_viewed_details*]
@@ -577,14 +577,14 @@ measure: products_viewed_per_session {
 
   measure: products_viewed_per_product_viewed_session {
     type: number
-    sql: ${products_viewed_total} / ${total_product_viewed_sessions} ;;
+    sql: ${products_viewed_total} / NULLIF(${total_product_viewed_sessions},0) ;;
     value_format_name:decimal_2
     group_label: "Product Viewed"
   }
 
 measure: products_viewed_per_user {
   type: number
-  sql: ${products_viewed_total} / ${sessions.unique_visitor_count} ;;
+  sql: ${products_viewed_total} / NULLIF(${sessions.unique_visitor_count},0) ;;
   value_format_name: decimal_2
   group_label: "Product Viewed"
 }
@@ -631,7 +631,7 @@ measure: products_viewed_per_converted_user {
 
 measure: product_viewed_conversion_rate {
   type: number
-  sql: ${total_product_viewed_users} / ${sessions.unique_visitor_count} ;;
+  sql: ${total_product_viewed_users} / NULLIF(${sessions.unique_visitor_count},0) ;;
   value_format_name: percent_0
   group_label: "Product Viewed"
   drill_fields: [product_viewed_details*]
@@ -639,7 +639,7 @@ measure: product_viewed_conversion_rate {
 
 measure: product_viewed_conversion_rate_by_session {
   type: number
-  sql: ${total_product_viewed_sessions} / ${sessions.unique_session_count} ;;
+  sql: ${total_product_viewed_sessions} / NULLIF(${sessions.unique_session_count},0) ;;
   value_format_name: percent_0
   group_label: "Product Viewed"
   drill_fields: [product_viewed_details*]
@@ -647,7 +647,7 @@ measure: product_viewed_conversion_rate_by_session {
 
 measure: product_viewed_activation_rate {
   type: number
-  sql: ${total_product_viewed_activated_user} / ${sessions.unique_visitor_count} ;;
+  sql: ${total_product_viewed_activated_user} / NULLIF(${sessions.unique_visitor_count},0) ;;
   value_format_name: percent_0
   group_label: "Product Viewed"
   drill_fields: [product_viewed_details*]
@@ -704,7 +704,7 @@ measure: outlinked_total {
 
   measure: outlinked_per_outlinked_session {
     type: number
-    sql: ${outlinked_total} / ${total_outlinked_sessions} ;;
+    sql: ${outlinked_total} / NULLIF(${total_outlinked_sessions},0) ;;
     value_format_name:decimal_2
     group_label: "Outlinked"
     drill_fields: [campaign_details*, product_viewed_details*]
@@ -881,7 +881,7 @@ measure: concierge_per_session {
 
   measure: concierge_per_concierge_session {
     type: number
-    sql: ${concierge_clicked_total} / ${total_concierge_clicked_sessions} ;;
+    sql: ${concierge_clicked_total} / NULLIF(${total_concierge_clicked_sessions},0) ;;
     value_format_name:decimal_2
     group_label: "Concierge"
     drill_fields: [campaign_details*, product_viewed_details*]
@@ -911,14 +911,14 @@ measure: total_concierge_clicked_sessions {
 
 measure: concierge_conversion_rate {
   type: number
-  sql: ${total_concierge_clicked_users} / ${sessions.unique_visitor_count} ;;
+  sql: ${total_concierge_clicked_users} / NULLIF(${sessions.unique_visitor_count},0) ;;
   value_format_name: percent_2
   group_label: "Concierge"
 }
 
 measure: concierge_conversion_rate_by_session {
   type: number
-  sql: ${total_concierge_clicked_sessions} / ${sessions.unique_session_count} ;;
+  sql: ${total_concierge_clicked_sessions} / NULLIF(${sessions.unique_session_count},0) ;;
   value_format_name: percent_2
   group_label: "Concierge"
 }
@@ -951,7 +951,7 @@ measure: added_to_wishlist_per_session {
 
   measure: added_to_wishlist_per_added_to_wishlist_session {
     type: number
-    sql: ${added_to_wishlist_total} / ${total_added_to_wishlist_sessions};;
+    sql: ${added_to_wishlist_total} / NULLIF(${total_added_to_wishlist_sessions},0);;
     value_format_name:decimal_2
     group_label: "Wishlist"
     drill_fields: [campaign_details*, product_viewed_details*]
@@ -981,14 +981,14 @@ measure: total_added_to_wishlist_sessions {
 
 measure: added_to_wishlist_conversion_rate {
   type: number
-  sql: ${total_added_to_wishlist_users} / ${sessions.unique_visitor_count} ;;
+  sql: ${total_added_to_wishlist_users} / NULLIF(${sessions.unique_visitor_count},0) ;;
   value_format_name: percent_2
   group_label: "Wishlist"
 }
 
 measure: added_to_wishlist_conversion_rate_by_session {
   type: number
-  sql: ${total_added_to_wishlist_sessions} / ${sessions.unique_session_count} ;;
+  sql: ${total_added_to_wishlist_sessions} / NULLIF(${sessions.unique_session_count},0) ;;
   value_format_name: percent_2
   group_label: "Wishlist"
 }
@@ -1206,7 +1206,7 @@ measure: outlink_to_order_completed_conversion_rate {
 
 measure: bounce_rate {
   type: number
-  sql: ${count_bounced_sessions} / ${sessions.count} ;;
+  sql: ${count_bounced_sessions} / NULLIF(${sessions.count},0) ;;
   value_format_name: percent_2
   drill_fields: [campaign_details*]
   group_label: "Session Facts"

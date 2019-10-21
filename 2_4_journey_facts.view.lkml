@@ -200,7 +200,7 @@ view: journey_facts {
 
   measure: journey_duration_per_unique_visitor {
     type: number
-    sql: ${total_journey_duration} / ${journeys.unique_visitor_count} ;;
+    sql: ${total_journey_duration} / NULLIF(${journeys.unique_visitor_count},0) ;;
     value_format_name: decimal_2
   }
 
@@ -275,7 +275,7 @@ view: journey_facts {
 
   measure: engaged_conversion_rate_per_journey {
     type: number
-    sql: ${engaged_journey_count} / ${journeys.count} ;;
+    sql: ${engaged_journey_count} / NULLIF(${journeys.count},0) ;;
     value_format_name: percent_0
     group_label: "Engagements"
   }
@@ -330,7 +330,7 @@ view: journey_facts {
 
   measure: product_list_viewed_conversion_rate {
     type: number
-    sql: ${total_product_list_viewed_users} / ${journeys.unique_visitor_count} ;;
+    sql: ${total_product_list_viewed_users} / NULLIF(${journeys.unique_visitor_count},0) ;;
     value_format_name: percent_0
     group_label: "Product List Viewed"
   }
@@ -373,7 +373,7 @@ view: journey_facts {
 
   measure: product_viewed_per_user {
     type: number
-    sql: ${product_viewed_total} / ${journeys.unique_visitor_count} ;;
+    sql: ${product_viewed_total} / NULLIF(${journeys.unique_visitor_count},0) ;;
     value_format_name: decimal_2
     group_label: "Product Viewed"
   }
@@ -420,21 +420,21 @@ view: journey_facts {
 
   measure: product_viewed_conversion_rate {
     type: number
-    sql: ${total_product_viewed_users} / ${journeys.unique_visitor_count} ;;
+    sql: ${total_product_viewed_users} / NULLIF(${journeys.unique_visitor_count},0) ;;
     value_format_name: percent_0
     group_label: "Product Viewed"
   }
 
   measure: product_viewed_conversion_rate_per_journey {
     type: number
-    sql: ${product_viewed_journey_count} / ${journeys.count} ;;
+    sql: ${product_viewed_journey_count} / NULLIF(${journeys.count},0) ;;
     value_format_name: percent_0
     group_label: "Product Viewed"
   }
 
   measure: product_viewed_activation_rate {
     type: number
-    sql: ${total_product_viewed_activated_user} / ${journeys.unique_visitor_count} ;;
+    sql: ${total_product_viewed_activated_user} / NULLIF(${journeys.unique_visitor_count},0) ;;
     value_format_name: percent_0
     group_label: "Product Viewed"
   }
@@ -527,7 +527,7 @@ view: journey_facts {
 
   measure: concierge_conversion_rate {
     type: number
-    sql: ${total_concierge_clicked_users} / ${journeys.unique_visitor_count} ;;
+    sql: ${total_concierge_clicked_users} / NULLIF(${journeys.unique_visitor_count},0) ;;
     value_format_name: percent_2
     group_label: "Concierge"
   }
@@ -570,7 +570,7 @@ view: journey_facts {
 
   measure: added_to_wishlist_conversion_rate {
     type: number
-    sql: ${total_added_to_wishlist_users} / ${journeys.unique_visitor_count} ;;
+    sql: ${total_added_to_wishlist_users} / NULLIF(${journeys.unique_visitor_count},0) ;;
     value_format_name: percent_2
     group_label: "Wishlist"
   }
