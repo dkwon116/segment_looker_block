@@ -7,7 +7,7 @@ view: session_facts {
     select
       s.session_id
       , s.looker_visitor_id
-      , if(f.first_signed_up is null or f.first_signed_up>s.session_start_at,true,false) as is_guest_at_session
+      , if(f.signed_up is null or f.signed_up>s.session_start_at,true,false) as is_guest_at_session
       , if(f.first_outlink_sent is null or f.first_outlink_sent>s.session_start_at,true,false) as is_pre_outlinked_at_session
       , if(f.first_order_completed is null or f.first_order_completed>s.session_start_at,true,false) as is_pre_purchase_at_session
       , s.session_start_at

@@ -1,9 +1,10 @@
 view: funnel_explorer {
   derived_table: {
     sql: SELECT
-        --CAST(TIMESTAMP(FORMAT_TIMESTAMP('%F %T', tracks_sessions_map.timestamp , 'Asia/Seoul')) AS {% parameter timeframe_picker %}) as date
-        tracks_sessions_map.session_id
-        ,tracks_sessions_map.looker_visitor_id as user_id
+        -- tracks_sessions_map.session_id
+        tracks_sessions_map.looker_visitor_id as user_id
+        , fe.first_order_completed
+        , fe.first_outlink_sent
         , MIN(
             CASE WHEN
               {% condition event1 %} tracks_sessions_map.event {% endcondition %}
@@ -34,8 +35,21 @@ view: funnel_explorer {
               THEN tracks_sessions_map.timestamp
               ELSE NULL END
             ) as event5_time
+
       FROM ${event_facts.SQL_TABLE_NAME} as tracks_sessions_map
-      GROUP BY 1, 2
+      LEFT JOIN ${first_events.SQL_TABLE_NAME} as fe
+        ON tracks_sessions_map.looker_visitor_id = fe.looker_visitor_id
+      WHERE
+        {% if no_event._parameter_value != "all" %}
+          fe.{% parameter no_event %} IS NULL
+        {% elsif before_event._parameter_value != "all" %}
+          tracks_sessions_map.timestamp <= fe.{% parameter before_event %}
+        {% elsif after_event._parameter_value != "all" %}
+          tracks_sessions_map.timestamp > fe.{% parameter after_event %}
+        {% else %}
+          1=1
+        {% endif %}
+      GROUP BY 1, 2, 3
        ;;
   }
 
@@ -64,14 +78,66 @@ view: funnel_explorer {
     suggest_dimension: event_list.event_types
   }
 
-  parameter: timeframe_picker {
-    label: "Date Granularity"
+  parameter: no_event {
     type: unquoted
-    allowed_value: { value: "Date" }
-    allowed_value: { value: "Week" }
-    allowed_value: { value: "Month" }
-    default_value: "Date"
+    allowed_value: {
+      label: "Not Purchase"
+      value: "first_order_completed"
+    }
+    allowed_value: {
+      label: "Not Outlinked"
+      value: "first_outlink_sent"
+    }
+    allowed_value: {
+      label: "Not SignedUp"
+      value: "signed_up"
+    }
+    default_value: "all"
   }
+
+  parameter: before_event {
+    type: unquoted
+    allowed_value: {
+      label: "Before First Purchase"
+      value: "first_order_completed"
+    }
+    allowed_value: {
+      label: "Before First Outlinked"
+      value: "first_outlink_sent"
+    }
+    allowed_value: {
+      label: "Before SignedUp"
+      value: "signed_up"
+    }
+    default_value: "all"
+  }
+
+  parameter: after_event {
+    type: unquoted
+    allowed_value: {
+      label: "After First Purchase"
+      value: "first_order_completed"
+    }
+    allowed_value: {
+      label: "Before First Outlinked"
+      value: "first_outlink_sent"
+    }
+    allowed_value: {
+      label: "Before SignedUp"
+      value: "signed_up"
+    }
+    default_value: "all"
+  }
+
+
+  # parameter: timeframe_picker {
+  #   label: "Date Granularity"
+  #   type: unquoted
+  #   allowed_value: { value: "Date" }
+  #   allowed_value: { value: "Week" }
+  #   allowed_value: { value: "Month" }
+  #   default_value: "Date"
+  # }
 
   dimension: user_id {
     type: string
@@ -112,6 +178,18 @@ view: funnel_explorer {
     type: time
     timeframes: [raw, time, date, week, month]
     sql: ${TABLE}.event5_time ;;
+  }
+
+  dimension_group: first_order_completed {
+    type: time
+    timeframes: [raw, time, date, week, month]
+    sql: ${TABLE}.first_order_completed ;;
+  }
+
+  dimension_group: first_outlink_sent {
+    type: time
+    timeframes: [raw, time, date, week, month]
+    sql: ${TABLE}.first_outlink_sent ;;
   }
 
   dimension: event1_before_event2 {

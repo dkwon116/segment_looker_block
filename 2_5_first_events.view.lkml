@@ -6,7 +6,7 @@ view: first_events {
         e.looker_visitor_id
         ,min(e.timestamp) as first_date
         ,max(e.timestamp) as last_date
-        ,min(if(e.event = "signed_up",e.timestamp,null)) as first_signed_up
+        ,min(u.created_at) as signed_up
         ,min(if(e.event = "product_added_to_wishlist",e.timestamp,null)) as first_product_added_to_wishlist
         ,max(if(e.event = "product_added_to_wishlist",e.timestamp,null)) as last_product_added_to_wishlist
         ,count(if(e.event = "product_added_to_wishlist",e.timestamp,null)) as number_of_product_added_to_wishlist
@@ -17,6 +17,8 @@ view: first_events {
         ,max(if(e.event = "order_completed",e.timestamp,null)) as last_order_completed
         ,count(if(e.event = "order_completed",e.timestamp,null)) as number_of_order_completed
       from ${event_facts.SQL_TABLE_NAME} e
+      left join ${catch_users.SQL_TABLE_NAME} as u
+        on e.looker_visitor_id = u.id
       where e.event in ("signed_up","outlink_sent","product_added_to_wishlist","order_completed")
       group by 1
       ;;
