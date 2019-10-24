@@ -1,51 +1,62 @@
+# Funnel based on first ever event by user
+# If user outlinked this 3 months ago, but also outlinked this month will not be counted
+# Also, this is strict funnel. Only counting if previous event happened
+
+
 view: funnel_explorer {
   derived_table: {
     sql: SELECT
-        -- tracks_sessions_map.session_id
-        tracks_sessions_map.looker_visitor_id as user_id
+        -- ef.session_id
+        ef.looker_visitor_id as user_id
         , fe.first_order_completed
         , fe.first_outlink_sent
         , MIN(
             CASE WHEN
-              {% condition event1 %} tracks_sessions_map.event {% endcondition %}
-              THEN tracks_sessions_map.timestamp
+              {% condition event1 %} ef.event {% endcondition %}
+              THEN ef.timestamp
               ELSE NULL END
             ) as event1_time
         , MIN(
             CASE WHEN
-              {% condition event2 %} tracks_sessions_map.event {% endcondition %}
-              THEN tracks_sessions_map.timestamp
+              {% condition event2 %} ef.event {% endcondition %}
+              THEN ef.timestamp
               ELSE NULL END
             ) as event2_time
         , MIN(
             CASE WHEN
-              {% condition event3 %} tracks_sessions_map.event {% endcondition %}
-              THEN tracks_sessions_map.timestamp
+              {% condition event3 %} ef.event {% endcondition %}
+              THEN ef.timestamp
               ELSE NULL END
             ) as event3_time
         , MIN(
             CASE WHEN
-              {% condition event4 %} tracks_sessions_map.event {% endcondition %}
-              THEN tracks_sessions_map.timestamp
+              {% condition event4 %} ef.event {% endcondition %}
+              THEN ef.timestamp
               ELSE NULL END
             ) as event4_time
         , MIN(
             CASE WHEN
-              {% condition event5 %} tracks_sessions_map.event {% endcondition %}
-              THEN tracks_sessions_map.timestamp
+              {% condition event5 %} ef.event {% endcondition %}
+              THEN ef.timestamp
               ELSE NULL END
             ) as event5_time
+        , MIN(
+            CASE WHEN
+              {% condition event6 %} ef.event {% endcondition %}
+              THEN ef.timestamp
+              ELSE NULL END
+            ) as event6_time
 
-      FROM ${event_facts.SQL_TABLE_NAME} as tracks_sessions_map
+      FROM ${event_facts.SQL_TABLE_NAME} as ef
       LEFT JOIN ${first_events.SQL_TABLE_NAME} as fe
-        ON tracks_sessions_map.looker_visitor_id = fe.looker_visitor_id
+        ON ef.looker_visitor_id = fe.looker_visitor_id
       WHERE
         {% if no_event._parameter_value != "all" %}
           fe.{% parameter no_event %} IS NULL
         {% elsif before_event._parameter_value != "all" %}
-          tracks_sessions_map.timestamp <= fe.{% parameter before_event %}
+          ef.timestamp <= fe.{% parameter before_event %} or fe.{% parameter before_event %} IS NULL
         {% elsif after_event._parameter_value != "all" %}
-          tracks_sessions_map.timestamp > fe.{% parameter after_event %}
+          ef.timestamp > fe.{% parameter after_event %} and fe.{% parameter after_event %} IS NOT NULL
         {% else %}
           1=1
         {% endif %}
@@ -74,6 +85,11 @@ view: funnel_explorer {
   }
 
   filter: event5 {
+    suggest_explore: event_list
+    suggest_dimension: event_list.event_types
+  }
+
+  filter: event6 {
     suggest_explore: event_list
     suggest_dimension: event_list.event_types
   }
@@ -180,6 +196,12 @@ view: funnel_explorer {
     sql: ${TABLE}.event5_time ;;
   }
 
+  dimension_group: event6 {
+    type: time
+    timeframes: [raw, time, date, week, month]
+    sql: ${TABLE}.event6_time ;;
+  }
+
   dimension_group: first_order_completed {
     type: time
     timeframes: [raw, time, date, week, month]
@@ -212,9 +234,14 @@ view: funnel_explorer {
     sql: ${event4_time} < ${event5_time} ;;
   }
 
+  dimension: event5_before_event6 {
+    type: yesno
+    sql: ${event5_time} < ${event6_time} ;;
+  }
+
   dimension: minutes_in_funnel {
     type: number
-    sql: timestamp_diff(${event1_raw},COALESCE(${event5_raw},${event4_raw},${event3_raw},${event2_raw}), minute) ;;
+    sql: timestamp_diff(${event1_raw},COALESCE(${event6_raw},${event5_raw},${event4_raw},${event3_raw},${event2_raw}), minute) ;;
   }
 
   measure: count_users {
@@ -226,150 +253,77 @@ view: funnel_explorer {
     type: count_distinct
     sql: ${user_id} ;;
 
-    filters: {
-      field: event1_time
-      value: "NOT NULL"
-    }
+    filters: {field: event1_time value: "NOT NULL"}
   }
 
   measure: count_users_event12 {
     type: count_distinct
     sql: ${user_id} ;;
 
-    filters: {
-      field: event1_time
-      value: "NOT NULL"
-    }
+    filters: {field: event1_time value: "NOT NULL"}
+    filters: {field: event2_time value: "NOT NULL"}
 
-    filters: {
-      field: event2_time
-      value: "NOT NULL"
-    }
-
-    filters: {
-      field: event1_before_event2
-      value: "yes"
-    }
+    filters: {field: event1_before_event2 value: "yes"}
   }
 
   measure: count_users_event123 {
     type: count_distinct
     sql: ${user_id} ;;
 
-    filters: {
-      field: event1_time
-      value: "NOT NULL"
-    }
+    filters: {field: event1_time value: "NOT NULL"}
+    filters: {field: event2_time value: "NOT NULL"}
+    filters: {field: event3_time value: "NOT NULL"}
 
-    filters: {
-      field: event2_time
-      value: "NOT NULL"
-    }
-
-    filters: {
-      field: event3_time
-      value: "NOT NULL"
-    }
-
-    filters: {
-      field: event1_before_event2
-      value: "yes"
-    }
-
-    filters: {
-      field: event2_before_event3
-      value: "yes"
-    }
+    filters: {field: event1_before_event2 value: "yes"}
+    filters: {field: event2_before_event3 value: "yes"}
   }
 
   measure: count_users_event1234 {
     type: count_distinct
     sql: ${user_id} ;;
 
-    filters: {
-      field: event1_time
-      value: "NOT NULL"
-    }
+    filters: {field: event1_time value: "NOT NULL"}
+    filters: {field: event2_time value: "NOT NULL"}
+    filters: {field: event3_time value: "NOT NULL"}
+    filters: {field: event4_time value: "NOT NULL"}
 
-    filters: {
-      field: event2_time
-      value: "NOT NULL"
-    }
-
-    filters: {
-      field: event3_time
-      value: "NOT NULL"
-    }
-
-    filters: {
-      field: event4_time
-      value: "NOT NULL"
-    }
-
-    filters: {
-      field: event1_before_event2
-      value: "yes"
-    }
-
-    filters: {
-      field: event2_before_event3
-      value: "yes"
-    }
-
-    filters: {
-      field: event3_before_event4
-      value: "yes"
-    }
+    filters: {field: event1_before_event2 value: "yes"}
+    filters: {field: event2_before_event3 value: "yes"}
+    filters: {field: event3_before_event4 value: "yes"}
   }
 
   measure: count_users_event12345 {
     type: count_distinct
     sql: ${user_id} ;;
 
-    filters: {
-      field: event1_time
-      value: "NOT NULL"
-    }
+    filters: {field: event1_time value: "NOT NULL"}
+    filters: {field: event2_time value: "NOT NULL"}
+    filters: {field: event3_time value: "NOT NULL"}
+    filters: {field: event4_time value: "NOT NULL"}
+    filters: {field: event5_time value: "NOT NULL"}
 
-    filters: {
-      field: event2_time
-      value: "NOT NULL"
-    }
+    filters: {field: event1_before_event2 value: "yes"}
+    filters: {field: event2_before_event3 value: "yes"}
+    filters: {field: event3_before_event4 value: "yes"}
+    filters: {field: event4_before_event5 value: "yes"}
+  }
 
-    filters: {
-      field: event3_time
-      value: "NOT NULL"
-    }
+  measure: count_users_event123456 {
+    type: count_distinct
+    sql: ${user_id} ;;
 
-    filters: {
-      field: event4_time
-      value: "NOT NULL"
-    }
+    filters: {field: event1_time value: "NOT NULL"}
+    filters: {field: event2_time value: "NOT NULL"}
+    filters: {field: event3_time value: "NOT NULL"}
+    filters: {field: event4_time value: "NOT NULL"}
+    filters: {field: event5_time value: "NOT NULL"}
+    filters: {field: event6_time value: "NOT NULL"}
 
-    filters: {
-      field: event5_time
-      value: "NOT NULL"
-    }
-
-    filters: {
-      field: event1_before_event2
-      value: "yes"
-    }
-
-    filters: {
-      field: event2_before_event3
-      value: "yes"
-    }
-
-    filters: {
-      field: event3_before_event4
-      value: "yes"
-    }
-
-    filters: {
-      field: event4_before_event5
-      value: "yes"
-    }
+    filters: {field: event1_before_event2 value: "yes"}
+    filters: {field: event2_before_event3 value: "yes"}
+    filters: {field: event3_before_event4 value: "yes"}
+    filters: {field: event4_before_event5 value: "yes"}
+    filters: {field: event5_before_event6 value: "yes"}
   }
 
   measure: event1_conversion {
@@ -402,6 +356,13 @@ view: funnel_explorer {
   measure: event5_conversion {
     type: number
     sql: ${count_users_event12345} / NULLIF(${count_users_event1},0) ;;
+    value_format_name: percent_0
+    group_label: "Conversion"
+  }
+
+  measure: event6_conversion {
+    type: number
+    sql: ${count_users_event123456} / NULLIF(${count_users_event1},0) ;;
     value_format_name: percent_0
     group_label: "Conversion"
   }

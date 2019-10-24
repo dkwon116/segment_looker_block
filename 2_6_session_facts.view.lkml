@@ -16,13 +16,16 @@ view: session_facts {
       -- event facts
       , count(case when t2s.event_source = 'tracks' then 1 else null end) as number_of_track_events
       , count(case when t2s.event_source = 'pages' then 1 else null end) as number_of_page_events
-      , count(case when t2s.event = "signed_up" then event_id else null end) as number_of_signed_up_events
-      , count(case when t2s.event in ("Search","Product Search", "Hashtag", "Category", "New", "Sale", "Brand") then event_id else null end) as count_product_discovery
-      , count(case when t2s.event = 'Product' then event_id else null end) as count_product_viewed
-      , count(distinct case when t2s.event = 'Product' then REGEXP_EXTRACT(t2s.page_path,"^/.*/(.*)$") else null end) as unique_count_product_viewed
+      , count(case when t2s.event_type in ("Discovery", "Cashback") then event_id else null end) as count_engaged
+      , count(case when t2s.event_type = "Discovery" then event_id else null end) as count_discovery_engaged
+      , count(case when t2s.event_type = "Cashback" then event_id else null end) as count_cashback_engaged
       , count(case when t2s.event = 'product_list_viewed' then event_id else null end) as count_product_list_viewed
       , count(distinct case when t2s.event = 'product_list_viewed' then REGEXP_EXTRACT(t2s.page_path,"^/.*/(.*)$") else null end) as unique_count_product_list_viewed
+      , count(case when t2s.event = 'Product' then event_id else null end) as count_product_viewed
+      , count(distinct case when t2s.event = 'Product' then REGEXP_EXTRACT(t2s.page_path,"^/.*/(.*)$") else null end) as unique_count_product_viewed
+      , count(case when t2s.event = "signed_up" then event_id else null end) as number_of_signed_up_events
       , count(case when t2s.event = 'outlink_sent' then event_id else null end) as count_outlinked
+
       , count(case when t2s.event = 'concierge_clicked' then event_id else null end) as count_concierge_clicked
       , count(case when t2s.event = 'product_added_to_wishlist' then event_id else null end) as count_added_to_wishlist
 
@@ -116,11 +119,24 @@ dimension: number_of_signed_up_events {
   group_label: "Event Counts"
 }
 
+dimension: engaged {
+  type: number
+  sql: ${TABLE}.count_engaged ;;
+  group_label: "Event Counts"
+}
+
 dimension: product_discovery {
   type: number
-  sql: ${TABLE}.count_product_discovery ;;
+  sql: ${TABLE}.count_discovery_engaged ;;
   group_label: "Event Counts"
   description: "Viewed Search, Category, Brand, Hashtag, New, Sale Product List"
+}
+
+dimension: cashback_engaged {
+  type: number
+  sql: ${TABLE}.count_cashback_engaged ;;
+  group_label: "Event Counts"
+  description: "Viewed Cashback related pages"
 }
 
 dimension: products_viewed {
@@ -424,6 +440,24 @@ measure: unique_first_signedup_conversion {
   value_format_name: percent_2
   group_label: "Signup"
 }
+
+measure: unique_engaged_visitor {
+  type: count_distinct
+  sql: ${sessions.looker_visitor_id} ;;
+  filters: {
+    field: engaged
+    value: ">0"
+  }
+}
+
+  measure: unique_cashback_engaged_visitor {
+    type: count_distinct
+    sql: ${sessions.looker_visitor_id} ;;
+    filters: {
+      field: cashback_engaged
+      value: ">0"
+    }
+  }
 
 
 ######################################

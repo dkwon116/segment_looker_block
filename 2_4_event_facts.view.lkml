@@ -32,6 +32,11 @@ view: event_facts {
         , s.first_content
         , s.first_term
         , s.user_agent as user_agent
+        , CASE
+            WHEN t.event in ("Search","Product Search", "Hashtag", "Category", "New", "Sale", "Brand", "Product") THEN "Discovery"
+            WHEN t.event in ("About Cashback", "How to Cashback", "Cashback Retailer", "Retailer Coupon", "Promotions") THEN "Cashback"
+            ELSE "Other"
+          END as event_type
       from ${mapped_events.SQL_TABLE_NAME} as t
       left join ${event_sessions.SQL_TABLE_NAME} as es
         on t.event_id = es.event_id
@@ -47,9 +52,7 @@ view: event_facts {
       left join javascript.outlink_sent_view as os
         on t.looker_visitor_id = os.user_id
         and t.event_id=os.id
-      window w as (partition by es.session_id order by t.timestamp rows between unbounded preceding and unbounded following)
-        ,wo as (partition by t.looker_visitor_id order by o.order_sequence_number rows between unbounded preceding and unbounded following)
-       ;;
+      ;;
   }
 
   dimension: event_id {
