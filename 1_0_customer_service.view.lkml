@@ -19,9 +19,9 @@ view: customer_service_log {
         ,cs.brand
         ,cs.retailer_order_id
       from google_sheets.cs_history as cs
-      left join mysql_smile_ventures.users as u1 ON cs.user_id = u1.id
-      left join mysql_smile_ventures.users as u2 ON cs.email = u2.email
-      left join mysql_smile_ventures.users as u3 ON REPLACE(cs.phone, "-", "") = REPLACE(u3.phone, "-", "")
+      left join aurora_smile_ventures.users as u1 ON cs.user_id = u1.id
+      left join aurora_smile_ventures.users as u2 ON cs.email = u2.email
+      left join aurora_smile_ventures.users as u3 ON REPLACE(cs.phone, "-", "") = REPLACE(u3.phone, "-", "")
       where cs._fivetran_deleted = false
        ;;
   }

@@ -11,10 +11,10 @@ view: product_maps {
               ELSE pm.internal_vendor_product_id END as affiliate_product_id
           , pm.vendor as vendor
 
-          FROM mysql_smile_ventures.products as p
-          LEFT JOIN mysql_smile_ventures.product_maps as pm
+          FROM aurora_smile_ventures.products as p
+          LEFT JOIN aurora_smile_ventures.product_maps as pm
             ON p.id = pm.product_id
-          LEFT JOIN mysql_ssense.products as sp
+          LEFT JOIN aurora_ssense.products as sp
             ON pm.internal_vendor_product_id = sp.vendor_id_string
           WHERE p._fivetran_deleted = false
     ;;

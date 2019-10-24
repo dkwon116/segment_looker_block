@@ -37,7 +37,7 @@ view: user_facts {
 
   SELECT
   cu.id as user_id
-  FROM mysql_smile_ventures.users as cu
+  FROM aurora_smile_ventures.users as cu
 )
 SELECT
   au.user_id as looker_visitor_id
@@ -71,7 +71,7 @@ SELECT
   , COUNT(o.order_id) as orders_completed
   , SUM(o.total) as lifetime_order_value
 FROM all_users as au
-LEFT JOIN mysql_smile_ventures.users as cu
+LEFT JOIN aurora_smile_ventures.users as cu
   ON au.user_id = cu.id
 LEFT JOIN user_attribution as us
   ON au.user_id = us.looker_visitor_id

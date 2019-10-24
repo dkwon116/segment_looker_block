@@ -31,7 +31,7 @@ view: page_aliases_mapping {
           id as user_id
           ,id as user_id
           ,null as timestamp
-        from mysql_smile_ventures.users
+        from aurora_smile_ventures.users
       )
         select
           distinct anonymous_id as alias

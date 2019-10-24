@@ -9,12 +9,12 @@ view: category_normalized {
           , c2.name as main_category
           , c3.name as sub_category
           , c4.name as category
-          from mysql_smile_ventures.categories as c
-          left join mysql_smile_ventures.categories as c2
+          from aurora_smile_ventures.categories as c
+          left join aurora_smile_ventures.categories as c2
             ON c.id = c2.parent_id
-          left join mysql_smile_ventures.categories as c3
+          left join aurora_smile_ventures.categories as c3
             ON c2.id = c3.parent_id
-          left join mysql_smile_ventures.categories as c4
+          left join aurora_smile_ventures.categories as c4
             ON c3.id = c4.parent_id
           where c.type = "category" and c.hierarchy_level = 1
     ;;

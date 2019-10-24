@@ -8,7 +8,7 @@ view: product_events {
             c.id as id
             , c.name as name
             , c.type as type
-          from mysql_smile_ventures.categories as c
+          from aurora_smile_ventures.categories as c
 
           union distinct
 
@@ -16,7 +16,7 @@ view: product_events {
             b.id as id
             , b.name as name
             , "brand" as type
-          from mysql_smile_ventures.brands as b
+          from aurora_smile_ventures.brands as b
         )
 
         select e.product_event_id
