@@ -6,7 +6,7 @@ view: product_maps {
           p.id
           , p.name
           , pm.internal_vendor_product_id as vendor_product_id
-          , CASE WHEN pm.vendor = "ssense" THEN sp.sku
+          , CASE
               WHEN pm.vendor = "24sevres" THEN substr(pm.internal_vendor_product_id, strpos(pm.internal_vendor_product_id, "_") + 1, 5)
               ELSE pm.internal_vendor_product_id END as affiliate_product_id
           , pm.vendor as vendor
@@ -14,8 +14,6 @@ view: product_maps {
           FROM aurora_smile_ventures.products as p
           LEFT JOIN aurora_smile_ventures.product_maps as pm
             ON p.id = pm.product_id
-          LEFT JOIN aurora_ssense.products as sp
-            ON pm.internal_vendor_product_id = sp.vendor_id_string
           WHERE p._fivetran_deleted = false
     ;;
   }
@@ -31,12 +29,12 @@ view: product_maps {
     link: {
       label: "캐치에서 보기"
       url: "https://www.catchfashion.com/view/{{product_maps.product_id._value | encode_url}}"
-      icon_url: "https://www.catchfashion.com/favicon.ico"
+      icon_url: "https://www.catchfashion.com/favicon.png"
     }
     link: {
       label: "캐치관리자에서 보기"
       url: "https://admin.catchfashion.com/products-view/{{product_maps.product_id._value | encode_url}}"
-      icon_url: "https://www.catchfashion.com/favicon.ico"
+      icon_url: "https://www.catchfashion.com/favicon.png"
     }
     link: {
       label: "{{product_maps.vendor._value}}에서 보기"
