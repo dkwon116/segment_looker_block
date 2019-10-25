@@ -440,6 +440,18 @@ explore: product_events {
     relationship: many_to_one
   }
 
+  join: journeys {
+    type: left_outer
+    sql_on: ${event_facts.journey_id} = ${journeys.journey_id} ;;
+    relationship: many_to_one
+  }
+
+  join: journey_facts {
+    type: left_outer
+    sql_on: ${journeys.journey_id} = ${journey_facts.journey_id} ;;
+    relationship: one_to_one
+  }
+
   join: list_facts {
     from: categories
     type: left_outer
@@ -512,9 +524,13 @@ explore: user_facts {
     sql_on: ${user_facts.looker_visitor_id} = ${catch_users.id} ;;
     relationship: one_to_one
   }
+
+  join: first_events {
+    type: left_outer
+    sql_on: ${user_facts.looker_visitor_id} = ${first_events.looker_visitor_id} ;;
+    relationship: one_to_one
+  }
 }
-
-
 
 explore: product_list_viewed {
   view_label: "Products Viewed in List"

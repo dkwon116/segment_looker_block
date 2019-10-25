@@ -87,7 +87,7 @@ LEFT JOIN google_sheets.user_type as ut
   ON cu.id = ut.user_id
 LEFT JOIN sendgrid.recipients_view as sr
   ON cu.email = sr.email
-GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18
+GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
 
        ;;
   }

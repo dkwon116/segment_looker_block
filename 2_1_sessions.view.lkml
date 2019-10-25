@@ -243,6 +243,18 @@ view: sessions {
     group_item_label: "Number of Unique Sessions"
   }
 
+  measure: first_count {
+    type: count
+    drill_fields: [session_detail*]
+    group_label: "Session Facts"
+    group_item_label: "Number of First Sessions"
+
+    filters: {
+      field: is_first_session
+      value: "First Session"
+    }
+  }
+
   measure: repeat_count {
     type: count
     drill_fields: [session_detail*]

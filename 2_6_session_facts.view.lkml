@@ -224,6 +224,12 @@ dimension_group: since_first_purchase {
     type: string
   }
 
+  dimension: first_utm {
+    type:  string
+    sql: concat(${sessions.first_source},',',${sessions.first_medium},',',${sessions.first_campaign},',',${sessions.first_content},',',${sessions.first_term}) ;;
+    group_label: "Attribution"
+  }
+
   dimension: first_campaign {
     type:  string
     sql: ${sessions.first_campaign} ;;
@@ -252,6 +258,12 @@ dimension_group: since_first_purchase {
   dimension: first_term {
     type:  string
     sql: ${sessions.first_term} ;;
+    group_label: "Attribution"
+  }
+
+  dimension: last_utm {
+    type:  string
+    sql: concat(${sessions.last_source},',',${sessions.last_medium},',',${sessions.last_campaign},',',${sessions.last_content},',',${sessions.last_term}) ;;
     group_label: "Attribution"
   }
 
@@ -307,12 +319,12 @@ dimension_group: since_first_purchase {
   dimension: last_diff_hours {
     type: number
     sql: ${sessions.last_diff_hours} ;;
+    group_label: "Attribution"
   }
 
 
 
 # ----- Measures -----
-
 
 
 
@@ -349,6 +361,20 @@ measure: avg_events {
   value_format_name: decimal_1
   group_label: "Session Facts"
 }
+
+measure: avg_journey_per_session {
+  type: number
+  sql: ${journeys.count} / NULLIF(${sessions.unique_session_count},0) ;;
+  value_format_name: decimal_2
+  group_label: "Session Facts"
+}
+
+  measure: avg_journey_per_unique_visitor {
+    type: number
+    sql: ${journeys.count} / NULLIF(${sessions.unique_visitor_count},0) ;;
+    value_format_name: decimal_2
+    group_label: "Session Facts"
+  }
 
 measure: total_session_duration {
   type: sum
