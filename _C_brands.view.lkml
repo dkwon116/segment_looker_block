@@ -1,5 +1,5 @@
 view: brands {
-  sql_table_name: mysql_smile_ventures.brands ;;
+  sql_table_name: aurora_smile_ventures.brands ;;
 
   dimension: id {
     primary_key: yes

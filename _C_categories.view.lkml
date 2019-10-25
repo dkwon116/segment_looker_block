@@ -1,5 +1,5 @@
 view: categories {
-#   sql_table_name: mysql_smile_ventures.categories ;;
+#   sql_table_name: aurora_smile_ventures.categories ;;
 
   derived_table: {
     sql:
@@ -9,11 +9,11 @@ view: categories {
         replace(array_to_string([ifnull(c5.name,'1'),ifnull(c4.name,'1'),ifnull(c3.name,'1'),ifnull(c2.name,'1'),ifnull(c.name,'1')],"-"),"1-","")
         ,null)
         as full_name
-      from mysql_smile_ventures.categories c
-      left join mysql_smile_ventures.categories c2 on c2.id=c.parent_id
-      left join mysql_smile_ventures.categories c3 on c3.id=c2.parent_id
-      left join mysql_smile_ventures.categories c4 on c4.id=c3.parent_id
-      left join mysql_smile_ventures.categories c5 on c5.id=c4.parent_id
+      from aurora_smile_ventures.categories c
+      left join aurora_smile_ventures.categories c2 on c2.id=c.parent_id
+      left join aurora_smile_ventures.categories c3 on c3.id=c2.parent_id
+      left join aurora_smile_ventures.categories c4 on c4.id=c3.parent_id
+      left join aurora_smile_ventures.categories c5 on c5.id=c4.parent_id
       ;;
   }
 

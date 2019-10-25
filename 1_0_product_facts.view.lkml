@@ -8,7 +8,7 @@ view: product_facts {
               SELECT
                 product_id
                 , first_value(url) over (partition by product_id order by width desc, position rows between unbounded preceding and unbounded following) as first_image
-              FROM  mysql_smile_ventures.product_images)
+              FROM  aurora_smile_ventures.product_images)
             GROUP BY 1, 2)
         SELECT
           p.id
@@ -23,8 +23,8 @@ view: product_facts {
           , b.name as brand_name
           , pi.first_image as product_image
 
-          FROM mysql_smile_ventures.products as p
-          LEFT JOIN mysql_smile_ventures.brands as b
+          FROM aurora_smile_ventures.products as p
+          LEFT JOIN aurora_smile_ventures.brands as b
             ON p.brand_id = b.id
           LEFT JOIN product_images as pi
             ON p.id = pi.product_id

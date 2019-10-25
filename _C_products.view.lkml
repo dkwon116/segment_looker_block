@@ -1,5 +1,5 @@
 view: products {
-  sql_table_name: mysql_smile_ventures.products ;;
+  sql_table_name: aurora_smile_ventures.products ;;
 
   dimension: cloned_from_product_id {
     primary_key: yes

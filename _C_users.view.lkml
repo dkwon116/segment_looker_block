@@ -1,5 +1,5 @@
 view: catch_users {
-  sql_table_name: mysql_smile_ventures.users ;;
+  sql_table_name: aurora_smile_ventures.users ;;
 
   dimension: id {
     primary_key: yes

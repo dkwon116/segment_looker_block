@@ -1,5 +1,5 @@
 view: products_categories {
-  sql_table_name: mysql_smile_ventures.products_categories ;;
+  sql_table_name: aurora_smile_ventures.products_categories ;;
 
   dimension: id {
     primary_key: yes

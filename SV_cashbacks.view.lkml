@@ -1,5 +1,5 @@
 view: sv_cashbacks {
-  sql_table_name: mysql_smile_ventures.cashbacks ;;
+  sql_table_name: aurora_smile_ventures.cashbacks ;;
 
   dimension: id {
     primary_key: yes
