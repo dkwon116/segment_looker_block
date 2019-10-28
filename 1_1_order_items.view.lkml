@@ -38,7 +38,7 @@ view: order_items {
             ON e.advertiser_id = r2.partnerize_id
           WHERE e._fivetran_deleted = false
             AND e.order_id NOT IN (SELECT order_id FROM google_sheets.test_orders)
-            AND CONCAT(e.order_id, "-", e.sku_number) NOT IN (select order_item from google_sheets.test_order_items)
+            AND CONCAT(e.order_id, "-", e.sku_number) NOT IN (select order_item from google_sheets.test_order_item)
         )
 
 
