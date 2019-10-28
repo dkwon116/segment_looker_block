@@ -219,6 +219,7 @@ view: sessions {
     type: number
     sql: ${TABLE}.last_diff_hours ;;
     hidden: yes
+    group_label: "Attribution"
   }
 
 

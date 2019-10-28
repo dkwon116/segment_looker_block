@@ -186,7 +186,11 @@ view: catch_users {
   dimension: phone {
     group_label: "Info"
     type: string
-    sql: regexp_replace(${TABLE}.phone, '[^0-9]','');;
+    sql:if(
+    starts_with(regexp_replace(${TABLE}.phone, '[^0-9]',''),'8210'),
+    concat('010',substr(regexp_replace(${TABLE}.phone, '[^0-9]',''),5)),
+    regexp_replace(${TABLE}.phone, '[^0-9]','')
+    );;
   }
 
   dimension: referred_by {
