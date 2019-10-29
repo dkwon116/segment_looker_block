@@ -6,6 +6,7 @@ view: sessions {
     sql:
       select
         s.*
+        ,last_value(s.first_referrer ignore nulls) over (w) as last_referrer
         ,split(if(s.first_utm is not null,s.first_utm,if(timestamp_diff(s.session_start_at,last_value(if(s.first_utm is null,null,s.session_start_at) ignore nulls) over (w),hour)<=72,last_value(s.first_utm ignore nulls) over (w),null)),',')[safe_offset(0)] as last_source
         ,split(if(s.first_utm is not null,s.first_utm,if(timestamp_diff(s.session_start_at,last_value(if(s.first_utm is null,null,s.session_start_at) ignore nulls) over (w),hour)<=72,last_value(s.first_utm ignore nulls) over (w),null)),',')[safe_offset(1)] as last_medium
         ,split(if(s.first_utm is not null,s.first_utm,if(timestamp_diff(s.session_start_at,last_value(if(s.first_utm is null,null,s.session_start_at) ignore nulls) over (w),hour)<=72,last_value(s.first_utm ignore nulls) over (w),null)),',')[safe_offset(2)] as last_campaign
