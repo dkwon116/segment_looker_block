@@ -247,6 +247,18 @@ view: email_activity {
     }
   }
 
+  measure: unique_open_users_per_delivered_users {
+    type: number
+    sql: ${users_opened} / nullif(${users_delievered},0) ;;
+    value_format_name: percent_0
+  }
+
+  measure: unique_click_users_per_open_users {
+    type: number
+    sql: ${users_clicked} / nullif(${users_opened},0) ;;
+    value_format_name: percent_0
+  }
+
   measure: click_through_rate {
     type: number
     sql: ${users_clicked} / NULLIF(${users_delievered}, 0) ;;

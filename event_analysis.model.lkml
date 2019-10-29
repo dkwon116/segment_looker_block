@@ -51,7 +51,7 @@ explore: active_users {
 
 
 explore: email_activity {
-  sql_always_where: ${event} = "delivered" ;;
+#   sql_always_where: ${event} = "delivered" ;;
 
   join: user_facts {
     sql_on: ${email_activity.email} = ${user_facts.email} ;;
@@ -61,6 +61,11 @@ explore: email_activity {
   join: orders {
     sql_on: ${user_facts.looker_visitor_id}=${orders.user_id} and ${orders.transaction_at_raw} > ${email_activity.received_raw} ;;
     relationship: many_to_many
+  }
+
+  join: email_campaigns{
+    sql_on: ${email_activity.marketing_campaign_id}=${email_campaigns.marketing_campaign_id} ;;
+    relationship: many_to_one
   }
 }
 
