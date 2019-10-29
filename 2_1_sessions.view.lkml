@@ -5,32 +5,39 @@ view: sessions {
     sql_trigger_value: select count(*) from ${mapped_events.SQL_TABLE_NAME} ;;
     sql:
       select
-        concat(cast(row_number() over(w) AS string),' - ',looker_visitor_id) as session_id
-        ,looker_visitor_id
-        ,timestamp as session_start_at
-        ,row_number() over(w) as session_sequence_number
-        ,lead(timestamp) over(w) as next_session_start_at
+        s.*
+        ,if(s.first_utm is not null,s.first_utm,if(timestamp_diff(s.session_start_at,last_value(if(s.first_utm is null,null,s.session_start_at) ignore nulls) over (w),hour)<=72,last_value(s.first_utm ignore nulls) over (w),null)) as last_utm
+        ,split(if(s.first_utm is not null,s.first_utm,if(timestamp_diff(s.session_start_at,last_value(if(s.first_utm is null,null,s.session_start_at) ignore nulls) over (w),hour)<=72,last_value(s.first_utm ignore nulls) over (w),null)),',')[safe_offset(0)] as last_source
+        ,split(if(s.first_utm is not null,s.first_utm,if(timestamp_diff(s.session_start_at,last_value(if(s.first_utm is null,null,s.session_start_at) ignore nulls) over (w),hour)<=72,last_value(s.first_utm ignore nulls) over (w),null)),',')[safe_offset(1)] as last_medium
+        ,split(if(s.first_utm is not null,s.first_utm,if(timestamp_diff(s.session_start_at,last_value(if(s.first_utm is null,null,s.session_start_at) ignore nulls) over (w),hour)<=72,last_value(s.first_utm ignore nulls) over (w),null)),',')[safe_offset(2)] as last_campaign
+        ,split(if(s.first_utm is not null,s.first_utm,if(timestamp_diff(s.session_start_at,last_value(if(s.first_utm is null,null,s.session_start_at) ignore nulls) over (w),hour)<=72,last_value(s.first_utm ignore nulls) over (w),null)),',')[safe_offset(3)] as last_content
+        ,split(if(s.first_utm is not null,s.first_utm,if(timestamp_diff(s.session_start_at,last_value(if(s.first_utm is null,null,s.session_start_at) ignore nulls) over (w),hour)<=72,last_value(s.first_utm ignore nulls) over (w),null)),',')[safe_offset(4)] as last_term
+      from(
+        select
+          concat(cast(row_number() over(w) AS string),' - ',looker_visitor_id) as session_id
+          ,looker_visitor_id
+          ,timestamp as session_start_at
+          ,row_number() over(w) as session_sequence_number
+          ,lead(timestamp) over(w) as next_session_start_at
+          ,user_agent as user_agent
 
-        ,referrer as first_referrer
-        ,campaign_source as first_source
-        ,campaign_medium as first_medium
-        ,campaign_name as first_campaign
-        ,campaign_content as first_content
-        ,campaign_term as first_term
-        ,user_agent as user_agent
+          ,referrer as first_referrer
+          ,campaign_source as first_source
+          ,campaign_medium as first_medium
+          ,campaign_name as first_campaign
+          ,campaign_content as first_content
+          ,campaign_term as first_term
+          ,if(campaign_source is null and campaign_medium is null and campaign_name is null and campaign_content is null and campaign_term is null
+            ,null
+            ,concat(ifnull(campaign_source,''),',',ifnull(campaign_medium,''),',',ifnull(campaign_name,''),',',ifnull(campaign_content,''),',',ifnull(campaign_term,'')))
+            as first_utm
 
-        ,last_value(referrer ignore nulls) over (w) as last_referrer
-        ,last_value(campaign_source ignore nulls) over (w) as last_source
-        ,last_value(campaign_medium ignore nulls) over (w) as last_medium
-        ,last_value(campaign_name ignore nulls) over (w) as last_campaign
-        ,last_value(campaign_content ignore nulls) over (w) as last_content
-        ,last_value(campaign_term ignore nulls) over (w) as last_term
-        ,last_value(if(coalesce(campaign_source,campaign_medium,campaign_name,campaign_content,campaign_term) is null,null,timestamp) ignore nulls) over (w) as last_start_at
-        ,timestamp_diff(timestamp,last_value(if(coalesce(campaign_source,campaign_medium,campaign_name,campaign_content,campaign_term) is null,null,timestamp) ignore nulls) over (w),hour) as last_diff_hours
+        from ${mapped_events.SQL_TABLE_NAME}
+        where (idle_time_minutes > 30 or idle_time_minutes is null)
+        window w as (partition by looker_visitor_id order by timestamp)
+      )s
+      window w as (partition by s.looker_visitor_id order by s.session_start_at)
 
-      from ${mapped_events.SQL_TABLE_NAME}
-      where (idle_time_minutes > 30 or idle_time_minutes is null)
-      window w as (partition by looker_visitor_id order by timestamp)
  ;;
   }
 
@@ -122,6 +129,13 @@ view: sessions {
     hidden: yes
   }
 
+  dimension: first_utm {
+    type:  string
+    sql: ${TABLE}.first_utm ;;
+    group_label: "Attribution"
+    hidden: yes
+  }
+
   dimension: first_campaign {
     type:  string
     sql: ${TABLE}.first_campaign ;;
@@ -179,9 +193,9 @@ view: sessions {
     hidden: yes
   }
 
-  dimension: last_campaign {
+  dimension: last_utm {
     type:  string
-    sql: ${TABLE}.last_campaign ;;
+    sql: ${TABLE}.last_utm ;;
     group_label: "Attribution"
     hidden: yes
   }
@@ -201,6 +215,13 @@ view: sessions {
     hidden: yes
   }
 
+  dimension: last_campaign {
+    type:  string
+    sql: ${TABLE}.last_campaign ;;
+    group_label: "Attribution"
+    hidden: yes
+  }
+
   dimension: last_content {
     type:  string
     sql: ${TABLE}.last_content ;;
@@ -215,12 +236,6 @@ view: sessions {
     hidden: yes
   }
 
-  dimension: last_diff_hours {
-    type: number
-    sql: ${TABLE}.last_diff_hours ;;
-    hidden: yes
-    group_label: "Attribution"
-  }
 
 
 

@@ -242,7 +242,7 @@ dimension_group: since_first_purchase {
 
   dimension: first_utm {
     type:  string
-    sql: concat(${sessions.first_source},',',${sessions.first_medium},',',${sessions.first_campaign},',',${sessions.first_content},',',${sessions.first_term}) ;;
+    sql: ${sessions.first_utm} ;;
     group_label: "Attribution"
   }
 
@@ -279,7 +279,7 @@ dimension_group: since_first_purchase {
 
   dimension: last_utm {
     type:  string
-    sql: concat(${sessions.last_source},',',${sessions.last_medium},',',${sessions.last_campaign},',',${sessions.last_content},',',${sessions.last_term}) ;;
+    sql: ${sessions.last_utm} ;;
     group_label: "Attribution"
   }
 
@@ -331,13 +331,6 @@ dimension_group: since_first_purchase {
     sql: ${sessions.last_term} ;;
     group_label: "Attribution"
   }
-
-  dimension: last_diff_hours {
-    type: number
-    sql: ${sessions.last_diff_hours} ;;
-    group_label: "Attribution"
-  }
-
 
 
 # ----- Measures -----
