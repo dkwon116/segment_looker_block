@@ -1,6 +1,6 @@
 view: cashbacks {
   derived_table: {
-    sql_trigger_value: select count(*) from data_data_api_db.cashbacks ;;
+    sql_trigger_value: select count(*) from aurora_smile_ventures.cashbacks ;;
     sql:
     SELECT
       CONCAT(c.order_id, "-", c.sku_number) as id
