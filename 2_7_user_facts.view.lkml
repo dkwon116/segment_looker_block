@@ -12,7 +12,7 @@ view: user_facts {
     , first_value(s.first_campaign IGNORE NULLS) over(w) as first_campaign
     , first_value(s.first_content IGNORE NULLS) over(w) as first_content
     , first_value(s.first_term IGNORE NULLS) over(w) as first_term
-    , last_value(s.last_referrer IGNORE NULLS) over(w) as last_referrer
+    , last_value(s.first_referrer IGNORE NULLS) over(w) as last_referrer
     , last_value(s.last_source IGNORE NULLS) over(w) as last_source
     , last_value(s.last_medium IGNORE NULLS) over(w) as last_medium
     , last_value(s.last_campaign IGNORE NULLS) over(w) as last_campaign

@@ -237,7 +237,19 @@ view: sessions {
     hidden: yes
   }
 
+  dimension: last_diff_hours {
+    type: number
+    sql: ${TABLE}.last_diff_hours ;;
+    group_label: "Attribution"
+  }
 
+  dimension: last_diff_hours_tier {
+    type: tier
+    sql: ${last_diff_hours} ;;
+    style: relational
+    tiers: [24, 72, 168, 336, 672]
+    group_label: "Attribution"
+  }
 
 
 
