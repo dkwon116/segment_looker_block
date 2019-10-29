@@ -6,12 +6,13 @@ view: sessions {
     sql:
       select
         s.*
-        ,if(s.first_utm is not null,s.first_utm,if(timestamp_diff(s.session_start_at,last_value(if(s.first_utm is null,null,s.session_start_at) ignore nulls) over (w),hour)<=72,last_value(s.first_utm ignore nulls) over (w),null)) as last_utm
         ,split(if(s.first_utm is not null,s.first_utm,if(timestamp_diff(s.session_start_at,last_value(if(s.first_utm is null,null,s.session_start_at) ignore nulls) over (w),hour)<=72,last_value(s.first_utm ignore nulls) over (w),null)),',')[safe_offset(0)] as last_source
         ,split(if(s.first_utm is not null,s.first_utm,if(timestamp_diff(s.session_start_at,last_value(if(s.first_utm is null,null,s.session_start_at) ignore nulls) over (w),hour)<=72,last_value(s.first_utm ignore nulls) over (w),null)),',')[safe_offset(1)] as last_medium
         ,split(if(s.first_utm is not null,s.first_utm,if(timestamp_diff(s.session_start_at,last_value(if(s.first_utm is null,null,s.session_start_at) ignore nulls) over (w),hour)<=72,last_value(s.first_utm ignore nulls) over (w),null)),',')[safe_offset(2)] as last_campaign
         ,split(if(s.first_utm is not null,s.first_utm,if(timestamp_diff(s.session_start_at,last_value(if(s.first_utm is null,null,s.session_start_at) ignore nulls) over (w),hour)<=72,last_value(s.first_utm ignore nulls) over (w),null)),',')[safe_offset(3)] as last_content
         ,split(if(s.first_utm is not null,s.first_utm,if(timestamp_diff(s.session_start_at,last_value(if(s.first_utm is null,null,s.session_start_at) ignore nulls) over (w),hour)<=72,last_value(s.first_utm ignore nulls) over (w),null)),',')[safe_offset(4)] as last_term
+        ,if(s.first_utm is not null,s.first_utm,if(timestamp_diff(s.session_start_at,last_value(if(s.first_utm is null,null,s.session_start_at) ignore nulls) over (w),hour)<=72,last_value(s.first_utm ignore nulls) over (w),null)) as last_utm
+        ,timestamp_diff(s.session_start_at,last_value(if(s.first_utm is null,null,s.session_start_at) ignore nulls) over (w),hour) as last_diff_hours
       from(
         select
           concat(cast(row_number() over(w) AS string),' - ',looker_visitor_id) as session_id
