@@ -181,20 +181,10 @@ view: orders {
   }
 
   measure: total_commission {
+    description: "Total commission of not returned, confirmed order with commission"
     type: sum
     sql: ${affiliate_commission} ;;
     value_format_name: decimal_0
-    filters: {
-      field: affiliate_commission
-      value: ">0"
-    }
-  }
-
-  measure: commissionable_total_order_amount {
-    type: sum
-    sql: ${total} ;;
-    value_format_name: decimal_0
-
     filters: {
       field: affiliate_commission
       value: ">0"
@@ -306,8 +296,9 @@ view: orders {
   }
 
   measure: dealtake {
+    description: "DT of Not Returned, Confirmed Orders with Commission"
     type: number
-    sql: ${total_commission} / NULLIF(${commissionable_total_order_amount}, 0) ;;
+    sql: ${total_commission} / NULLIF(${net_order_amount}, 0) ;;
     value_format_name: percent_1
   }
 }
