@@ -39,6 +39,7 @@ view: order_items {
           WHERE e._fivetran_deleted = false
             AND e.order_id NOT IN (SELECT order_id FROM google_sheets.test_orders)
             AND CONCAT(e.order_id, "-", e.sku_number) NOT IN (select order_item from google_sheets.test_order_item)
+            AND e.sale_amount <> 0
         )
 
 
