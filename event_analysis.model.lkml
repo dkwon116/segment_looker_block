@@ -109,11 +109,20 @@ explore: campaigns {
     relationship: one_to_one
   }
 
-  join: email_activity {
+  join: order_facts {
+    view_label: "Order"
     type: left_outer
-    sql_on: ${email_activity.marketing_campaign_id}=${campaigns.marketing_campaign_id};;
+    sql_on: ${order_facts.session_id} = ${sessions.session_id} ;;
     relationship: many_to_one
   }
+
+
+
+#   join: email_activity {
+#     type: left_outer
+#     sql_on: ${email_activity.marketing_campaign_id}=${campaigns.marketing_campaign_id};;
+#     relationship: many_to_one
+#   }
 
 }
 
