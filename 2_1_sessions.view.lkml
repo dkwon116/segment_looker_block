@@ -24,14 +24,14 @@ view: sessions {
           ,user_agent as user_agent
 
           ,referrer as first_referrer
-          ,upper(campaign_source) as first_source
-          ,upper(campaign_medium) as first_medium
-          ,upper(campaign_name) as first_campaign
-          ,upper(campaign_content) as first_content
-          ,upper(campaign_term) as first_term
+          ,campaign_source as first_source
+          ,campaign_medium as first_medium
+          ,campaign_name as first_campaign
+          ,campaign_content as first_content
+          ,campaign_term as first_term
           ,if(campaign_source is null and campaign_medium is null and campaign_name is null and campaign_content is null and campaign_term is null
             ,null
-            ,concat(ifnull(upper(campaign_source),''),',',ifnull(upper(campaign_medium),''),',',ifnull(upper(campaign_name),''),',',ifnull(upper(campaign_content),''),',',ifnull(upper(campaign_term),'')))
+            ,concat(ifnull(campaign_source,''),',',ifnull(campaign_medium,''),',',ifnull(campaign_name,''),',',ifnull(campaign_content,''),',',ifnull(campaign_term,'')))
             as first_utm
 
         from ${mapped_events.SQL_TABLE_NAME}

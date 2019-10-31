@@ -71,14 +71,14 @@ explore: campaigns {
   join: campaign_facts {
     view_label: "Campaign"
     type: left_outer
-    sql_on: ${campaign_facts.utm} = ${campaigns.utm} ;;
+    sql_on: upper(${campaign_facts.utm}) = upper(${campaigns.utm}) ;;
     relationship: one_to_one
   }
 
   join: sessions {
     view_label: "Session"
     type: left_outer
-    sql_on: ${sessions.last_utm} = ${campaigns.utm} ;;
+    sql_on: upper(${sessions.last_utm}) = upper(${campaigns.utm}) ;;
     relationship: many_to_one
   }
 

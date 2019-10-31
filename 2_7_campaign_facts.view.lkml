@@ -24,7 +24,7 @@ view: campaign_facts {
         LEFT JOIN ${email_campaigns.SQL_TABLE_NAME} AS email_campaigns ON email_activity.marketing_campaign_id=email_campaigns.marketing_campaign_id
         WHERE email_campaigns.utm IS NOT NULL
         GROUP BY 1
-      ) email on email.utm=c.utm
+      ) email on upper(email.utm)=upper(c.utm)
 
  ;;
   }
