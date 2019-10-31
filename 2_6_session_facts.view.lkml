@@ -460,6 +460,11 @@ measure: unique_first_signedup_conversion {
   group_label: "Signup"
 }
 
+
+######################################
+#   Engaged
+
+
 measure: unique_engaged_visitor {
   type: count_distinct
   sql: ${sessions.looker_visitor_id} ;;
@@ -467,7 +472,15 @@ measure: unique_engaged_visitor {
     field: engaged
     value: ">0"
   }
+  group_label: "Engaged"
 }
+
+  measure: engaged_conversion_rate {
+    type: number
+    sql: ${unique_engaged_visitor} / NULLIF(${sessions.unique_visitor_count},0) ;;
+    value_format_name: percent_0
+    group_label: "Engaged"
+  }
 
   measure: unique_cashback_engaged_visitor {
     type: count_distinct
@@ -476,6 +489,14 @@ measure: unique_engaged_visitor {
       field: cashback_engaged
       value: ">0"
     }
+    group_label: "Engaged"
+  }
+
+  measure: cashback_engaged_conversion_rate {
+    type: number
+    sql: ${unique_cashback_engaged_visitor} / NULLIF(${sessions.unique_visitor_count},0) ;;
+    value_format_name: percent_0
+    group_label: "Engaged"
   }
 
 
@@ -1101,6 +1122,26 @@ measure: total_order_value {
   sql: ${order_value} ;;
   group_label: "Order Completed"
 }
+
+  measure: total_first_order_value {
+    type: sum
+    sql: ${order_value} ;;
+    group_label: "Order Completed"
+    filters: {
+      field: is_pre_purchase_at_session
+      value: "yes"
+    }
+  }
+
+  measure: total_repeat_order_value {
+    type: sum
+    sql: ${order_value} ;;
+    group_label: "Order Completed"
+    filters: {
+      field: is_pre_purchase_at_session
+      value: "no"
+    }
+  }
 
 measure: order_completed_per_session {
   type: average

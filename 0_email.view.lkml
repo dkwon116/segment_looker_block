@@ -1,11 +1,26 @@
 view: email_activity {
-  sql_table_name: sendgrid.activity_view ;;
+  derived_table: {
+    sql_trigger_value: select count(*) from sendgrid.activity_view ;;
+    sql:
+      select
+        s.*
+        ,u.id as looker_visitor_id
+      from sendgrid.activity_view s
+      left join ${catch_users.SQL_TABLE_NAME} u on u.email=s.email
+ ;;
+  }
+
 
   dimension: id {
     primary_key: yes
     type: string
     sql: ${TABLE}.id ;;
     hidden: yes
+  }
+
+  dimension: looker_visitor_id {
+    type: string
+    sql: ${TABLE}.looker_visitor_id ;;
   }
 
   dimension: category {
@@ -61,7 +76,6 @@ view: email_activity {
   dimension: marketing_campaign_id {
     type: number
     sql: ${TABLE}.marketing_campaign_id ;;
-    hidden: yes
   }
 
   dimension: marketing_campaign_name {
