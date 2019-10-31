@@ -4,7 +4,7 @@ view: experiment_facts {
     sql:
       select
         e.experiment_id
-        ,coalesce(t.experiment_label,e.experiment_name) as experiment_label
+        ,coalesce(t.experiment_label,e.experiment_name) as experiment_name
         ,count(distinct variant_id) as number_of_variant
         ,min(s.session_start_at) as experiment_start_at
         ,max(s.session_start_at) as experiment_end_at
@@ -28,9 +28,9 @@ view: experiment_facts {
 
   }
 
-  dimension: experiment_label {
+  dimension: experiment_name {
     type: string
-    sql: ${TABLE}.experiment_label ;;
+    sql: ${TABLE}.experiment_name ;;
     group_label: "Experiment"
     link: {
       label: "Go to {{value}} dashboard"

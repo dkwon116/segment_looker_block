@@ -2,6 +2,11 @@ view: email_campaigns {
   derived_table: {
     sql_trigger_value: select count(*) from ${email_activity.SQL_TABLE_NAME} ;;
     sql:
+
+    CREATE TEMP FUNCTION decodeurl(a STRING)
+    RETURNS STRING
+    LANGUAGE js AS "return decodeURIComponent(a)";
+
       select
         distinct
         e.marketing_campaign_id
@@ -20,7 +25,7 @@ view: email_campaigns {
           ,split(split(e.url,'utm_medium=')[safe_offset(1)],'&')[safe_offset(0)] as medium
           ,split(split(e.url,'utm_campaign=')[safe_offset(1)],'&')[safe_offset(0)] as campaign
           ,split(split(e.url,'utm_content=')[safe_offset(1)],'&')[safe_offset(0)] as content
-          ,split(split(e.url,'utm_term=')[safe_offset(1)],'&')[safe_offset(0)] as term
+          ,decodeurl(split(split(e.url,'utm_term=')[safe_offset(1)],'&')[safe_offset(0)]) as term
           ,count(1) as click_cnt
         from ${email_activity.SQL_TABLE_NAME} e
         where e.event='click'

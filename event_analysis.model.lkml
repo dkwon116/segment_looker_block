@@ -63,11 +63,69 @@ explore: email_activity {
     relationship: many_to_many
   }
 
-  join: email_campaigns{
-    sql_on: ${email_activity.marketing_campaign_id}=${email_campaigns.marketing_campaign_id} ;;
+}
+
+explore: campaigns {
+  view_label: "Campaign"
+
+  join: campaign_facts {
+    view_label: "Campaign"
+    type: left_outer
+    sql_on: upper(${campaign_facts.utm}) = upper(${campaigns.utm}) ;;
+    relationship: one_to_one
+  }
+
+  join: sessions {
+    view_label: "Session"
+    type: left_outer
+    sql_on: upper(${sessions.last_utm}) = upper(${campaigns.utm}) ;;
     relationship: many_to_one
   }
+
+  join: session_facts {
+    view_label: "Session"
+    type: left_outer
+    sql_on: ${session_facts.session_id} = ${sessions.session_id} ;;
+    relationship: one_to_one
+  }
+
+  join: user_facts {
+    type: left_outer
+    sql_on: ${user_facts.looker_visitor_id} = ${sessions.looker_visitor_id} ;;
+    relationship: one_to_one
+  }
+
+  join: journeys {
+    view_label: "Journey"
+    type: left_outer
+    sql_on: ${journeys.session_id} = ${sessions.session_id} ;;
+    relationship: many_to_one
+  }
+
+  join: journey_facts {
+    view_label: "Journey"
+    type: left_outer
+    sql_on: ${journey_facts.journey_id} = ${journeys.journey_id} ;;
+    relationship: one_to_one
+  }
+
+  join: order_facts {
+    view_label: "Order"
+    type: left_outer
+    sql_on: ${order_facts.session_id} = ${sessions.session_id} ;;
+    relationship: many_to_one
+  }
+
+
+
+#   join: email_activity {
+#     type: left_outer
+#     sql_on: ${email_activity.marketing_campaign_id}=${campaigns.marketing_campaign_id};;
+#     relationship: many_to_one
+#   }
+
 }
+
 
 
 explore: event_list {hidden:yes}

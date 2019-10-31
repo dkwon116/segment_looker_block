@@ -286,11 +286,6 @@ explore: event_facts {
     sql_on: ${user_facts.looker_visitor_id} = ${dynamic_cohort_users.user_id} ;;
   }
 
-  join: email_activity {
-    type: left_outer
-    sql_on: ${catch_users.email} = ${email_activity.email} ;;
-    relationship: one_to_many
-  }
 }
 
 

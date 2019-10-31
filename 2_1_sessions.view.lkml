@@ -335,7 +335,7 @@ view: sessions {
 
   measure: unique_repeat_session_visitors_per_unique_visitor {
     type: number
-    sql: ${unique_repeat_session_visitor_count} / ${unique_visitor_count} ;;
+    sql: ${unique_repeat_session_visitor_count} / nullif(${unique_visitor_count},0) ;;
     value_format_name: percent_0
   }
 
