@@ -109,6 +109,12 @@ view: sessions {
        ;;
   }
 
+  dimension: is_utm {
+    type:  yesno
+    sql: CASE WHEN ${TABLE}.last_utm is null THEN false ELSE true END ;;
+    group_label: "Attribution"
+  }
+
 
   dimension: first_referrer {
     sql: ${TABLE}.first_referrer ;;

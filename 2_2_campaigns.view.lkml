@@ -8,12 +8,12 @@ view: campaigns {
         ,coalesce(email.marketing_campaign_name) as marketing_campaign_name
       from(
         select
-          s.first_utm as utm
-          ,s.first_source as source
-          ,s.first_medium as medium
-          ,s.first_campaign as campaign
-          ,s.first_content as content
-          ,s.first_term as term
+          upper(s.first_utm) as utm
+          ,upper(s.first_source) as source
+          ,upper(s.first_medium) as medium
+          ,upper(s.first_campaign) as campaign
+          ,upper(s.first_content) as content
+          ,upper(s.first_term) as term
           ,timestamp(safe_cast(concat('20',substr(s.first_term,1,2),'-',substr(s.first_term,3,2),'-',substr(s.first_term,5,2),' 00:00:00') as datetime)) as start_timestamp
           ,timestamp_add(timestamp(safe_cast(concat('20',substr(s.first_term,1,2),'-',substr(s.first_term,3,2),'-',substr(s.first_term,5,2),' 00:00:00') as datetime)), interval 168 hour) as end_timestamp
           ,min(s.session_start_at) as first_session_timestamp
@@ -21,7 +21,7 @@ view: campaigns {
         where s.first_utm is not null
         group by 1,2,3,4,5,6,7,8
       ) c
-      left join ${email_campaigns.SQL_TABLE_NAME} email on email.utm=c.utm
+      left join ${email_campaigns.SQL_TABLE_NAME} email on upper(email.utm)=upper(c.utm)
  ;;
   }
 

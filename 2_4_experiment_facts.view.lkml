@@ -34,7 +34,7 @@ view: experiment_facts {
     group_label: "Experiment"
     link: {
       label: "Go to {{value}} dashboard"
-      url: "https://smileventures.au.looker.com/dashboards/68?Experiment%20Label={{value | encode_url}}"
+      url: "https://smileventures.au.looker.com/dashboards/68?Experiment%20Name={{value | encode_url}}"
     }
   }
 

@@ -277,6 +277,8 @@ dimension_group: since_first_purchase {
     group_label: "Attribution"
   }
 
+
+
   dimension: last_utm {
     type:  string
     sql: ${sessions.last_utm} ;;
@@ -1122,6 +1124,13 @@ measure: total_order_value {
   sql: ${order_value} ;;
   group_label: "Order Completed"
 }
+
+  measure: total_order_value_per_converted_user {
+    type: number
+    sql: ${total_order_value} / NULLIF(${total_order_completed_users}, 0);;
+    value_format_name:decimal_2
+    group_label: "Order Completed"
+  }
 
   measure: total_first_order_value {
     type: sum
