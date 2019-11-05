@@ -30,10 +30,7 @@ view: experiment_sessions {
     type: string
     sql: ${TABLE}.experiment_id ;;
     group_label: "Experiment"
-    link: {
-      label: "Go to dashboard"
-      url: "https://smileventures.au.looker.com/dashboards/68?Experiment%20ID={{value | encode_url}}"
-    }
+    hidden: yes
   }
 
   dimension: variant_id {
