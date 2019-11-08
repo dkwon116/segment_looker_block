@@ -60,6 +60,12 @@ view: funnel_explorer {
         {% else %}
           1=1
         {% endif %}
+        AND
+        {% if platform._parameter_value != "all" %}
+          {% condition platform %} ef.platform {% endcondition %}
+        {% else %}
+          1=1
+        {% endif %}
       GROUP BY 1, 2, 3
        ;;
   }
@@ -141,6 +147,23 @@ view: funnel_explorer {
     allowed_value: {
       label: "Before SignedUp"
       value: "signed_up"
+    }
+    default_value: "all"
+  }
+
+  parameter: platform {
+    type: unquoted
+    allowed_value: {
+      label: "Desktop"
+      value: "Desktop"
+    }
+    allowed_value: {
+      label: "Mobile"
+      value: "Mobile"
+    }
+    allowed_value: {
+      label: "All"
+      value: "all"
     }
     default_value: "all"
   }

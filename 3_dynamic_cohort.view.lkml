@@ -8,6 +8,7 @@ view: dynamic_cohort_users {
           LEFT JOIN ${user_facts.SQL_TABLE_NAME} as uf on ef.looker_visitor_id = uf.looker_visitor_id
           LEFT JOIN ${product_events.SQL_TABLE_NAME} as pe on ef.event_id = pe.event_id
           LEFT JOIN ${product_facts.SQL_TABLE_NAME} as pf on pe.product_id = pf.id
+          LEFT JOIN ${orders.SQL_TABLE_NAME} as o on ef.looker_visitor_id = o.user_id and ef.event_id=o.order_id
           LEFT JOIN ${email_activity.SQL_TABLE_NAME} as ea on uf.email = ea.email
 
           WHERE ({% condition cohort_filter_event %} ef.event {% endcondition %})
@@ -27,6 +28,10 @@ view: dynamic_cohort_users {
             AND ({% condition cohort_user_gender %} uf.gender {% endcondition %})
             AND ({% condition cohort_filter_signed_up_at %} uf.signed_up_date {% endcondition %} )
             AND ({% condition cohort_filter_users_first_source %} uf.first_source {% endcondition %} )
+            AND ({% condition cohort_filter_users_type %} uf.user_type {% endcondition %} )
+
+            -- order filters
+            AND ({% condition cohort_filter_transaction_at %} o.transaction_at {% endcondition %})
           GROUP BY 1;;
   }
 
@@ -141,6 +146,13 @@ view: dynamic_cohort_users {
     suggest_dimension: user_facts.first_source
   }
 
+  filter: cohort_filter_users_type {
+    description: "User Type to filter cohort"
+    type: string
+    suggest_explore: event_facts
+    suggest_dimension: user_facts.user_type
+  }
+
 
 
   filter: cohort_filter_product_id {
@@ -165,5 +177,12 @@ view: dynamic_cohort_users {
     group_label: "Product Filters"
     suggest_explore: products
     suggest_dimension: products.brand_name
+  }
+
+
+  filter: cohort_filter_transaction_at {
+    description: "Made Purchase At"
+    type: date
+#     group_label: "Order Filters"
   }
 }

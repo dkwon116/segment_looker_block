@@ -556,3 +556,5 @@ explore: event_list {
 explore: utm_values {
   hidden: yes
 }
+
+explore: products {}

@@ -33,6 +33,9 @@ view: event_facts {
         , s.first_term
         , s.user_agent as user_agent
         , CASE
+            WHEN s.user_agent LIKE '%Mobile%' THEN "Mobile"
+            ELSE "Desktop" END as platform
+        , CASE
             -- Discovery engaged for anyone started Discovery journey
             WHEN t.event in ("Search","Product Search", "Hashtag", "Category", "New", "Sale", "Brand") THEN "Discovery"
             -- Cashback engaged for anyone started Cashback related journey
@@ -208,9 +211,7 @@ view: event_facts {
   dimension: platform {
     group_label: "Event Context"
     type: string
-    sql:  CASE
-            WHEN ${user_agent} LIKE '%Mobile%' THEN "Mobile"
-            ELSE "Desktop" END;;
+    sql:  ${TABLE}.platform ;;
   }
 
   dimension: in_app {
