@@ -75,6 +75,24 @@ explore: campaigns {
     relationship: one_to_one
   }
 
+  join: email_campaigns {
+    type: left_outer
+    sql_on: ${email_campaigns.marketing_campaign_id}=${campaigns.marketing_campaign_id};;
+    relationship: one_to_one
+  }
+
+  join: email_campaign_facts {
+    type: left_outer
+    sql_on: upper(${email_campaign_facts.utm}) = upper(${campaigns.utm});;
+    relationship: one_to_one
+  }
+
+#   join: email_activity {
+#     type: left_outer
+#     sql_on: ${email_activity.marketing_campaign_id}=${email_campaigns.marketing_campaign_id};;
+#     relationship: many_to_one
+#   }
+
   join: sessions {
     view_label: "Session"
     type: left_outer
@@ -117,12 +135,6 @@ explore: campaigns {
   }
 
 
-
-#   join: email_activity {
-#     type: left_outer
-#     sql_on: ${email_activity.marketing_campaign_id}=${campaigns.marketing_campaign_id};;
-#     relationship: many_to_one
-#   }
 
 }
 

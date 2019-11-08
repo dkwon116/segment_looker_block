@@ -11,6 +11,7 @@ view: email_campaigns {
         distinct
         e.marketing_campaign_id
         ,e.marketing_campaign_name
+        ,t.delivered_at
         ,concat(first_value(e.source) over (w),',',first_value(e.medium) over (w),',',first_value(e.campaign) over (w),',',first_value(e.content) over (w),',',first_value(e.term) over (w)) as utm
         ,first_value(e.source) over (w) as source
         ,first_value(e.medium) over (w) as medium
@@ -37,7 +38,16 @@ view: email_campaigns {
         and split(split(e.url,'utm_content=')[safe_offset(1)],'&')[safe_offset(0)] is not null
         and split(split(e.url,'utm_term=')[safe_offset(1)],'&')[safe_offset(0)] is not null
         group by 1,2,3,4,5,6,7
-      )e
+      ) e
+      left join(
+        select
+          e.marketing_campaign_id
+          ,TIMESTAMP_SECONDS(min(e.timestamp)) as delivered_at
+        from ${email_activity.SQL_TABLE_NAME} e
+        where e.event='delivered'
+        and e.marketing_campaign_id is not null
+        group by 1
+      ) t on t.marketing_campaign_id=e.marketing_campaign_id
       window w as (partition by e.marketing_campaign_id order by e.click_cnt desc rows between unbounded preceding and unbounded following)
  ;;
   }
@@ -51,6 +61,11 @@ view: email_campaigns {
     type:  string
     sql: ${TABLE}.marketing_campaign_name ;;
     hidden: yes
+  }
+  dimension_group: delivered_at {
+    type: time
+    timeframes: [time, date, hour_of_day, day_of_week_index, week, hour, month, quarter, raw]
+    sql: ${TABLE}.delivered_at ;;
   }
   dimension: utm {
     type:  string

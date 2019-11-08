@@ -28,19 +28,25 @@ view: email_activity {
     sql: ${TABLE}.category ;;
   }
 
-  dimension_group: date {
+  dimension_group: start {
     type: time
-    timeframes: [
-      raw,
-      time,
-      date,
-      week,
-      month,
-      quarter,
-      year
-    ]
-    sql: ${TABLE}.date ;;
+    timeframes: [time, date, hour_of_day, day_of_week_index, week, hour, month, quarter, raw]
+    sql: TIMESTAMP_SECONDS(${TABLE}.timestamp) ;;
   }
+
+#   dimension_group: date {
+#     type: time
+#     timeframes: [
+#       raw,
+#       time,
+#       date,
+#       week,
+#       month,
+#       quarter,
+#       year
+#     ]
+#     sql: ${TABLE}.date ;;
+#   }
 
   dimension: email {
     type: string
@@ -171,10 +177,7 @@ view: email_activity {
     sql: ${TABLE}.template_id ;;
   }
 
-  dimension: timestamp {
-    type: number
-    sql: ${TABLE}.timestamp ;;
-  }
+
 
   dimension: tls {
     type: number
@@ -234,6 +237,20 @@ view: email_activity {
     drill_fields: [id, marketing_campaign_name, sg_template_name]
   }
 
+  measure: unique_campaigns {
+    type: count_distinct
+    sql: ${marketing_campaign_id} ;;
+  }
+
+  measure: unique_delievered_campaigns {
+    type: count_distinct
+    sql: ${marketing_campaign_id} ;;
+    filters: {
+      field: event
+      value: "delivered"
+    }
+  }
+
   measure: users_delievered {
     type: count_distinct
     sql: ${email} ;;
@@ -260,6 +277,54 @@ view: email_activity {
       value: "open"
     }
   }
+
+  measure: users_unsubscribed {
+    type: count_distinct
+    sql: ${email} ;;
+    filters: {
+      field: event
+      value: "unsubscribe"
+    }
+  }
+
+  measure: users_bounced {
+    type: count_distinct
+    sql: ${email} ;;
+    filters: {
+      field: event
+      value: "bounce"
+    }
+  }
+
+  measure: users_spamreport {
+    type: count_distinct
+    sql: ${email} ;;
+    filters: {
+      field: event
+      value: "spamreport"
+    }
+  }
+
+  measure: users_dropped {
+    type: count_distinct
+    sql: ${email} ;;
+    filters: {
+      field: event
+      value: "dropped"
+    }
+  }
+
+  measure: users_deferred {
+    type: count_distinct
+    sql: ${email} ;;
+    filters: {
+      field: event
+      value: "deferred"
+    }
+  }
+
+
+
 
   measure: unique_open_users_per_delivered_users {
     type: number

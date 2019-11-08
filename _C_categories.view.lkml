@@ -5,10 +5,12 @@ view: categories {
     sql:
       select
         c.*
-        ,if(c.type='category',
-        replace(array_to_string([ifnull(c5.name,'1'),ifnull(c4.name,'1'),ifnull(c3.name,'1'),ifnull(c2.name,'1'),ifnull(c.name,'1')],"-"),"1-","")
-        ,null)
-        as full_name
+        ,if(c.type='category',replace(array_to_string([ifnull(c5.name,'1'),ifnull(c4.name,'1'),ifnull(c3.name,'1'),ifnull(c2.name,'1'),ifnull(c.name,'1')],"-"),"1-",""),null) as full_name
+        ,if(c.type='category',split(replace(array_to_string([ifnull(c5.name,'1'),ifnull(c4.name,'1'),ifnull(c3.name,'1'),ifnull(c2.name,'1'),ifnull(c.name,'1')],"-"),"1-",""),'-')[safe_offset(0)],null) as category1
+        ,if(c.type='category',split(replace(array_to_string([ifnull(c5.name,'1'),ifnull(c4.name,'1'),ifnull(c3.name,'1'),ifnull(c2.name,'1'),ifnull(c.name,'1')],"-"),"1-",""),'-')[safe_offset(1)],null) as category2
+        ,if(c.type='category',split(replace(array_to_string([ifnull(c5.name,'1'),ifnull(c4.name,'1'),ifnull(c3.name,'1'),ifnull(c2.name,'1'),ifnull(c.name,'1')],"-"),"1-",""),'-')[safe_offset(2)],null) as category3
+        ,if(c.type='category',split(replace(array_to_string([ifnull(c5.name,'1'),ifnull(c4.name,'1'),ifnull(c3.name,'1'),ifnull(c2.name,'1'),ifnull(c.name,'1')],"-"),"1-",""),'-')[safe_offset(3)],null) as category4
+        ,if(c.type='category',split(replace(array_to_string([ifnull(c5.name,'1'),ifnull(c4.name,'1'),ifnull(c3.name,'1'),ifnull(c2.name,'1'),ifnull(c.name,'1')],"-"),"1-",""),'-')[safe_offset(4)],null) as category5
       from aurora_smile_ventures.categories c
       left join aurora_smile_ventures.categories c2 on c2.id=c.parent_id
       left join aurora_smile_ventures.categories c3 on c3.id=c2.parent_id
