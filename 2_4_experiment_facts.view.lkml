@@ -8,13 +8,14 @@ view: experiment_facts {
         ,count(distinct variant_id) as number_of_variant
         ,min(s.session_start_at) as experiment_start_at
         ,max(s.session_start_at) as experiment_end_at
+        ,count(s.session_id) as number_of_sessions
       from ${experiment_sessions.SQL_TABLE_NAME} e
       join ${sessions.SQL_TABLE_NAME} s on s.session_id=e.session_id
       left join(
        select null as experiment_id, null as experiment_label
-        union all select 'ahM-yfSbQgqwCC01Ogkf2g', '20191011_NewAboutPage'
-        union all select '7wAUOphhRq2C9mR-zoOFfQ','20191009_CashbackFlow'
-        union all select 'cDKNWZjsQaS3zjxNRPqbbg','20191009_CashbackBanner'
+        union all select 'ahM-yfSbQgqwCC01Ogkf2g', '191011_NewAboutPage'
+        union all select '7wAUOphhRq2C9mR-zoOFfQ','191009_CashbackFlow'
+        union all select 'cDKNWZjsQaS3zjxNRPqbbg','191009_CashbackBanner'
       ) t on t.experiment_id=e.experiment_id
       group by 1,2
       ;;
@@ -24,8 +25,10 @@ view: experiment_facts {
     type: string
     sql: ${TABLE}.experiment_id ;;
     group_label: "Experiment"
-    hidden: yes
-
+    link: {
+      label: "Go to dashboard"
+      url: "https://smileventures.au.looker.com/dashboards/68?Experiment%20ID={{value | encode_url}}"
+    }
   }
 
   dimension: experiment_name {
@@ -34,8 +37,14 @@ view: experiment_facts {
     group_label: "Experiment"
     link: {
       label: "Go to {{value}} dashboard"
-      url: "https://smileventures.au.looker.com/dashboards/68?Experiment%20Label={{value | encode_url}}"
+      url: "https://smileventures.au.looker.com/dashboards/68?Experiment%20Name={{value | encode_url}}"
     }
+  }
+
+  dimension:number_of_variant{
+    type: number
+    sql: ${TABLE}.number_of_variant ;;
+    group_label: "Experiment"
   }
 
   dimension_group: start {
@@ -52,9 +61,9 @@ view: experiment_facts {
     group_label: "Experiment"
   }
 
-  dimension:number_of_variant{
+  dimension:number_of_sessions{
     type: number
-    sql: ${TABLE}.number_of_variant ;;
+    sql: ${TABLE}.number_of_sessions ;;
     group_label: "Experiment"
   }
 

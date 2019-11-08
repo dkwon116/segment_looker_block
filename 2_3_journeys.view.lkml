@@ -135,6 +135,7 @@ view:journeys {
     }
   }
 
+
   measure: unique_discovery_journey_visitor_count {
     type: count_distinct
     sql: ${looker_visitor_id} ;;
