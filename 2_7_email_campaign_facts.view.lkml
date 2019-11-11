@@ -43,6 +43,11 @@ view: email_campaign_facts {
     sql: ${TABLE}.utm ;;
     hidden: yes
   }
+  dimension: marketing_campaign_id {
+    type:  string
+    sql: ${TABLE}.marketing_campaign_id ;;
+    hidden: yes
+  }
   dimension: delivered_users {
     type:  number
     sql: ${TABLE}.delivered_users ;;
@@ -72,6 +77,14 @@ view: email_campaign_facts {
     sql: ${TABLE}.order_value ;;
   }
 
+  measure: unique_delivered_campaigns {
+    type: count_distinct
+    sql: ${marketing_campaign_id} ;;
+    filters: {
+      field: delivered_users
+      value: "NOT NULL"
+    }
+  }
 
   measure: total_delivered_users {
     type:  sum
