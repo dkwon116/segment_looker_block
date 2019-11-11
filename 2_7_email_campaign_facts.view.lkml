@@ -12,13 +12,23 @@ view: email_campaign_facts {
         ,s.outlinked_users
         ,s.order_completed_users
         ,s.order_value
+        ,e.bounce_users
+        ,e.dropped_users
+        ,e.unsubscribe_users
+        ,e.spamreport_users
       from(
         select
           email_campaigns.utm  as utm
           ,email_activity.marketing_campaign_id
-          ,count(distinct case when (email_activity.event = 'delivered') then email_activity.email  else null end) as delivered_users
-          ,count(distinct case when (email_activity.event = 'open') then email_activity.email  else null end) as open_users
-          ,count(distinct case when (email_activity.event = 'click') then email_activity.email  else null end) as click_users
+          ,count(distinct case when (email_activity.event = 'delivered') then email_activity.email else null end) as delivered_users
+          ,count(distinct case when (email_activity.event = 'open') then email_activity.email else null end) as open_users
+          ,count(distinct case when (email_activity.event = 'click') then email_activity.email else null end) as click_users
+
+          ,count(distinct case when (email_activity.event = 'bounce') then email_activity.email else null end) as bounce_users
+          ,count(distinct case when (email_activity.event = 'dropped') then email_activity.email else null end) as dropped_users
+          ,count(distinct case when (email_activity.event = 'unsubscribe') then email_activity.email else null end) as unsubscribe_users
+          ,count(distinct case when (email_activity.event = 'spamreport') then email_activity.email else null end) as spamreport_users
+
         from ${email_activity.SQL_TABLE_NAME} as email_activity
         join ${email_campaigns.SQL_TABLE_NAME} as email_campaigns on email_activity.marketing_campaign_id=email_campaigns.marketing_campaign_id
         group by 1,2
@@ -76,6 +86,27 @@ view: email_campaign_facts {
     type:  number
     sql: ${TABLE}.order_value ;;
   }
+  dimension: bounce_users {
+    type:  number
+    sql: ${TABLE}.bounce_users ;;
+  }
+  dimension: dropped_users {
+    type:  number
+    sql: ${TABLE}.dropped_users ;;
+  }
+  dimension: unsubscribe_users {
+    type:  number
+    sql: ${TABLE}.unsubscribe_users ;;
+  }
+  dimension: spamreport_users {
+    type:  number
+    sql: ${TABLE}.spamreport_users ;;
+  }
+
+
+
+
+
 
   measure: unique_delivered_campaigns {
     type: count_distinct
@@ -146,4 +177,26 @@ view: email_campaign_facts {
     value_format_name: decimal_3
     group_label: "Campaign Facts"
   }
+
+  measure: total_bounce_users {
+    type:  sum
+    sql:  ${bounce_users};;
+    group_label: "Campaign Facts"
+  }
+  measure: total_dropped_users {
+    type:  sum
+    sql:  ${dropped_users};;
+    group_label: "Campaign Facts"
+  }
+  measure: total_unsubscribe_users {
+    type:  sum
+    sql:  ${unsubscribe_users};;
+    group_label: "Campaign Facts"
+  }
+  measure: total_spamreport_users {
+    type:  sum
+    sql:  ${spamreport_users};;
+    group_label: "Campaign Facts"
+  }
+
 }
