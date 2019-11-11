@@ -242,7 +242,7 @@ view: email_activity {
     sql: ${marketing_campaign_id} ;;
   }
 
-  measure: unique_delievered_campaigns {
+  measure: unique_delivered_campaigns {
     type: count_distinct
     sql: ${marketing_campaign_id} ;;
     filters: {
@@ -251,7 +251,7 @@ view: email_activity {
     }
   }
 
-  measure: users_delievered {
+  measure: users_delivered {
     type: count_distinct
     sql: ${email} ;;
     filters: {
@@ -328,7 +328,7 @@ view: email_activity {
 
   measure: unique_open_users_per_delivered_users {
     type: number
-    sql: ${users_opened} / nullif(${users_delievered},0) ;;
+    sql: ${users_opened} / nullif(${users_delivered},0) ;;
     value_format_name: percent_0
   }
 
@@ -340,7 +340,7 @@ view: email_activity {
 
   measure: click_through_rate {
     type: number
-    sql: ${users_clicked} / NULLIF(${users_delievered}, 0) ;;
+    sql: ${users_clicked} / NULLIF(${users_delivered}, 0) ;;
     value_format_name: percent_1
   }
 }
