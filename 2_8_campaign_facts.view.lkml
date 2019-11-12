@@ -4,11 +4,12 @@ view: campaign_facts {
     sql:
       select
         c.utm
+        ,c.marketing_campaign_id
         ,coalesce(email.delivered_users) as delivered_users
         ,coalesce(email.open_users) as open_users
         ,coalesce(email.click_users) as click_users
       from ${campaigns.SQL_TABLE_NAME} c
-      left join ${email_campaign_facts.SQL_TABLE_NAME} AS email on upper(email.utm)=upper(c.utm)
+      left join ${email_campaign_facts.SQL_TABLE_NAME} AS email on upper(email.utm)=upper(c.utm) and email.marketing_campaign_id=c.marketing_campaign_id
  ;;
   }
 
@@ -17,13 +18,18 @@ view: campaign_facts {
     sql: ${TABLE}.utm ;;
     hidden: yes
   }
+  dimension: marketing_campaign_id {
+    type:  string
+    sql: ${TABLE}.marketing_campaign_id ;;
+    hidden: yes
+  }
   measure: delivered_users {
-    type:  sum
+    type:  average
     sql: ${TABLE}.delivered_users ;;
     group_label: "Campaign Facts"
   }
   measure: open_users {
-    type:  sum
+    type:  average
     sql: ${TABLE}.open_users ;;
     group_label: "Campaign Facts"
   }
@@ -34,7 +40,7 @@ view: campaign_facts {
     group_label: "Campaign Facts"
   }
   measure: click_users {
-    type:  sum
+    type:  average
     sql: ${TABLE}.click_users ;;
     group_label: "Campaign Facts"
   }

@@ -29,6 +29,7 @@ view: experiment_facts {
       label: "Go to dashboard"
       url: "https://smileventures.au.looker.com/dashboards/68?Experiment%20ID={{value | encode_url}}"
     }
+    primary_key: yes
   }
 
   dimension: experiment_name {

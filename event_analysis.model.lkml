@@ -48,6 +48,13 @@ explore: active_users {
   }
 }
 
+explore: experiment_facts {
+  join: experiment_variant_facts {
+    sql_on: ${experiment_facts.experiment_id}=${experiment_variant_facts.experiment_id} ;;
+    type: inner
+    relationship: one_to_one
+  }
+}
 
 
 explore: email_activity {
@@ -71,7 +78,7 @@ explore: campaigns {
   join: campaign_facts {
     view_label: "Campaign"
     type: left_outer
-    sql_on: upper(${campaign_facts.utm}) = upper(${campaigns.utm}) ;;
+    sql_on: upper(${campaign_facts.utm}) = upper(${campaigns.utm}) and ${campaign_facts.marketing_campaign_id}=${campaigns.marketing_campaign_id}  ;;
     relationship: one_to_one
   }
 
