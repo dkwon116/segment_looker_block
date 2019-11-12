@@ -18,12 +18,12 @@ view: campaign_facts {
     hidden: yes
   }
   measure: delivered_users {
-    type:  sum
+    type:  average
     sql: ${TABLE}.delivered_users ;;
     group_label: "Campaign Facts"
   }
   measure: open_users {
-    type:  sum
+    type:  average
     sql: ${TABLE}.open_users ;;
     group_label: "Campaign Facts"
   }
@@ -34,7 +34,7 @@ view: campaign_facts {
     group_label: "Campaign Facts"
   }
   measure: click_users {
-    type:  sum
+    type:  average
     sql: ${TABLE}.click_users ;;
     group_label: "Campaign Facts"
   }

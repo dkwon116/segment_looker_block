@@ -48,6 +48,13 @@ explore: active_users {
   }
 }
 
+explore: experiment_facts {
+  join: experiment_variant_facts {
+    sql_on: ${experiment_facts.experiment_id}=${experiment_variant_facts.experiment_id} ;;
+    type: inner
+    relationship: one_to_one
+  }
+}
 
 
 explore: email_activity {

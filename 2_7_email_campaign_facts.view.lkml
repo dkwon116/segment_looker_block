@@ -11,6 +11,10 @@ view: email_campaign_facts {
         ,s.visitors
         ,s.outlinked_users
         ,s.order_completed_users
+        ,s.pre_purchase_visitors
+        ,s.first_order_completed_users
+        ,s.post_purchase_visitors
+        ,s.repeat_order_completed_users
         ,s.order_value
         ,e.bounce_users
         ,e.dropped_users
@@ -40,6 +44,10 @@ view: email_campaign_facts {
           ,count(distinct case when (sf.count_outlinked  > 0) then s.looker_visitor_id  else null end) as outlinked_users
           ,count(distinct case when (sf.count_order_completed  > 0) then s.looker_visitor_id  else null end) as order_completed_users
           ,coalesce(round(coalesce(cast( ( sum(distinct (cast(round(coalesce(sf.order_value ,0)*(1/1000*1.0), 9) as numeric) + (cast(cast(concat('0x', substr(to_hex(md5(cast(sf.session_id  as string))), 1, 15)) as int64) as numeric) * 4294967296 + cast(cast(concat('0x', substr(to_hex(md5(cast(sf.session_id  as string))), 16, 8)) as int64) as numeric)) * 0.000000001 )) - sum(distinct (cast(cast(concat('0x', substr(to_hex(md5(cast(sf.session_id  as string))), 1, 15)) as int64) as numeric) * 4294967296 + cast(cast(concat('0x', substr(to_hex(md5(cast(sf.session_id  as string))), 16, 8)) as int64) as numeric)) * 0.000000001) )  / (1/1000*1.0) as float64), 0), 6), 0) as order_value
+          ,COUNT(DISTINCT CASE WHEN sf.is_pre_purchase_at_session  THEN s.looker_visitor_id  ELSE NULL END) AS pre_purchase_visitors
+          ,COUNT(DISTINCT CASE WHEN (sf.count_order_completed  > 0) AND sf.is_pre_purchase_at_session THEN s.looker_visitor_id  ELSE NULL END) AS first_order_completed_users
+          ,COUNT(DISTINCT CASE WHEN NOT COALESCE(sf.is_pre_purchase_at_session , FALSE) THEN s.looker_visitor_id  ELSE NULL END) AS post_purchase_visitors
+          ,COUNT(DISTINCT CASE WHEN (sf.count_order_completed  > 0) AND (NOT COALESCE(sf.is_pre_purchase_at_session , FALSE)) THEN s.looker_visitor_id  ELSE NULL END) AS repeat_order_completed_users
         from ${sessions.SQL_TABLE_NAME} s
         join ${session_facts.SQL_TABLE_NAME} sf on sf.session_id=s.session_id
         where s.last_source='sendgrid'
@@ -86,6 +94,24 @@ view: email_campaign_facts {
     type:  number
     sql: ${TABLE}.order_value ;;
   }
+  dimension: pre_purchase_visitors {
+    type:  number
+    sql: ${TABLE}.pre_purchase_visitors ;;
+  }
+  dimension: first_order_completed_users {
+    type:  number
+    sql: ${TABLE}.first_order_completed_users ;;
+  }
+  dimension: post_purchase_visitors {
+    type:  number
+    sql: ${TABLE}.post_purchase_visitors ;;
+  }
+  dimension: repeat_order_completed_users {
+    type:  number
+    sql: ${TABLE}.repeat_order_completed_users ;;
+  }
+
+
   dimension: bounce_users {
     type:  number
     sql: ${TABLE}.bounce_users ;;
@@ -160,15 +186,27 @@ view: email_campaign_facts {
     sql:  ${outlinked_users};;
     group_label: "Campaign Facts"
   }
+  measure: outlink_conversion {
+    type:  number
+    sql:  ${total_outlinked_users}/nullif(${total_visitors},0);;
+    value_format_name: percent_2
+    group_label: "Campaign Facts"
+  }
   measure: total_order_completed_users {
     type:  sum
     sql:  ${order_completed_users};;
     group_label: "Campaign Facts"
   }
+  measure: order_completed_conversion {
+    type:  number
+    sql:  ${total_order_completed_users}/nullif(${total_outlinked_users},0);;
+    value_format_name: percent_2
+    group_label: "Campaign Facts"
+  }
   measure: total_order_value {
     type:  sum
     sql:  ${order_value} ;;
-    value_format_name: decimal_3
+    value_format_name: decimal_0
     group_label: "Campaign Facts"
   }
   measure: sales_per_email {
@@ -177,6 +215,53 @@ view: email_campaign_facts {
     value_format_name: decimal_3
     group_label: "Campaign Facts"
   }
+
+  measure: total_pre_purchase_visitors {
+    type:  sum
+    sql:  ${pre_purchase_visitors};;
+    group_label: "Campaign Facts"
+  }
+  measure: total_first_order_completed_users {
+    type:  sum
+    sql:  ${first_order_completed_users};;
+    group_label: "Campaign Facts"
+  }
+  measure: first_order_completed_conversion {
+    type:  number
+    sql:  ${total_first_order_completed_users}/nullif(${total_pre_purchase_visitors},0);;
+    value_format_name: percent_2
+    group_label: "Campaign Facts"
+  }
+  measure: total_post_purchase_visitors {
+    type:  sum
+    sql:  ${post_purchase_visitors};;
+    group_label: "Campaign Facts"
+  }
+  measure: total_repeat_order_completed_users {
+    type:  sum
+    sql:  ${repeat_order_completed_users};;
+    group_label: "Campaign Facts"
+  }
+  measure: repeat_order_completed_conversion {
+    type:  number
+    sql:  ${total_repeat_order_completed_users}/nullif(${total_post_purchase_visitors},0);;
+    value_format_name: percent_2
+    group_label: "Campaign Facts"
+  }
+  measure: first_order_user_ratio {
+    type:  number
+    sql:  ${total_first_order_completed_users}/nullif(${total_order_completed_users},0);;
+    value_format_name: percent_2
+    group_label: "Campaign Facts"
+  }
+  measure: repeat_order_user_ratio {
+    type:  number
+    sql:  ${total_repeat_order_completed_users}/nullif(${total_order_completed_users},0);;
+    value_format_name: percent_2
+    group_label: "Campaign Facts"
+  }
+
+
 
   measure: total_bounce_users {
     type:  sum
