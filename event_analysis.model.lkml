@@ -78,7 +78,7 @@ explore: campaigns {
   join: campaign_facts {
     view_label: "Campaign"
     type: left_outer
-    sql_on: upper(${campaign_facts.utm}) = upper(${campaigns.utm}) ;;
+    sql_on: upper(${campaign_facts.utm}) = upper(${campaigns.utm}) and ${campaign_facts.marketing_campaign_id}=${campaigns.marketing_campaign_id}  ;;
     relationship: one_to_one
   }
 
