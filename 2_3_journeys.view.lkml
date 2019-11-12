@@ -160,6 +160,23 @@ view:journeys {
     }
   }
 
+  measure: unique_search_journey_visitor_count {
+    type: count_distinct
+    sql: ${looker_visitor_id} ;;
+
+    filters: {
+      field: is_search
+      value: "yes"
+    }
+  }
+
+  measure: search_journey_per_unique_visitor {
+    type: number
+    sql: ${unique_search_journey_visitor_count} / NULLIF(${unique_visitor_count},0) ;;
+    group_label: "Product Discovery"
+    value_format_name: percent_0
+  }
+
   measure: discovery_journeys_per_discovery_journey_user {
     type: number
     sql: ${discovery_journey_count} / NULLIF(${unique_discovery_journey_visitor_count}, 0);;

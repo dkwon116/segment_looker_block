@@ -458,7 +458,7 @@ measure: unique_visitor_signup_conversion {
 measure: unique_first_signedup_conversion {
   type: number
   sql: ${unique_signed_up_visitor} / NULLIF(${unique_guest_count},0);;
-  value_format_name: percent_2
+  value_format_name: percent_1
   group_label: "Signup"
 }
 
@@ -925,7 +925,7 @@ measure: repeat_outlinked_conversion_rate {
 measure: outlinked_conversion_rate_by_session {
   type: number
   sql: ${total_outlinked_sessions} / NULLIF(${sessions.unique_session_count}, 0) ;;
-  value_format_name: percent_2
+  value_format_name: percent_1
   group_label: "Outlinked"
 }
 
