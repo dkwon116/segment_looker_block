@@ -444,6 +444,12 @@ GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
     }
   }
 
+  measure: total_order_value {
+    type: sum
+    sql: ${lifetime_order_value} ;;
+    value_format_name: decimal_0
+  }
+
   measure: average_orders {
     type: average
     sql: ${orders_completed} ;;
