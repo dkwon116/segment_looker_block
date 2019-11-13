@@ -1,5 +1,5 @@
-view: retailer_clicked {
-  sql_table_name: javascript.retailer_clicked_view ;;
+view: product_searched {
+  sql_table_name: javascript.product_searched_view ;;
 
   dimension: id {
     primary_key: yes
@@ -18,19 +18,20 @@ view: retailer_clicked {
     sql: ${TABLE}.event ;;
   }
 
-  dimension: path_type {
+  dimension: gender {
     type: string
-    sql: ${TABLE}.path_type ;;
+    sql: ${TABLE}.gender ;;
   }
 
-  dimension: retailer {
+  dimension: query {
     type: string
-    sql: ${TABLE}.retailer ;;
+    sql: ${TABLE}.query ;;
   }
 
   dimension: user_id {
     type: string
     sql: ${TABLE}.user_id ;;
   }
+
 
 }

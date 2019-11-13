@@ -231,6 +231,44 @@ explore: event_facts {
 #     relationship: one_to_one
 #   }
 
+
+
+  join: search_suggestions {
+    view_label: "T_Search Suggestions"
+    type: left_outer
+    sql_on: event_facts.event_id = search_suggestions.id;;
+    relationship: one_to_one
+  }
+
+
+#   join: product_searched {
+#     view_label: "T_Product Searched"
+#     type: left_outer
+#     sql_on: event_facts.event_id = product_searched.id;;
+#     relationship: one_to_one
+#   }
+
+#   join: search_suggestion_clicked {
+#     view_label: "T_Search Suggestion Clicked"
+#     type: left_outer
+#     sql_on: event_facts.event_id = search_suggestion_clicked.id;;
+#     relationship: one_to_one
+#   }
+#
+#   join: search_suggestion_viewed {
+#     view_label: "T_Search Suggestion Viewed"
+#     type: left_outer
+#     sql_on: event_facts.event_id = search_suggestion_viewed.id;;
+#     relationship: one_to_one
+#   }
+#
+#   join: search_suggestion_viewed_in_list {
+#     view_label: "T_Search Suggestion Viewed In List"
+#     type: left_outer
+#     sql_on: event_facts.event_id = search_suggestion_viewed_in_list.id;;
+#     relationship: one_to_one
+#   }
+
   join: product_clicked {
     view_label: "T_Product Clicked"
     type: left_outer
