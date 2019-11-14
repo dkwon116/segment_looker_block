@@ -12,6 +12,7 @@ view: session_facts {
       , if(f.first_order_completed is null or f.first_order_completed>s.session_start_at,true,false) as is_pre_purchase_at_session
       , s.session_start_at
       , max(t2s.timestamp) as session_end_at
+      , timestamp_diff(max(t2s.timestamp), s.session_start_at, minute) as session_duration_minutes
 
       -- event facts
       , count(case when t2s.event_source = 'tracks' then 1 else null end) as number_of_track_events
@@ -84,7 +85,7 @@ dimension: is_bounced_session {
 
 dimension: session_duration_minutes {
   type: number
-  sql: timestamp_diff(TIMESTAMP(${end_time}), TIMESTAMP(${sessions.start_time}), minute) ;;
+  sql: session_duration_minutes ;;
 }
 
 dimension: session_duration_minutes_tier {
@@ -398,6 +399,7 @@ measure: session_duration_per_unique_visitor {
   type: number
   sql: ${total_session_duration} / NULLIF(${sessions.unique_visitor_count},0) ;;
   value_format_name: decimal_2
+  group_label: "Session Facts"
 }
 
 

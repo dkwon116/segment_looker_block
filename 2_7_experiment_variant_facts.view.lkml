@@ -2,6 +2,10 @@ view: experiment_variant_facts {
   derived_table: {
     sql_trigger_value: select count(*) from ${experiment.SQL_TABLE_NAME} ;;
     sql:
+    select
+      e.*
+      ,u.sessions_variance as session_per_user_variance
+    from(
       SELECT
         experiment_facts.experiment_id  AS experiment_id,
         experiment_facts.experiment_name  AS experiment_name,
@@ -9,9 +13,11 @@ view: experiment_variant_facts {
         COUNT(DISTINCT session_facts.session_id ) AS session_count,
         COUNT(DISTINCT session_facts.looker_visitor_id ) AS unique_visitor_count,
         COUNT(DISTINCT session_facts.session_id ) / NULLIF(COUNT(DISTINCT session_facts.looker_visitor_id ),0) AS session_per_user,
-        COALESCE(ROUND(COALESCE(CAST( ( SUM(DISTINCT (CAST(ROUND(COALESCE((timestamp_diff(TIMESTAMP((FORMAT_TIMESTAMP('%F %T', TIMESTAMP(FORMAT_TIMESTAMP('%F %T', session_facts.session_end_at , 'Asia/Seoul'))))), TIMESTAMP((FORMAT_TIMESTAMP('%F %T', TIMESTAMP(FORMAT_TIMESTAMP('%F %T', session_facts.session_start_at , 'Asia/Seoul'))))), minute)) ,0)*(1/1000*1.0), 9) AS NUMERIC) + (cast(cast(concat('0x', substr(to_hex(md5(CAST(session_facts.session_id  AS STRING))), 1, 15)) as int64) as numeric) * 4294967296 + cast(cast(concat('0x', substr(to_hex(md5(CAST(session_facts.session_id  AS STRING))), 16, 8)) as int64) as numeric)) * 0.000000001 )) - SUM(DISTINCT (cast(cast(concat('0x', substr(to_hex(md5(CAST(session_facts.session_id  AS STRING))), 1, 15)) as int64) as numeric) * 4294967296 + cast(cast(concat('0x', substr(to_hex(md5(CAST(session_facts.session_id  AS STRING))), 16, 8)) as int64) as numeric)) * 0.000000001) )  / (1/1000*1.0) AS FLOAT64), 0), 6), 0) AS total_session_duration,
-        COALESCE(ROUND(COALESCE(CAST( ( SUM(DISTINCT (CAST(ROUND(COALESCE((timestamp_diff(TIMESTAMP((FORMAT_TIMESTAMP('%F %T', TIMESTAMP(FORMAT_TIMESTAMP('%F %T', session_facts.session_end_at , 'Asia/Seoul'))))), TIMESTAMP((FORMAT_TIMESTAMP('%F %T', TIMESTAMP(FORMAT_TIMESTAMP('%F %T', session_facts.session_start_at , 'Asia/Seoul'))))), minute)) ,0)*(1/1000*1.0), 9) AS NUMERIC) + (cast(cast(concat('0x', substr(to_hex(md5(CAST(session_facts.session_id  AS STRING))), 1, 15)) as int64) as numeric) * 4294967296 + cast(cast(concat('0x', substr(to_hex(md5(CAST(session_facts.session_id  AS STRING))), 16, 8)) as int64) as numeric)) * 0.000000001 )) - SUM(DISTINCT (cast(cast(concat('0x', substr(to_hex(md5(CAST(session_facts.session_id  AS STRING))), 1, 15)) as int64) as numeric) * 4294967296 + cast(cast(concat('0x', substr(to_hex(md5(CAST(session_facts.session_id  AS STRING))), 16, 8)) as int64) as numeric)) * 0.000000001) )  / (1/1000*1.0) AS FLOAT64), 0), 6), 0) / NULLIF(COUNT(DISTINCT session_facts.session_id ),0) AS session_duration_minutes_per_session,
-        COALESCE(ROUND(COALESCE(CAST( ( SUM(DISTINCT (CAST(ROUND(COALESCE((timestamp_diff(TIMESTAMP((FORMAT_TIMESTAMP('%F %T', TIMESTAMP(FORMAT_TIMESTAMP('%F %T', session_facts.session_end_at , 'Asia/Seoul'))))), TIMESTAMP((FORMAT_TIMESTAMP('%F %T', TIMESTAMP(FORMAT_TIMESTAMP('%F %T', session_facts.session_start_at , 'Asia/Seoul'))))), minute)) ,0)*(1/1000*1.0), 9) AS NUMERIC) + (cast(cast(concat('0x', substr(to_hex(md5(CAST(session_facts.session_id  AS STRING))), 1, 15)) as int64) as numeric) * 4294967296 + cast(cast(concat('0x', substr(to_hex(md5(CAST(session_facts.session_id  AS STRING))), 16, 8)) as int64) as numeric)) * 0.000000001 )) - SUM(DISTINCT (cast(cast(concat('0x', substr(to_hex(md5(CAST(session_facts.session_id  AS STRING))), 1, 15)) as int64) as numeric) * 4294967296 + cast(cast(concat('0x', substr(to_hex(md5(CAST(session_facts.session_id  AS STRING))), 16, 8)) as int64) as numeric)) * 0.000000001) )  / (1/1000*1.0) AS FLOAT64), 0), 6), 0) / NULLIF(COUNT(DISTINCT session_facts.looker_visitor_id ),0) AS session_duration_minutes_per_user,
+        COALESCE(ROUND(COALESCE(CAST( ( SUM(DISTINCT (CAST(ROUND(COALESCE(session_facts.session_duration_minutes ,0)*(1/1000*1.0), 9) AS NUMERIC) + (cast(cast(concat('0x', substr(to_hex(md5(CAST(session_facts.session_id  AS STRING))), 1, 15)) as int64) as numeric) * 4294967296 + cast(cast(concat('0x', substr(to_hex(md5(CAST(session_facts.session_id  AS STRING))), 16, 8)) as int64) as numeric)) * 0.000000001 )) - SUM(DISTINCT (cast(cast(concat('0x', substr(to_hex(md5(CAST(session_facts.session_id  AS STRING))), 1, 15)) as int64) as numeric) * 4294967296 + cast(cast(concat('0x', substr(to_hex(md5(CAST(session_facts.session_id  AS STRING))), 16, 8)) as int64) as numeric)) * 0.000000001) )  / (1/1000*1.0) AS FLOAT64), 0), 6), 0) AS total_session_duration,
+        COALESCE(ROUND(COALESCE(CAST( ( SUM(DISTINCT (CAST(ROUND(COALESCE(session_facts.session_duration_minutes ,0)*(1/1000*1.0), 9) AS NUMERIC) + (cast(cast(concat('0x', substr(to_hex(md5(CAST(session_facts.session_id  AS STRING))), 1, 15)) as int64) as numeric) * 4294967296 + cast(cast(concat('0x', substr(to_hex(md5(CAST(session_facts.session_id  AS STRING))), 16, 8)) as int64) as numeric)) * 0.000000001 )) - SUM(DISTINCT (cast(cast(concat('0x', substr(to_hex(md5(CAST(session_facts.session_id  AS STRING))), 1, 15)) as int64) as numeric) * 4294967296 + cast(cast(concat('0x', substr(to_hex(md5(CAST(session_facts.session_id  AS STRING))), 16, 8)) as int64) as numeric)) * 0.000000001) )  / (1/1000*1.0) AS FLOAT64), 0), 6), 0) / NULLIF(COUNT(DISTINCT session_facts.session_id ),0) AS session_duration_minutes_per_session,
+        var_samp(session_facts.session_duration_minutes) as session_duration_minutes_per_session_variance,
+        COALESCE(ROUND(COALESCE(CAST( ( SUM(DISTINCT (CAST(ROUND(COALESCE(session_facts.session_duration_minutes ,0)*(1/1000*1.0), 9) AS NUMERIC) + (cast(cast(concat('0x', substr(to_hex(md5(CAST(session_facts.session_id  AS STRING))), 1, 15)) as int64) as numeric) * 4294967296 + cast(cast(concat('0x', substr(to_hex(md5(CAST(session_facts.session_id  AS STRING))), 16, 8)) as int64) as numeric)) * 0.000000001 )) - SUM(DISTINCT (cast(cast(concat('0x', substr(to_hex(md5(CAST(session_facts.session_id  AS STRING))), 1, 15)) as int64) as numeric) * 4294967296 + cast(cast(concat('0x', substr(to_hex(md5(CAST(session_facts.session_id  AS STRING))), 16, 8)) as int64) as numeric)) * 0.000000001) )  / (1/1000*1.0) AS FLOAT64), 0), 6), 0) / NULLIF(COUNT(DISTINCT session_facts.looker_visitor_id ),0) AS session_duration_minutes_per_user,
+
         COUNT(DISTINCT CASE WHEN session_facts.is_guest_at_session  THEN session_facts.looker_visitor_id  ELSE NULL END) AS unique_guest_count,
         COUNT(DISTINCT CASE WHEN (session_facts.number_of_signed_up_events  > 0) THEN session_facts.looker_visitor_id  ELSE NULL END) AS unique_signed_up_visitor,
         (COUNT(DISTINCT CASE WHEN (session_facts.number_of_signed_up_events  > 0) THEN session_facts.looker_visitor_id  ELSE NULL END)) / NULLIF((COUNT(DISTINCT CASE WHEN session_facts.is_guest_at_session  THEN session_facts.looker_visitor_id  ELSE NULL END)),0) AS signedup_conversion,
@@ -48,6 +54,8 @@ view: experiment_variant_facts {
       JOIN ${experiment_facts.SQL_TABLE_NAME} AS experiment_facts ON experiment_sessions.experiment_id =  experiment_facts.experiment_id
       WHERE (session_facts.session_start_at BETWEEN experiment_facts.experiment_start_at AND experiment_facts.experiment_end_at)
       GROUP BY 1,2,3
+    ) e
+    join ${experiment_user_session_facts.SQL_TABLE_NAME} u on u.experiment_id=e.experiment_id and u.variant_id=e.experiment_variant_id
       ;;
   }
 
@@ -86,6 +94,11 @@ view: experiment_variant_facts {
     sql: ${TABLE}.session_per_user ;;
     group_label: "Experiment Variant Facts"
   }
+  measure:session_per_user_variance{
+    type: sum
+    sql: ${TABLE}.session_per_user_variance ;;
+    group_label: "Experiment Variant Facts"
+  }
   measure:total_session_duration{
     type: sum
     sql: ${TABLE}.total_session_duration ;;
@@ -94,6 +107,11 @@ view: experiment_variant_facts {
   measure:session_duration_minutes_per_session{
     type: sum
     sql: ${TABLE}.session_duration_minutes_per_session ;;
+    group_label: "Experiment Variant Facts"
+  }
+  measure:session_duration_minutes_per_session_variance{
+    type: sum
+    sql: ${TABLE}.session_duration_minutes_per_session_variance ;;
     group_label: "Experiment Variant Facts"
   }
   measure:session_duration_minutes_per_user{
