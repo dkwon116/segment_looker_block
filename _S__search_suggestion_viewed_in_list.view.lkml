@@ -27,7 +27,7 @@
           ,trim(JSON_EXTRACT(CONCAT(sug, '}'), "$.id"), '"') as suggestion_id
           ,trim(JSON_EXTRACT(CONCAT(sug, '}'), "$.name"), '"') as suggestion_name
         from t1
-        join unnest(suggestions_array) as sug
+        cross join unnest(suggestions_array) as sug
           ;;
     }
 

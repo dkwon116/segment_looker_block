@@ -80,8 +80,8 @@ view: search_suggestions {
   }
 
   measure: view_count {
-    type: count_distinct
-    sql: ${id} ;;
+    type: count
+#     sql: ${id} ;;
     filters: {
       field: event
       value: "search_suggestion_viewed  "
@@ -139,13 +139,13 @@ view: search_suggestions {
   measure: suggestion_ctr {
     type: number
     sql: ${click_count}/nullif(${view_count},0) ;;
-    value_format_name: percent_2
+    value_format_name: percent_0
   }
 
   measure: suggestion_view_ctr {
     type: number
     sql: ${click_count}/nullif(${unique_suggestion_view_count},0) ;;
-    value_format_name: percent_2
+    value_format_name: percent_0
   }
 
   measure: count_visitors {
