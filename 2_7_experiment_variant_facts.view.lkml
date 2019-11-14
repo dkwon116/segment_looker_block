@@ -2,6 +2,10 @@ view: experiment_variant_facts {
   derived_table: {
     sql_trigger_value: select count(*) from ${experiment.SQL_TABLE_NAME} ;;
     sql:
+    select
+      e.*
+      ,u.sessions_variance as session_per_user_variance
+    from(
       SELECT
         experiment_facts.experiment_id  AS experiment_id,
         experiment_facts.experiment_name  AS experiment_name,
@@ -48,6 +52,8 @@ view: experiment_variant_facts {
       JOIN ${experiment_facts.SQL_TABLE_NAME} AS experiment_facts ON experiment_sessions.experiment_id =  experiment_facts.experiment_id
       WHERE (session_facts.session_start_at BETWEEN experiment_facts.experiment_start_at AND experiment_facts.experiment_end_at)
       GROUP BY 1,2,3
+    ) e
+    join ${experiment_user_session_facts.SQL_TABLE_NAME} u on u.experiment_id=e.experiment_id and u.variant_id=e.experiment_variant_id
       ;;
   }
 
@@ -84,6 +90,11 @@ view: experiment_variant_facts {
   measure:session_per_user{
     type: sum
     sql: ${TABLE}.session_per_user ;;
+    group_label: "Experiment Variant Facts"
+  }
+  measure:session_per_user_variance{
+    type: sum
+    sql: ${TABLE}.session_per_user_variance ;;
     group_label: "Experiment Variant Facts"
   }
   measure:total_session_duration{
