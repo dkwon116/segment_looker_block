@@ -17,7 +17,9 @@ view: experiment_facts {
         union all select '7wAUOphhRq2C9mR-zoOFfQ','191009_CashbackFlow'
         union all select 'cDKNWZjsQaS3zjxNRPqbbg','191009_CashbackBanner'
       ) t on t.experiment_id=e.experiment_id
+      where e.experiment_name not in ("191105_CategoryNav_ProductViewed", "Mobile Sidebar Gender")
       group by 1,2
+
       ;;
   }
 
@@ -27,7 +29,7 @@ view: experiment_facts {
     group_label: "Experiment"
     link: {
       label: "Go to dashboard"
-      url: "https://smileventures.au.looker.com/dashboards/68?Experiment%20ID={{value | encode_url}}"
+      url: "https://smileventures.au.looker.com/dashboards/77?Experiment%20ID={{value | encode_url}}"
     }
     primary_key: yes
   }
@@ -38,7 +40,7 @@ view: experiment_facts {
     group_label: "Experiment"
     link: {
       label: "Go to {{value}} dashboard"
-      url: "https://smileventures.au.looker.com/dashboards/68?Experiment%20Name={{value | encode_url}}"
+      url: "https://smileventures.au.looker.com/dashboards/77?Experiment%20Name={{value | encode_url}}"
     }
   }
 
