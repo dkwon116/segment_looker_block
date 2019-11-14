@@ -33,5 +33,13 @@ view: product_searched {
     sql: ${TABLE}.user_id ;;
   }
 
+  dimension: count {
+    type: number
+    sql: ${TABLE}.count ;;
+  }
 
+
+  measure: query_count{
+    type: count
+  }
 }

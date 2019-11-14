@@ -241,12 +241,12 @@ explore: event_facts {
   }
 
 
-#   join: product_searched {
-#     view_label: "T_Product Searched"
-#     type: left_outer
-#     sql_on: event_facts.event_id = product_searched.id;;
-#     relationship: one_to_one
-#   }
+  join: product_searched {
+    view_label: "T_Product Searched"
+    type: left_outer
+    sql_on: event_facts.event_id = product_searched.id;;
+    relationship: one_to_one
+  }
 
 #   join: search_suggestion_clicked {
 #     view_label: "T_Search Suggestion Clicked"
