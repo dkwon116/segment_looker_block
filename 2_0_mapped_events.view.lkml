@@ -81,11 +81,16 @@ view: mapped_events {
         inner join ${page_aliases_mapping.SQL_TABLE_NAME} as a2v
           on a2v.alias = t.user_id
       ) as e
-      WHERE (e.ip NOT IN ('210.123.124.177', '222.106.98.162', '121.134.191.141', '63.118.26.234', '14.39.183.130', '125.140.120.54', '98.113.6.12')
+      WHERE (e.ip NOT IN ('210.123.124.177', '222.106.98.162', '121.134.191.141', '63.118.26.234', '14.39.183.130', '125.140.120.54', '98.113.6.12', '221.149.2.114')
       AND e.page_url LIKE '%catchfashion%'
       AND e.page_url NOT LIKE '%staging%'
       AND e.user_agent NOT LIKE '%Bot%'
       AND e.looker_visitor_id NOT IN (SELECT user_id FROM google_sheets.filter_user))
+      AND e.looker_visitor_id NOT IN (
+            select
+              distinct id
+            from javascript.users
+            where context_ip IN ('210.123.124.177', '222.106.98.162', '121.134.191.141', '63.118.26.234', '14.39.183.130', '125.140.120.54', '98.113.6.12', '221.149.2.114', '59.10.186.201'))
        ;;
   }
 

@@ -7,6 +7,11 @@ view: users {
     sql: ${TABLE}.id ;;
   }
 
+  dimension: context_ip {
+    type: string
+    sql: ${TABLE}.context_ip ;;
+  }
+
   dimension: context_library_name {
     type: string
     sql: ${TABLE}.context_library_name ;;
