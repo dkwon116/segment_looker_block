@@ -56,6 +56,13 @@ explore: experiment_facts {
   }
 }
 
+explore: experiment_session_facts {
+  join: experiment_facts {
+    sql_on: ${experiment_facts.experiment_id}=${experiment_session_facts.experiment_id} ;;
+    type: inner
+    relationship: many_to_one
+  }
+}
 
 explore: email_activity {
 #   sql_always_where: ${event} = "delivered" ;;

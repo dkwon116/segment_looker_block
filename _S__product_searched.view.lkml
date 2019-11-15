@@ -33,7 +33,7 @@ view: product_searched {
     sql: ${TABLE}.user_id ;;
   }
 
-  dimension: count {
+  dimension: result_count {
     type: number
     sql: ${TABLE}.count ;;
   }
@@ -41,5 +41,10 @@ view: product_searched {
 
   measure: query_count{
     type: count
+  }
+
+  measure: avg_result_count {
+    type: average
+    sql: ${result_count} ;;
   }
 }

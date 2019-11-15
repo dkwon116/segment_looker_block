@@ -85,7 +85,7 @@ dimension: is_bounced_session {
 
 dimension: session_duration_minutes {
   type: number
-  sql: session_duration_minutes ;;
+  sql: ${TABLE}.session_duration_minutes ;;
 }
 
 dimension: session_duration_minutes_tier {
