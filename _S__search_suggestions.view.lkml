@@ -78,13 +78,17 @@ view: search_suggestions {
     type: number
     sql: ${TABLE}.position ;;
   }
+  dimension: query_length {
+    type: number
+    sql: length(${query}) ;;
+  }
 
   measure: view_count {
     type: count
 #     sql: ${id} ;;
     filters: {
       field: event
-      value: "search_suggestion_viewed  "
+      value: "search_suggestion_viewed"
     }
   }
 
@@ -93,7 +97,7 @@ view: search_suggestions {
     sql: ${id} ;;
     filters: {
       field: event
-      value: "search_suggestion_viewed  "
+      value: "search_suggestion_viewed"
     }
   }
 
@@ -102,7 +106,7 @@ view: search_suggestions {
     sql: ${id} ;;
     filters: {
       field: event
-      value: "search_suggestion_clicked "
+      value: "search_suggestion_clicked"
     }
   }
 
@@ -111,7 +115,7 @@ view: search_suggestions {
     sql: length(${query}) ;;
     filters: {
       field: event
-      value: "search_suggestion_clicked "
+      value: "search_suggestion_clicked"
     }
     value_format_name: decimal_2
   }
@@ -121,7 +125,7 @@ view: search_suggestions {
     sql: length(${category}) ;;
     filters: {
       field: event
-      value: "search_suggestion_clicked "
+      value: "search_suggestion_clicked"
     }
     value_format_name: decimal_2
   }
@@ -131,18 +135,20 @@ view: search_suggestions {
     sql: ${position} ;;
     filters: {
       field: event
-      value: "search_suggestion_clicked "
+      value: "search_suggestion_clicked"
     }
     value_format_name: decimal_2
   }
 
   measure: suggestion_ctr {
+    description: "Suggestion clicked per all possible suggestions"
     type: number
     sql: ${click_count}/nullif(${view_count},0) ;;
     value_format_name: percent_0
   }
 
   measure: suggestion_view_ctr {
+    description: "Suggestion clicked per list of suggestion viewed"
     type: number
     sql: ${click_count}/nullif(${unique_suggestion_view_count},0) ;;
     value_format_name: percent_0
