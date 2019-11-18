@@ -55,7 +55,25 @@ view: experiment_variant_facts {
       WHERE (session_facts.session_start_at BETWEEN experiment_facts.experiment_start_at AND experiment_facts.experiment_end_at)
       GROUP BY 1,2,3
     ) e
-    join ${experiment_user_session_facts.SQL_TABLE_NAME} u on u.experiment_id=e.experiment_id and u.variant_id=e.experiment_variant_id
+    join(
+      select
+        e.experiment_id
+        ,e.variant_id
+        --,sum(e.number_of_sessions) as number_of_sessions
+        --,count(e.looker_visitor_id) as unique_visitors
+        --,sum(e.number_of_sessions)/count(e.looker_visitor_id) as sessions_per_unique_visitor
+        ,var_samp(e.number_of_sessions) as sessions_variance
+      from(
+        select
+          e.experiment_id
+          ,e.variant_id
+          ,e.looker_visitor_id
+          ,count(distinct e.session_id) as number_of_sessions
+        from ${experiment_sessions.SQL_TABLE_NAME} e
+        group by 1,2,3
+      ) e
+      group by 1,2
+    ) u on u.experiment_id=e.experiment_id and u.variant_id=e.experiment_variant_id
       ;;
   }
 
