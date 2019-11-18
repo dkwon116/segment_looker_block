@@ -46,5 +46,6 @@ view: product_searched {
   measure: avg_result_count {
     type: average
     sql: ${result_count} ;;
+    value_format_name: decimal_0
   }
 }
