@@ -222,8 +222,8 @@ join ${experiment_sessions.SQL_TABLE_NAME} AS e ON e.session_id = s.session_id;;
   }
   measure: sig_imp_avg_session_duration {
     type: number
-    sql:  if(${significance_avg_session_duration}='0.05 Significant level',${improvement_avg_session_duration}+1,1);;
-    value_format_name: decimal_4
+    sql:  if(${significance_avg_session_duration}='0.05 Significant level',${improvement_avg_session_duration},null);;
+    value_format_name: percent_2 #sig_imp
     group_label: "Session Duration"
   }
 
@@ -294,8 +294,8 @@ if(
   }
   measure: sig_imp_conversion_engaged {
     type: number
-    sql:  if(${significance_conversion_engaged}='0.05 Significant level',${improvement_conversion_engaged}+1,1);;
-    value_format_name: decimal_4
+    sql:  if(${significance_conversion_engaged}='0.05 Significant level',${improvement_conversion_engaged},null);;
+    value_format_name: percent_2 #sig_imp
     group_label: "Engaged"
   }
 
@@ -366,8 +366,8 @@ if(
   }
   measure: sig_imp_conversion_discovery_engaged {
     type: number
-    sql:  if(${significance_conversion_discovery_engaged}='0.05 Significant level',${improvement_conversion_discovery_engaged}+1,1);;
-    value_format_name: decimal_4
+    sql:  if(${significance_conversion_discovery_engaged}='0.05 Significant level',${improvement_conversion_discovery_engaged},null);;
+    value_format_name: percent_2 #sig_imp
     group_label: "Discovery Engaged"
   }
 
@@ -436,8 +436,8 @@ if(${count_session_0}+${count_session_1}=${count_product_view_session_0}+${count
   }
   measure: sig_imp_conversion_product_view {
     type: number
-    sql:  if(${significance_conversion_product_view}='0.05 Significant level',${improvement_conversion_product_view}+1,1);;
-    value_format_name: decimal_4
+    sql:  if(${significance_conversion_product_view}='0.05 Significant level',${improvement_conversion_product_view},null);;
+    value_format_name: percent_2 #sig_imp
     group_label: "Product Viewed"
   }
 
@@ -501,8 +501,8 @@ if(${count_session_0}+${count_session_1}=${count_product_view_session_0}+${count
   }
   measure: sig_imp_avg_product_view {
     type: number
-    sql:  if(${significance_avg_product_view}='0.05 Significant level',${improvement_avg_product_view}+1,1);;
-    value_format_name: decimal_4
+    sql:  if(${significance_avg_product_view}='0.05 Significant level',${improvement_avg_product_view},null);;
+    value_format_name: percent_2 #sig_imp
     group_label: "Product Viewed"
   }
 
@@ -604,8 +604,8 @@ if(${count_session_0}+${count_session_1}=${count_product_view_session_0}+${count
   }
   measure: sig_imp_conversion_signup {
     type: number
-    sql:  if(${significance_conversion_signup}='0.05 Significant level',${improvement_conversion_signup}+1,1);;
-    value_format_name: decimal_4
+    sql:  if(${significance_conversion_signup}='0.05 Significant level',${improvement_conversion_signup},null);;
+    value_format_name: percent_2 #sig_imp
     group_label: "Signed Up"
   }
 
@@ -673,8 +673,8 @@ if(${count_session_0}+${count_session_1}=${count_outlink_session_0}+${count_outl
   }
   measure: sig_imp_conversion_outlink {
     type: number
-    sql:  if(${significance_conversion_outlink}='0.05 Significant level',${improvement_conversion_outlink}+1,1);;
-    value_format_name: decimal_4
+    sql:  if(${significance_conversion_outlink}='0.05 Significant level',${improvement_conversion_outlink},null);;
+    value_format_name: percent_2 #sig_imp
     group_label: "Outlinked"
   }
 
@@ -775,8 +775,8 @@ if(${count_session_0}+${count_session_1}=${count_outlink_session_0}+${count_outl
   }
   measure: sig_imp_conversion_first_outlink {
     type: number
-    sql:  if(${significance_conversion_first_outlink}='0.05 Significant level',${improvement_conversion_first_outlink}+1,1);;
-    value_format_name: decimal_4
+    sql:  if(${significance_conversion_first_outlink}='0.05 Significant level',${improvement_conversion_first_outlink},null);;
+    value_format_name: percent_2 #sig_imp
     group_label: "Outlinked First"
   }
 
@@ -877,8 +877,8 @@ if(${count_session_0}+${count_session_1}=${count_outlink_session_0}+${count_outl
   }
   measure: sig_imp_conversion_repeat_outlink {
     type: number
-    sql:  if(${significance_conversion_repeat_outlink}='0.05 Significant level',${improvement_conversion_repeat_outlink}+1,1);;
-    value_format_name: decimal_4
+    sql:  if(${significance_conversion_repeat_outlink}='0.05 Significant level',${improvement_conversion_repeat_outlink},null);;
+    value_format_name: percent_2 #sig_imp
     group_label: "Outlinked Repeat"
   }
 
@@ -946,8 +946,8 @@ if(${count_session_0}+${count_session_1}=${count_order_session_0}+${count_order_
   }
   measure: sig_imp_conversion_order {
     type: number
-    sql:  if(${significance_conversion_order}='0.05 Significant level',${improvement_conversion_order}+1,1);;
-    value_format_name: decimal_4
+    sql:  if(${significance_conversion_order}='0.05 Significant level',${improvement_conversion_order},null);;
+    value_format_name: percent_2 #sig_imp
     group_label: "Order"
   }
 
@@ -1047,8 +1047,8 @@ if(${count_session_0}+${count_session_1}=${count_order_session_0}+${count_order_
   }
   measure: sig_imp_conversion_first_order {
     type: number
-    sql:  if(${significance_conversion_first_order}='0.05 Significant level',${improvement_conversion_first_order}+1,1);;
-    value_format_name: decimal_4
+    sql:  if(${significance_conversion_first_order}='0.05 Significant level',${improvement_conversion_first_order},null);;
+    value_format_name: percent_2 #sig_imp
     group_label: "Order First"
   }
 
@@ -1149,8 +1149,8 @@ if(${count_session_0}+${count_session_1}=${count_order_session_0}+${count_order_
   }
   measure: sig_imp_conversion_repeat_order {
     type: number
-    sql:  if(${significance_conversion_repeat_order}='0.05 Significant level',${improvement_conversion_repeat_order}+1,1);;
-    value_format_name: decimal_4
+    sql:  if(${significance_conversion_repeat_order}='0.05 Significant level',${improvement_conversion_repeat_order},null);;
+    value_format_name: percent_2 #sig_imp
     group_label: "Order Repeat"
   }
 

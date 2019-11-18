@@ -123,7 +123,7 @@ view: experiment_facts {
   dimension:ratio_of_sessions{
     type: number
     sql: ${number_of_sessions}/nullif(${all_sessions},0) ;;
-    value_format_name: percent_2
+    value_format_name: percent_0
     group_label: "Experiment"
   }
 }
