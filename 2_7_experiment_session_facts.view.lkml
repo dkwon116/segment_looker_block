@@ -136,6 +136,7 @@ join ${experiment_sessions.SQL_TABLE_NAME} AS e ON e.session_id = s.session_id;;
     type: number
     sql: ${TABLE}.order_value ;;
     value_format_name: decimal_0
+    group_label: "Event Counts"
   }
 
 

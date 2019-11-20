@@ -48,6 +48,8 @@ explore: active_users {
   }
 }
 
+
+#fade-out
 explore: experiment_facts {
   join: experiment_variant_facts {
     sql_on: ${experiment_facts.experiment_id}=${experiment_variant_facts.experiment_id} ;;
@@ -79,51 +81,31 @@ explore: email_activity {
 
 }
 
-explore: campaigns {
-  view_label: "Campaign"
+explore: campaign_session_facts {
 
-  join: campaign_facts {
-    view_label: "Campaign"
-    type: left_outer
-    sql_on: upper(${campaign_facts.utm}) = upper(${campaigns.utm}) and ${campaign_facts.marketing_campaign_id}=${campaigns.marketing_campaign_id}  ;;
+  join: campaigns {
+    type: inner
+    sql_on: upper(${campaigns.utm})=upper(${campaign_session_facts.utm}) ;;
     relationship: one_to_one
   }
 
   join: email_campaigns {
     type: left_outer
-    sql_on: ${email_campaigns.marketing_campaign_id}=${campaigns.marketing_campaign_id};;
+    sql_on: upper(${email_campaigns.utm})=upper(${campaign_session_facts.utm});;
     relationship: one_to_one
   }
-
-  join: email_campaign_facts {
-    type: left_outer
-    sql_on: upper(${email_campaign_facts.utm}) = upper(${campaigns.utm});;
-    relationship: one_to_one
-  }
-
-#   join: email_activity {
-#     type: left_outer
-#     sql_on: ${email_activity.marketing_campaign_id}=${email_campaigns.marketing_campaign_id};;
-#     relationship: many_to_one
-#   }
 
   join: sessions {
     view_label: "Session"
     type: left_outer
-    sql_on: upper(${sessions.last_utm}) = upper(${campaigns.utm}) ;;
-    relationship: many_to_one
+    sql_on: ${sessions.session_id} = ${campaign_session_facts.session_id} ;;
+    relationship: one_to_one
   }
 
   join: session_facts {
     view_label: "Session"
     type: left_outer
-    sql_on: ${session_facts.session_id} = ${sessions.session_id} ;;
-    relationship: one_to_one
-  }
-
-  join: user_facts {
-    type: left_outer
-    sql_on: ${user_facts.looker_visitor_id} = ${sessions.looker_visitor_id} ;;
+    sql_on: ${session_facts.session_id} = ${campaign_session_facts.session_id} ;;
     relationship: one_to_one
   }
 
@@ -134,22 +116,11 @@ explore: campaigns {
     relationship: many_to_one
   }
 
-  join: journey_facts {
-    view_label: "Journey"
+  join: user_facts {
     type: left_outer
-    sql_on: ${journey_facts.journey_id} = ${journeys.journey_id} ;;
+    sql_on: ${user_facts.looker_visitor_id} = ${sessions.looker_visitor_id} ;;
     relationship: one_to_one
   }
-
-  join: order_facts {
-    view_label: "Order"
-    type: left_outer
-    sql_on: ${order_facts.session_id} = ${sessions.session_id} ;;
-    relationship: many_to_one
-  }
-
-
-
 }
 
 
