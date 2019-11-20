@@ -336,7 +336,12 @@ view: campaign_session_facts {
   }
   measure: conversion_campaign_order_per_outlink {
     type: number
-    sql:  ${count_campaign_order_user}/nullif(${count_campaign_visitor},0);;
+    sql:  ${count_campaign_order_user}/nullif(${count_campaign_outlink_user},0);;
+    value_format_name: percent_1
+  }
+  measure: conversion_campaign_order_per_deliver {
+    type: number
+    sql:  ${count_campaign_order_user}/nullif(${count_delivered},0);;
     value_format_name: percent_1
   }
 
