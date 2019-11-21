@@ -221,6 +221,7 @@ view: journey_facts {
     sql: ${journey_duration_seconds} ;;
     group_label: "Product Discovery"
     group_item_label: "Avg Duration"
+    value_format_name: decimal_0
 
     filters: {
       field: journeys.is_discovery

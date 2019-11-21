@@ -60,12 +60,12 @@ view: product_facts {
     link: {
       label: "캐치에서 보기"
       url: "https://www.catchfashion.com/view/{{product_facts.id._value | encode_url}}"
-      icon_url: "https://www.catchfashion.com/favicon.ico"
+      icon_url: "https://www.catchfashion.com/favicon.png"
     }
     link: {
       label: "캐치관리자에서 보기"
       url: "https://admin.catchfashion.com/products-view/{{product_facts.id._value | encode_url}}"
-      icon_url: "https://www.catchfashion.com/favicon.ico"
+      icon_url: "https://www.catchfashion.com/favicon.png"
     }
   }
 
