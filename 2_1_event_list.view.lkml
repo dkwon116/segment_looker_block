@@ -32,26 +32,26 @@ view: utm_values {
 
   dimension: campaign_source {
     type: string
-    sql: ${TABLE}.campaign_source ;;
+    sql: upper(${TABLE}.campaign_source) ;;
   }
 
   dimension: campaign_medium {
     type: string
-    sql: ${TABLE}.campaign_medium ;;
+    sql: upper(${TABLE}.campaign_medium) ;;
   }
 
   dimension: campaign_name {
     type: string
-    sql: ${TABLE}.campaign_name ;;
+    sql: upper(${TABLE}.campaign_name) ;;
   }
 
   dimension: campaign_content {
     type: string
-    sql: ${TABLE}.campaign_content ;;
+    sql: upper(${TABLE}.campaign_content) ;;
   }
 
   dimension: campaign_term {
     type: string
-    sql: ${TABLE}.campaign_term ;;
+    sql: upper(${TABLE}.campaign_term) ;;
   }
 }
