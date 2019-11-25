@@ -19,7 +19,6 @@ view: experiment_sessions {
   dimension: session_id {
     type: string
     sql: ${TABLE}.session_id ;;
-    primary_key: yes
     hidden: yes
   }
 

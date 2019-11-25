@@ -50,6 +50,11 @@ view: experiment_session_journey_facts {
     sql: ${session_id} ;;
   }
 
+  measure: var_session_journey_duration_seconds {
+    type: number
+    sql: var_samp(${session_journey_duration_seconds}) ;;
+  }
+
   measure: sum_session_journey_duration_seconds {
     type: sum
     sql: ${session_journey_duration_seconds} ;;
@@ -58,11 +63,6 @@ view: experiment_session_journey_facts {
   measure: avg_session_journey_duration_seconds_per_session {
     type: number
     sql: ${sum_session_journey_duration_seconds}/nullif(${count_session},0) ;;
-  }
-
-  measure: var_session_journey_duration_seconds {
-    type: number
-    sql: var_samp(${session_journey_duration_seconds}) ;;
   }
 
 }
