@@ -64,6 +64,12 @@ explore: experiment_session_facts {
     type: inner
     relationship: many_to_one
   }
+  join: experiment_session_journey_facts {
+    sql_on: ${experiment_session_journey_facts.session_id}=${experiment_session_facts.session_id}
+      and  ${experiment_session_journey_facts.variant_id}=${experiment_session_facts.variant_id};;
+    type: inner
+    relationship: many_to_one
+  }
 }
 
 explore: email_activity {
