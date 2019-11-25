@@ -184,6 +184,19 @@ view: journey_facts {
     group_label: "Journey Facts"
   }
 
+  measure: avg_journey_duration_per_session {
+    type: number
+    value_format_name: decimal_1
+    sql: ${total_journey_duration}/nullif(${sessions.count},0);;
+    group_label: "Journey Facts"
+  }
+
+  measure: var_journey_duration {
+    type: number
+    sql: var_samp(${journey_duration_seconds}) ;;
+    group_label: "Journey Facts"
+  }
+
   measure: avg_track_events {
     type: average
     value_format_name: decimal_1

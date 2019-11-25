@@ -252,6 +252,21 @@ GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
     sql: IF(${orders_completed} > 0, true, false) ;;
   }
 
+  dimension: first_type {
+    type: string
+    sql:
+        case
+          when
+            (${first_source} IN ('sendgrid','sweet','transactional'))
+            or (${first_source} is null)
+            or (${first_medium} IN ('message','email','lms'))
+          then 'direct'
+          else 'campaign'
+        end
+    ;;
+    group_label: "Acquisition"
+  }
+
   dimension: first_source {
     type: string
     sql: ${TABLE}.first_source ;;
