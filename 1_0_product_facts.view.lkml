@@ -19,6 +19,7 @@ view: product_facts {
           , p.normalized_at as normalized_at
           , p.origin as origin
           , p.updated_at as updated_at
+          , b.id as brand_id
           , b.active as brand_active
           , b.name as brand_name
           , pi.first_image as product_image

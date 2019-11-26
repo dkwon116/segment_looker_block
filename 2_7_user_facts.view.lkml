@@ -2,95 +2,209 @@ view: user_facts {
   derived_table: {
     sql_trigger_value: select count(*) from ${sessions.SQL_TABLE_NAME} ;;
     sql:
- WITH user_attribution as (
-  SELECT
-  distinct
-    s.looker_visitor_id
-    , first_value(s.first_referrer IGNORE NULLS) over(w) as first_referrer
-    , first_value(s.first_source IGNORE NULLS) over(w) as first_source
-    , first_value(s.first_medium IGNORE NULLS) over(w) as first_medium
-    , first_value(s.first_campaign IGNORE NULLS) over(w) as first_campaign
-    , first_value(s.first_content IGNORE NULLS) over(w) as first_content
-    , first_value(s.first_term IGNORE NULLS) over(w) as first_term
-    , last_value(s.last_referrer IGNORE NULLS) over(w) as last_referrer
-    , last_value(s.last_source IGNORE NULLS) over(w) as last_source
-    , last_value(s.last_medium IGNORE NULLS) over(w) as last_medium
-    , last_value(s.last_campaign IGNORE NULLS) over(w) as last_campaign
-    , last_value(s.last_content IGNORE NULLS) over(w) as last_content
-    , last_value(s.last_term IGNORE NULLS) over(w) as last_term
-    , first_value(if(sf.number_of_signed_up_events>0,s.first_source,null) IGNORE NULLS) over(w) as signup_source
-    , first_value(if(sf.number_of_signed_up_events>0,s.first_medium,null) IGNORE NULLS) over(w) as signup_medium
-    , first_value(if(sf.number_of_signed_up_events>0,s.first_campaign,null) IGNORE NULLS) over(w) as signup_campaign
-    , first_value(if(sf.number_of_signed_up_events>0,s.first_content,null) IGNORE NULLS) over(w) as signup_content
-    , first_value(if(sf.number_of_signed_up_events>0,s.first_term,null) IGNORE NULLS) over(w) as signup_term
-  FROM ${sessions.SQL_TABLE_NAME} as s
-  LEFT JOIN ${session_facts.SQL_TABLE_NAME} as sf
-  ON s.session_id = sf.session_id
-  window w as (partition by s.looker_visitor_id order by s.session_start_at rows between unbounded preceding and unbounded following)
-)
-, all_users as (
-  SELECT
-  s.looker_visitor_id as user_id
-  FROM ${sessions.SQL_TABLE_NAME} as s
+      WITH
+      all_users as (
+        SELECT s.looker_visitor_id as user_id FROM ${sessions.SQL_TABLE_NAME} as s
+        UNION DISTINCT
+        SELECT cu.id as user_id FROM aurora_smile_ventures.users as cu
+      )
+      ,user_attribution as (
+        SELECT
+        distinct
+          s.looker_visitor_id
+          , first_value(s.first_referrer IGNORE NULLS) over(w) as first_referrer
+          , first_value(s.first_source IGNORE NULLS) over(w) as first_source
+          , first_value(s.first_medium IGNORE NULLS) over(w) as first_medium
+          , first_value(s.first_campaign IGNORE NULLS) over(w) as first_campaign
+          , first_value(s.first_content IGNORE NULLS) over(w) as first_content
+          , first_value(s.first_term IGNORE NULLS) over(w) as first_term
+          , last_value(s.last_referrer IGNORE NULLS) over(w) as last_referrer
+          , last_value(s.last_source IGNORE NULLS) over(w) as last_source
+          , last_value(s.last_medium IGNORE NULLS) over(w) as last_medium
+          , last_value(s.last_campaign IGNORE NULLS) over(w) as last_campaign
+          , last_value(s.last_content IGNORE NULLS) over(w) as last_content
+          , last_value(s.last_term IGNORE NULLS) over(w) as last_term
+          , first_value(if(sf.number_of_signed_up_events>0,s.first_source,null) IGNORE NULLS) over(w) as signup_source
+          , first_value(if(sf.number_of_signed_up_events>0,s.first_medium,null) IGNORE NULLS) over(w) as signup_medium
+          , first_value(if(sf.number_of_signed_up_events>0,s.first_campaign,null) IGNORE NULLS) over(w) as signup_campaign
+          , first_value(if(sf.number_of_signed_up_events>0,s.first_content,null) IGNORE NULLS) over(w) as signup_content
+          , first_value(if(sf.number_of_signed_up_events>0,s.first_term,null) IGNORE NULLS) over(w) as signup_term
+        FROM ${sessions.SQL_TABLE_NAME} as s
+        LEFT JOIN ${session_facts.SQL_TABLE_NAME} as sf
+        ON s.session_id = sf.session_id
+        window w as (partition by s.looker_visitor_id order by s.session_start_at rows between unbounded preceding and unbounded following)
+      )
 
-  UNION DISTINCT
-
-  SELECT
-  cu.id as user_id
-  FROM aurora_smile_ventures.users as cu
-)
-SELECT
-  au.user_id as looker_visitor_id
-  , cu.first_name as name
-  , cu.email as email
-  , us.first_source as first_source
-  , us.first_medium as first_medium
-  , us.first_campaign as first_campaign
-  , us.first_content as first_content
-  , us.first_term as first_term
-  , us.first_referrer as first_referrer
-  , us.signup_source as signup_source
-  , us.signup_medium as signup_medium
-  , us.signup_campaign as signup_campaign
-  , us.signup_content as signup_content
-  , us.signup_term as signup_term
-  , cu.id as is_user
-  , cu.gender as gender
-  , cu.created_at as signed_up_date
-  , sr.custom_fields_random_index as random_idx
-  , IF(au.user_id IN (SELECT oi.user_id FROM ${order_items.SQL_TABLE_NAME} as oi  WHERE oi.quantity >= 3), "VIP", "Customer") as user_type
-  , IF(DATE(cu.created_at) < DATE(2018,11,20), "Giveaway", "Beta") as joined_at
-  , COALESCE(MIN(s.session_start_at), cu.created_at) as first_date
-  , ARRAY_TO_STRING(ARRAY_AGG(distinct o2.vendor ignore nulls), "-") as purchased_vendors
-  , MAX(s.session_start_at) as last_date
-  , COUNT(s.session_id) as number_of_sessions
-  , MIN(o.transaction_at) as first_purchased
-  , MAX(o.transaction_at) as last_purchased
-  , SUM(sf.count_product_viewed) as products_viewed
-  , SUM(sf.count_outlinked) as number_of_outlinks
-  , COUNT(o.order_id) as orders_completed
-  , SUM(o.total) as lifetime_order_value
-FROM all_users as au
-LEFT JOIN aurora_smile_ventures.users as cu
-  ON au.user_id = cu.id
-LEFT JOIN user_attribution as us
-  ON au.user_id = us.looker_visitor_id
-LEFT JOIN ${sessions.SQL_TABLE_NAME} as s
-  ON au.user_id = s.looker_visitor_id
-LEFT JOIN ${session_facts.SQL_TABLE_NAME} as sf
-  ON s.session_id = sf.session_id
-LEFT JOIN ${order_facts.SQL_TABLE_NAME} as o
-  ON s.session_id = o.session_id
-LEFT JOIN ${orders.SQL_TABLE_NAME} as o2
-  ON o.order_id = o2.order_id
-LEFT JOIN google_sheets.user_type as ut
-  ON cu.id = ut.user_id
-LEFT JOIN sendgrid.recipients_view as sr
-  ON cu.email = sr.email
-GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
-
-       ;;
+      SELECT
+        au.user_id as looker_visitor_id
+        , cu.first_name as name
+        , cu.email as email
+        , us.first_source as first_source
+        , us.first_medium as first_medium
+        , us.first_campaign as first_campaign
+        , us.first_content as first_content
+        , us.first_term as first_term
+        , us.first_referrer as first_referrer
+        , us.signup_source as signup_source
+        , us.signup_medium as signup_medium
+        , us.signup_campaign as signup_campaign
+        , us.signup_content as signup_content
+        , us.signup_term as signup_term
+        , cu.id as is_user
+        , cu.gender as gender
+        , cu.created_at as signed_up_date
+        , IF(DATE(cu.created_at) < DATE(2018,11,20), "Giveaway", "Beta") as joined_at
+        , ui.random_idx
+        , IF(au.user_id IN (SELECT oi.user_id FROM ${order_items.SQL_TABLE_NAME} as oi  WHERE oi.quantity >= 3), "VIP", "Customer") as user_type
+        , COALESCE(ui.first_date, cu.created_at) as first_date
+        , ui.last_date
+        , ui.number_of_sessions
+        , ui.first_purchased
+        , ui.last_purchased
+        , ui.products_viewed
+        , ui.number_of_outlinks
+        , ui.orders_completed
+        , ui.lifetime_order_value
+        , ui.purchased_vendors
+        , ub.brand_name as favorite_brand
+        , ub.count_orders as favorite_brand_order_products
+      FROM all_users as au
+      LEFT JOIN aurora_smile_ventures.users as cu ON au.user_id = cu.id
+      LEFT JOIN user_attribution as us ON au.user_id = us.looker_visitor_id
+      LEFT JOIN(
+        SELECT
+          au.user_id as looker_visitor_id
+          , sr.custom_fields_random_index as random_idx
+          , ARRAY_TO_STRING(ARRAY_AGG(distinct o2.vendor ignore nulls), "-") as purchased_vendors
+          , MIN(s.session_start_at) as first_date
+          , MAX(s.session_start_at) as last_date
+          , COUNT(s.session_id) as number_of_sessions
+          , MIN(o.transaction_at) as first_purchased
+          , MAX(o.transaction_at) as last_purchased
+          , SUM(sf.count_product_viewed) as products_viewed
+          , SUM(sf.count_outlinked) as number_of_outlinks
+          , COUNT(o.order_id) as orders_completed
+          , SUM(o.total) as lifetime_order_value
+        FROM all_users as au
+        LEFT JOIN aurora_smile_ventures.users as cu ON au.user_id = cu.id
+        LEFT JOIN ${sessions.SQL_TABLE_NAME} as s ON au.user_id = s.looker_visitor_id
+        LEFT JOIN ${session_facts.SQL_TABLE_NAME} as sf ON s.session_id = sf.session_id
+        LEFT JOIN ${order_facts.SQL_TABLE_NAME} as o ON s.session_id = o.session_id
+        LEFT JOIN ${orders.SQL_TABLE_NAME} as o2 ON o.order_id = o2.order_id
+        LEFT JOIN google_sheets.user_type as ut ON cu.id = ut.user_id
+        LEFT JOIN sendgrid.recipients_view as sr ON cu.email = sr.email
+      GROUP BY 1,2
+      ) ui on ui.looker_visitor_id=au.user_id
+      LEFT JOIN(
+        select
+          distinct
+          t.user_id
+          ,first_value(t.brand_name) over (w) as brand_name
+          ,first_value(t.unique_products) over (w) as count_orders
+        from(
+          select
+            o.user_id
+            ,pf.brand_name
+            ,count(distinct pf.id) as unique_products
+          from ${order_items.SQL_TABLE_NAME} o
+          join ${product_maps.SQL_TABLE_NAME} pm on o.vendor_product_id =pm.affiliate_product_id and o.vendor_slug = pm.vendor
+          join ${product_facts.SQL_TABLE_NAME} pf on pf.id=pm.id
+          group by 1,2
+        ) t
+        window w as (partition by t.user_id order by t.unique_products desc rows between unbounded preceding and unbounded following)
+      ) ub on ub.user_id=au.user_id
+    ;;
   }
+
+
+# WITH user_attribution as (
+#   SELECT
+#   distinct
+#     s.looker_visitor_id
+#     , first_value(s.first_referrer IGNORE NULLS) over(w) as first_referrer
+#     , first_value(s.first_source IGNORE NULLS) over(w) as first_source
+#     , first_value(s.first_medium IGNORE NULLS) over(w) as first_medium
+#     , first_value(s.first_campaign IGNORE NULLS) over(w) as first_campaign
+#     , first_value(s.first_content IGNORE NULLS) over(w) as first_content
+#     , first_value(s.first_term IGNORE NULLS) over(w) as first_term
+#     , last_value(s.last_referrer IGNORE NULLS) over(w) as last_referrer
+#     , last_value(s.last_source IGNORE NULLS) over(w) as last_source
+#     , last_value(s.last_medium IGNORE NULLS) over(w) as last_medium
+#     , last_value(s.last_campaign IGNORE NULLS) over(w) as last_campaign
+#     , last_value(s.last_content IGNORE NULLS) over(w) as last_content
+#     , last_value(s.last_term IGNORE NULLS) over(w) as last_term
+#     , first_value(if(sf.number_of_signed_up_events>0,s.first_source,null) IGNORE NULLS) over(w) as signup_source
+#     , first_value(if(sf.number_of_signed_up_events>0,s.first_medium,null) IGNORE NULLS) over(w) as signup_medium
+#     , first_value(if(sf.number_of_signed_up_events>0,s.first_campaign,null) IGNORE NULLS) over(w) as signup_campaign
+#     , first_value(if(sf.number_of_signed_up_events>0,s.first_content,null) IGNORE NULLS) over(w) as signup_content
+#     , first_value(if(sf.number_of_signed_up_events>0,s.first_term,null) IGNORE NULLS) over(w) as signup_term
+#   FROM ${sessions.SQL_TABLE_NAME} as s
+#   LEFT JOIN ${session_facts.SQL_TABLE_NAME} as sf
+#   ON s.session_id = sf.session_id
+#   window w as (partition by s.looker_visitor_id order by s.session_start_at rows between unbounded preceding and unbounded following)
+# )
+# , all_users as (
+#   SELECT
+#   s.looker_visitor_id as user_id
+#   FROM ${sessions.SQL_TABLE_NAME} as s
+#
+#   UNION DISTINCT
+#
+#   SELECT
+#   cu.id as user_id
+#   FROM aurora_smile_ventures.users as cu
+# )
+# SELECT
+#   au.user_id as looker_visitor_id
+#   , cu.first_name as name
+#   , cu.email as email
+#   , us.first_source as first_source
+#   , us.first_medium as first_medium
+#   , us.first_campaign as first_campaign
+#   , us.first_content as first_content
+#   , us.first_term as first_term
+#   , us.first_referrer as first_referrer
+#   , us.signup_source as signup_source
+#   , us.signup_medium as signup_medium
+#   , us.signup_campaign as signup_campaign
+#   , us.signup_content as signup_content
+#   , us.signup_term as signup_term
+#   , cu.id as is_user
+#   , cu.gender as gender
+#   , cu.created_at as signed_up_date
+#   , sr.custom_fields_random_index as random_idx
+#   , IF(au.user_id IN (SELECT oi.user_id FROM ${order_items.SQL_TABLE_NAME} as oi  WHERE oi.quantity >= 3), "VIP", "Customer") as user_type
+#   , IF(DATE(cu.created_at) < DATE(2018,11,20), "Giveaway", "Beta") as joined_at
+#   , COALESCE(MIN(s.session_start_at), cu.created_at) as first_date
+#   , ARRAY_TO_STRING(ARRAY_AGG(distinct o2.vendor ignore nulls), "-") as purchased_vendors
+#   , MAX(s.session_start_at) as last_date
+#   , COUNT(s.session_id) as number_of_sessions
+#   , MIN(o.transaction_at) as first_purchased
+#   , MAX(o.transaction_at) as last_purchased
+#   , SUM(sf.count_product_viewed) as products_viewed
+#   , SUM(sf.count_outlinked) as number_of_outlinks
+#   , COUNT(o.order_id) as orders_completed
+#   , SUM(o.total) as lifetime_order_value
+# FROM all_users as au
+# LEFT JOIN aurora_smile_ventures.users as cu
+#   ON au.user_id = cu.id
+# LEFT JOIN user_attribution as us
+#   ON au.user_id = us.looker_visitor_id
+# LEFT JOIN ${sessions.SQL_TABLE_NAME} as s
+#   ON au.user_id = s.looker_visitor_id
+# LEFT JOIN ${session_facts.SQL_TABLE_NAME} as sf
+#   ON s.session_id = sf.session_id
+# LEFT JOIN ${order_facts.SQL_TABLE_NAME} as o
+#   ON s.session_id = o.session_id
+# LEFT JOIN ${orders.SQL_TABLE_NAME} as o2
+#   ON o.order_id = o2.order_id
+# LEFT JOIN google_sheets.user_type as ut
+#   ON cu.id = ut.user_id
+# LEFT JOIN sendgrid.recipients_view as sr
+#   ON cu.email = sr.email
+# GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
+
+
 
   #     Define your dimensions and measures here, like this:
   dimension: looker_visitor_id {
@@ -251,6 +365,17 @@ GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
     type: yesno
     sql: IF(${orders_completed} > 0, true, false) ;;
   }
+
+  dimension: favorite_brand {
+    type: string
+    sql: ${TABLE}.favorite_brand ;;
+  }
+
+  dimension: favorite_brand_order_products {
+    type: number
+    sql: ${TABLE}.favorite_brand_order_products ;;
+  }
+
 
   dimension: first_type {
     type: string
