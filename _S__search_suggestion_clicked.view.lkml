@@ -18,6 +18,11 @@ view: search_suggestion_clicked {
     sql: ${TABLE}.event ;;
   }
 
+  dimension: gender {
+    type: string
+    sql: ${TABLE}.gender ;;
+  }
+
   dimension: query {
     type: string
     sql: ${TABLE}.query ;;

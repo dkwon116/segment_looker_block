@@ -87,6 +87,11 @@ view: product_facts {
     timeframes: [time, date, week, month]
   }
 
+  dimension: brand_id {
+    type: string
+    sql: ${TABLE}.brand_id ;;
+  }
+
   dimension: brand_active {
     type: yesno
     sql: ${TABLE}.brand_active ;;

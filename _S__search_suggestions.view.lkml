@@ -7,7 +7,7 @@ view: search_suggestions {
           s.id
           ,coalesce(a2v.looker_visitor_id,a2v.alias) as looker_visitor_id
           ,s.event
-          ,'' as gender
+          ,s.gender
           ,s.query
           ,s.type
           ,s._id as list_id
