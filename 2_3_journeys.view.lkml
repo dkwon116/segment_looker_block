@@ -53,6 +53,17 @@ view:journeys {
       ,IF(t.journey_type IN ('Brand', 'Category', 'Product Search', 'Hashtag', 'Sale', 'New'), true, false) as is_discovery
       ,t.first_journey_event_sequence
       ,ifnull(lead(t.first_journey_event_sequence) over (ws)-1,t.last_session_event_sequence) as last_journey_event_sequence
+      ,case
+        when t.journey_type in ('Daily','Direct','Landing','About') then 'Acquisition'
+        when t.journey_type in ('Profile','Account') then 'My'
+        when t.journey_type in ('Brand','Brand List') then 'Brand'
+        when t.journey_type in ('Search','Product Search') then 'Search'
+        when t.journey_type in ('Pending Cashback List','Available Cashback List','Paid Cashback List') then 'Cashout'
+        when t.journey_type in ('Cashback Retailer','Retailer Coupon','About Cashback','How to Cashback','Linkout') then 'Cashback'
+        when t.journey_type in ('FAQ','FAQ List') then 'FAQ'
+        when t.journey_type in ('Hashtag','Hashtag List') then 'Hashtag'
+        else t.journey_type
+      end as journey_group
     from t
     where t.first_journey_event_sequence is not null
     window ws as (partition by t.session_id order by t.event_sequence)

@@ -71,6 +71,13 @@ explore: experiment_session_facts {
     type: inner
     relationship: one_to_many
   }
+  join: experiment_session_journey_group_facts {
+    sql_on: ${experiment_session_journey_group_facts.experiment_id}=${experiment_session_facts.experiment_id}
+      and ${experiment_session_journey_group_facts.session_id}=${experiment_session_facts.session_id}
+      and ${experiment_session_journey_group_facts.variant_id}=${experiment_session_facts.variant_id};;
+    type: inner
+    relationship: one_to_many
+  }
 }
 
 explore: email_activity {
