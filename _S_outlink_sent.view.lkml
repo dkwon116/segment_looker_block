@@ -146,7 +146,7 @@ view: outlink_sent {
 
   dimension: retailer {
     type: string
-    sql: ${TABLE}.retailer ;;
+    sql: lower(${TABLE}.retailer) ;;
   }
 
   dimension_group: sent {
