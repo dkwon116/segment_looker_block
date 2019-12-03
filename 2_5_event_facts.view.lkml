@@ -5,8 +5,9 @@ view: event_facts {
     sql:
       select
         t.event_id
-        , j.journey_id
         , es.session_id
+        , j.journey_id
+        , jg.journey_group_id
         , t.anonymous_id
         , t.looker_visitor_id
         , t.timestamp
@@ -51,6 +52,9 @@ view: event_facts {
       left join ${journeys.SQL_TABLE_NAME} as j
         on j.session_id=es.session_id
         and es.event_sequence between j.first_journey_event_sequence and j.last_journey_event_sequence
+      left join ${journey_groups.SQL_TABLE_NAME} as jg
+        on jg.session_id=es.session_id
+        and es.event_sequence between jg.first_journey_group_event_sequence and jg.last_journey_group_event_sequence
       left join ${orders.SQL_TABLE_NAME} as o
         on t.looker_visitor_id = o.user_id
         and t.event_id=o.order_id
@@ -69,6 +73,11 @@ view: event_facts {
   dimension: journey_id {
     type: string
     sql: ${TABLE}.journey_id ;;
+  }
+
+  dimension: journey_group_id {
+    type: string
+    sql: ${TABLE}.journey_group_id ;;
   }
 
   dimension: session_id {

@@ -112,6 +112,20 @@ explore: event_facts {
     relationship: one_to_one
   }
 
+  join: journey_groups {
+    view_label: "0_Journey_Groups"
+    type: left_outer
+    sql_on: ${event_facts.journey_group_id} = ${journey_groups.journey_group_id} ;;
+    relationship: many_to_one
+  }
+
+  join: journey_group_facts {
+    view_label: "0_Journey_Groups"
+    type: left_outer
+    sql_on: ${journey_groups.journey_group_id} = ${journey_group_facts.journey_group_id} ;;
+    relationship: one_to_one
+  }
+
   join: brands {
     view_label: "Brands"
     type: left_outer
