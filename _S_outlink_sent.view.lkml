@@ -149,6 +149,11 @@ view: outlink_sent {
     sql: ${TABLE}.retailer ;;
   }
 
+  dimension: retailer_upper {
+    type: string
+    sql: upper(${TABLE}.retailer) ;;
+  }
+
   dimension_group: sent {
     type: time
     timeframes: [
