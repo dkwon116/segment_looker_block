@@ -278,6 +278,12 @@ dimension_group: since_first_purchase {
     group_label: "Attribution"
   }
 
+  dimension: first_keyword {
+    type: string
+    sql: if(${first_medium}="blog-seo", split(${first_term}, "-")[OFFSET(1)], "-") ;;
+    group_label: "Attribution"
+  }
+
 
 
   dimension: last_utm {
@@ -332,6 +338,12 @@ dimension_group: since_first_purchase {
   dimension: last_term {
     type:  string
     sql: ${sessions.last_term} ;;
+    group_label: "Attribution"
+  }
+
+  dimension: last_keyword {
+    type: string
+    sql: if(${last_medium}="blog-seo", split(${last_term}, "-")[OFFSET(1)],"-") ;;
     group_label: "Attribution"
   }
 

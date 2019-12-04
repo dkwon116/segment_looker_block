@@ -282,13 +282,13 @@ view: user_facts {
 
   dimension_group: first_visited {
     type: time
-    timeframes: [time, date, week, month, raw]
+    timeframes: [time, date, week, month, quarter, raw]
     sql: ${TABLE}.first_date ;;
   }
 
   dimension_group: last_visited {
     type: time
-    timeframes: [time, date, week, month, year]
+    timeframes: [time, date, week, month, quarter, year]
     sql: ${TABLE}.last_date ;;
   }
 
@@ -448,6 +448,12 @@ view: user_facts {
     group_label: "Acquisition"
     suggest_explore: utm_values
     suggest_dimension: utm_values.campaign_term
+  }
+
+  dimension: first_keyword {
+    type: string
+    sql: if(${TABLE}.first_medium = "blog-seo", split(${first_term}, "-")[OFFSET(1)], "-") ;;
+    group_label: "Acquisition"
   }
 
   dimension: signup_source {
@@ -613,6 +619,21 @@ view: user_facts {
       label: "First Purchased"
       value: "first_purchased"
     }
+    default_value: "first_purchased"
+
+  }
+
+  parameter: cohort_time {
+    type: string
+    allowed_value: {
+      label: "Month"
+      value: "month"
+    }
+    allowed_value: {
+      label: "Quarter"
+      value: "quarter"
+    }
+    default_value: "quarter"
   }
 
   dimension: cohort_by {
@@ -621,11 +642,11 @@ view: user_facts {
     sql:
       CASE
         WHEN {% parameter cohort_type %} = 'first_visited' THEN
-          ${first_visited_month}
+          if({% parameter cohort_time %} = 'month', ${first_visited_month}, ${first_visited_quarter})
         WHEN {% parameter cohort_type %} = 'signed_up' THEN
-          ${signed_up_month}
+          if({% parameter cohort_time %} = 'month', ${signed_up_month}, ${signed_up_quarter})
         WHEN {% parameter cohort_type %} = 'first_purchased' THEN
-          ${first_purchased_month}
+          if({% parameter cohort_time %} = 'month', ${first_purchased_month}, ${first_purchased_quarter})
         ELSE
           NULL
       END ;;
