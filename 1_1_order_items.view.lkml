@@ -16,8 +16,8 @@ view: order_items {
             ,IF(e.order_type = "P", e.quantity, 0 - e.quantity) as quantity
             ,e.user_id
             ,e.product_name
-            ,e.sale_amount
-            ,e.krw_amount
+            ,if(e.order_type = "R", -abs(e.sale_amount), e.sale_amount) as sale_amount
+            ,if(e.order_type = "R", -abs(e.krw_amount), e.krw_amount) as krw_amount
             ,e.process_date as process_at
             ,e.advertiser_id
             , CASE

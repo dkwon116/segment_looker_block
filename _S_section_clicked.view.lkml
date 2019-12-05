@@ -1,5 +1,6 @@
-view: product_list_viewed {
-  sql_table_name: javascript.product_list_viewed_view ;;
+view: section_clicked {
+  sql_table_name: javascript.section_clicked_view ;;
+  drill_fields: [id]
 
   dimension: id {
     primary_key: yes
@@ -7,19 +8,9 @@ view: product_list_viewed {
     sql: ${TABLE}.id ;;
   }
 
-#  dimension: event_id {
-#    type: string
-#    sql: CONCAT(cast(${TABLE}.timestamp AS string), ${TABLE}.anonymous_id, '-t') ;;
-#  }
-
   dimension: anonymous_id {
     type: string
     sql: ${TABLE}.anonymous_id ;;
-  }
-
-  dimension: category {
-    type: string
-    sql: ${TABLE}.category ;;
   }
 
   dimension: context_ip {
@@ -29,13 +20,11 @@ view: product_list_viewed {
 
   dimension: context_library_name {
     type: string
-    hidden: yes
     sql: ${TABLE}.context_library_name ;;
   }
 
   dimension: context_library_version {
     type: string
-    hidden: yes
     sql: ${TABLE}.context_library_version ;;
   }
 
@@ -46,19 +35,11 @@ view: product_list_viewed {
 
   dimension: context_page_referrer {
     type: string
-    hidden: yes
     sql: ${TABLE}.context_page_referrer ;;
-  }
-
-  dimension: context_page_search {
-    type: string
-    hidden: yes
-    sql: ${TABLE}.context_page_search ;;
   }
 
   dimension: context_page_title {
     type: string
-    hidden: yes
     sql: ${TABLE}.context_page_title ;;
   }
 
@@ -69,30 +50,17 @@ view: product_list_viewed {
 
   dimension: context_user_agent {
     type: string
-    hidden: yes
     sql: ${TABLE}.context_user_agent ;;
   }
 
   dimension: event {
     type: string
-    hidden: yes
     sql: ${TABLE}.event ;;
   }
 
   dimension: event_text {
     type: string
-    hidden: yes
     sql: ${TABLE}.event_text ;;
-  }
-
-  dimension: gender {
-    type: string
-    sql: ${TABLE}.gender ;;
-  }
-
-  dimension: list_id {
-    type: string
-    sql: ${TABLE}.list_id ;;
   }
 
   dimension_group: loaded {
@@ -123,20 +91,9 @@ view: product_list_viewed {
     sql: ${TABLE}.original_timestamp ;;
   }
 
-  dimension: page_number {
+  dimension: position {
     type: number
-    sql: ${TABLE}.page_number ;;
-  }
-
-  dimension: product_count {
-    type: number
-    sql: ${TABLE}.product_count ;;
-  }
-
-  dimension: products {
-    type: string
-    sql: ${TABLE}.products ;;
-    hidden: yes
+    sql: ${TABLE}.position ;;
   }
 
   dimension_group: received {
@@ -151,6 +108,16 @@ view: product_list_viewed {
       year
     ]
     sql: ${TABLE}.received_at ;;
+  }
+
+  dimension: section_id {
+    type: string
+    sql: ${TABLE}.section_id ;;
+  }
+
+  dimension: section_name {
+    type: string
+    sql: ${TABLE}.section_name ;;
   }
 
   dimension_group: sent {
@@ -184,33 +151,6 @@ view: product_list_viewed {
   dimension: type {
     type: string
     sql: ${TABLE}.type ;;
-    hidden: yes
-  }
-
-  dimension: list_type {
-    type: string
-    sql: CASE
-    WHEN ${type} = 'daily' THEN 'Daily'
-    WHEN ${type} = 'hashtag' THEN 'Hashtag'
-    WHEN ${type} = 'category' THEN 'Category'
-    WHEN ${type} = 'brand' THEN 'Brand'
-    WHEN ${context_page_path} = '/sale' THEN 'Sale'
-    WHEN ${context_page_path} LIKE '%/new-arrival%' THEN 'New'
-    WHEN ${context_page_path} LIKE '%/brands/view%' THEN 'Brand'
-    WHEN ${context_page_path} LIKE '%/wishlist%' THEN 'Wishlist'
-    WHEN ${context_page_path} LIKE '%/search%' THEN 'Search'
-    ELSE 'NA'
-    END;;
-  }
-
-  dimension: section {
-    type: string
-    sql: ${TABLE}.section_name ;;
-  }
-
-  dimension: is_curated {
-    type: yesno
-    sql: IF(${list_type} IN ('Daily', 'Hashtag'), true, false) ;;
   }
 
   dimension: user_id {
@@ -232,13 +172,8 @@ view: product_list_viewed {
     sql: ${TABLE}.uuid_ts ;;
   }
 
-  measure: product_list_viewed_count {
+  measure: count {
     type: count
-    drill_fields: [category, list_id, list_type, product_list_viewed_count]
+    drill_fields: [id, context_library_name, section_name]
   }
-
-#   measure: count_visitors {
-#     type: count_distinct
-#     sql: ${event_facts.looker_visitor_id} ;;
-#   }
 }

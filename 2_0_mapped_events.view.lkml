@@ -7,7 +7,6 @@ view: mapped_events {
         ,timestamp_diff(timestamp, lag(timestamp) over(partition by looker_visitor_id order by timestamp), minute) as idle_time_minutes
       from (
         select
-          --CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') as event_id
           t.id as event_id
           ,t.anonymous_id
           ,coalesce(a2v.looker_visitor_id,a2v.alias) as looker_visitor_id
@@ -26,15 +25,12 @@ view: mapped_events {
           ,'tracks' as event_source
           ,t.context_page_path AS page_path
         from javascript.tracks_view as t
-        inner join ${tracks_sanitized.SQL_TABLE_NAME} as ts
-        on t.id = ts.id
         inner join ${page_aliases_mapping.SQL_TABLE_NAME} as a2v
         on a2v.alias = t.anonymous_id
 
         union all
 
         select
-          --CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-p') as event_id
           t.id as event_id
           ,t.anonymous_id
           ,coalesce(a2v.looker_visitor_id,a2v.alias) as looker_visitor_id
@@ -59,7 +55,6 @@ view: mapped_events {
         union all
 
         select
-          --CONCAT(cast(t.transaction_at as string), t.user_id, '-r') as event_id
           t.order_id as event_id
           ,t.user_id as anonymous_id
           ,coalesce(a2v.looker_visitor_id,a2v.alias) as looker_visitor_id
@@ -85,6 +80,7 @@ view: mapped_events {
       AND e.page_url LIKE '%catchfashion%'
       AND e.page_url NOT LIKE '%staging%'
       AND e.user_agent NOT LIKE '%Bot%'
+      AND e.event_id NOT IN (SELECT id FROM ${duplicate_events.SQL_TABLE_NAME})
       AND e.looker_visitor_id NOT IN (SELECT user_id FROM google_sheets.filter_user))
       AND e.looker_visitor_id NOT IN (
             select
