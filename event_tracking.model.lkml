@@ -449,13 +449,6 @@ explore: product_events {
     relationship: many_to_one
   }
 
-join: page_facts {
-  type: left_outer
-  sql_on: ${page_facts.event_id}=${product_events.event_id} ;;
-  relationship: one_to_one
-}
-
-
   join: product_maps {
     type: left_outer
     sql_on: ${product_facts.id} = ${product_maps.product_id} ;;
@@ -524,6 +517,12 @@ join: page_facts {
   join: journey_facts {
     type: left_outer
     sql_on: ${journeys.journey_id} = ${journey_facts.journey_id} ;;
+    relationship: one_to_one
+  }
+
+  join: page_path_facts {
+    type: left_outer
+    sql_on: ${page_path_facts.page_path_id}=${event_facts.page_path_id} ;;
     relationship: one_to_one
   }
 

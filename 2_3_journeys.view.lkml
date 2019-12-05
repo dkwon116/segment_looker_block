@@ -27,7 +27,7 @@ view:journeys {
       ,we as (partition by e.session_id order by e.event_sequence rows between unbounded preceding and unbounded following)
     )
     select
-      concat(t.session_id, ' - ', cast(row_number() over(ws) AS string)) AS journey_id
+      concat(t.session_id, ' - J', cast(row_number() over(ws) AS string)) AS journey_id
       ,t.session_id
       ,t.anonymous_id
       ,t.looker_visitor_id
