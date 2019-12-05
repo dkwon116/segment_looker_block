@@ -23,6 +23,7 @@ view:event_sessions {
             when e.event_source='pages' and e.event IN ('Category', 'Product Search', 'Hashtag') then REGEXP_EXTRACT(e.page_path,"^/.*/(.*)$")
             else null
         end as journey_prop
+        , e.page_path
       from ${mapped_events.SQL_TABLE_NAME} as e
       left join ${sessions.SQL_TABLE_NAME} as s
         on e.looker_visitor_id = s.looker_visitor_id

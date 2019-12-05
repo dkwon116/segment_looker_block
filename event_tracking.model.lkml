@@ -54,6 +54,12 @@ explore: event_facts {
     relationship: many_to_one
   }
 
+  join: campaigns {
+    type: left_outer
+    sql_on: upper(${campaigns.utm})=upper(${sessions.last_utm}) ;;
+    relationship: one_to_many
+  }
+
   join: experiment_sessions {
     view_label: "0_Sessions"
     type: left_outer
@@ -219,6 +225,21 @@ explore: event_facts {
     relationship: one_to_many
   }
 
+  join: product_maps {
+    view_label: "Product_on_Order"
+    type: left_outer
+    sql_on: ${order_items.vendor_product_id} = ${product_maps.affiliate_product_id} and ${order_items.vendor_slug} = ${product_maps.vendor};;
+    relationship: many_to_one
+  }
+
+  join: product_facts {
+    view_label: "Product_on_Order"
+    type: left_outer
+    sql_on: ${product_maps.product_id} = ${product_facts.id} ;;
+    relationship: many_to_one
+    fields: [active, brand_name, gender, product_image, image_url, created_at_time]
+  }
+
   join: list_facts {
     from: categories
     type: left_outer
@@ -367,6 +388,12 @@ explore: product_events {
   join: journey_facts {
     type: left_outer
     sql_on: ${journeys.journey_id} = ${journey_facts.journey_id} ;;
+    relationship: one_to_one
+  }
+
+  join: page_path_facts {
+    type: left_outer
+    sql_on: ${page_path_facts.page_path_id}=${event_facts.page_path_id} ;;
     relationship: one_to_one
   }
 
