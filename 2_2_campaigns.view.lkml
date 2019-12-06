@@ -142,31 +142,55 @@ view: campaigns {
     sql: ${TABLE}.utm ;;
     primary_key: yes
     group_label: "UTM"
+    link: {
+      label: "Go to dashboard"
+      url: "https://smileventures.au.looker.com/dashboards/78?UTM=%22{{value | encode_url}}%22&Start%20Date=7%20days"
+    }
   }
   dimension: source {
     type:  string
     sql: ${TABLE}.source ;;
     group_label: "UTM"
+    link: {
+      label: "Go to dashboard"
+      url: "https://smileventures.au.looker.com/dashboards/78?Source={{value | encode_url}}&Start%20Date=7%20days"
+    }
   }
   dimension: medium {
     type:  string
     sql: ${TABLE}.medium ;;
     group_label: "UTM"
+    link: {
+      label: "Go to dashboard"
+      url: "https://smileventures.au.looker.com/dashboards/78?Medium={{value | encode_url}}&Start%20Date=7%20days"
+    }
   }
   dimension: campaign {
     type:  string
     sql: ${TABLE}.campaign ;;
     group_label: "UTM"
+    link: {
+      label: "Go to dashboard"
+      url: "https://smileventures.au.looker.com/dashboards/78?Campaign={{value | encode_url}}&Start%20Date=7%20days"
+    }
   }
   dimension: content {
     type:  string
     sql: ${TABLE}.content ;;
     group_label: "UTM"
+    link: {
+      label: "Go to dashboard"
+      url: "https://smileventures.au.looker.com/dashboards/78?Content={{value | encode_url}}&Start%20Date=7%20days"
+    }
   }
   dimension: term {
     type:  string
     sql: ${TABLE}.term ;;
     group_label: "UTM"
+    link: {
+      label: "Go to dashboard"
+      url: "https://smileventures.au.looker.com/dashboards/78?Term={{value | encode_url}}&Start%20Date=7%20days"
+    }
   }
   dimension: marketing_campaign_id {
     type:  string

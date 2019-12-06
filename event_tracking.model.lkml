@@ -349,6 +349,12 @@ explore: product_events {
     fields: []
   }
 
+  join: products_categories {
+    type: left_outer
+    sql_on: ${product_maps.product_id} = ${products_categories.product_id} and ${products_categories._fivetran_deleted} = false ;;
+    relationship: many_to_many
+  }
+
   join: product_viewed {
     sql_on: ${product_events.event_id} = ${product_viewed.id} ;;
     relationship: one_to_one
