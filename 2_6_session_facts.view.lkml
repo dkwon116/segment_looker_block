@@ -1137,6 +1137,7 @@ measure: total_order_value {
   type: sum
   sql: ${order_value} ;;
   group_label: "Order Completed"
+  value_format_name:decimal_3
 }
 
   measure: total_order_value_per_converted_user {
@@ -1154,6 +1155,7 @@ measure: total_order_value {
       field: is_pre_purchase_at_session
       value: "yes"
     }
+    value_format_name:decimal_3
   }
 
   measure: total_repeat_order_value {
@@ -1164,6 +1166,7 @@ measure: total_order_value {
       field: is_pre_purchase_at_session
       value: "no"
     }
+    value_format_name:decimal_3
   }
 
 measure: order_completed_per_session {

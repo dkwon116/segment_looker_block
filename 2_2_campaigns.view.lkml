@@ -85,18 +85,20 @@ view: campaigns {
           ,upper(s.first_campaign) as campaign
           ,upper(s.first_content) as content
           ,upper(s.first_term) as term
-          ,timestamp(safe_cast(concat('20',substr(s.first_term,1,2),'-',substr(s.first_term,3,2),'-',substr(s.first_term,5,2),' 00:00:00') as datetime)) as start_timestamp
-          ,timestamp_add(timestamp(safe_cast(concat('20',substr(s.first_term,1,2),'-',substr(s.first_term,3,2),'-',substr(s.first_term,5,2),' 00:00:00') as datetime)), interval 168 hour) as end_timestamp
+--          ,timestamp(safe_cast(concat('20',substr(s.first_term,1,2),'-',substr(s.first_term,3,2),'-',substr(s.first_term,5,2),' 00:00:00') as datetime)) as start_timestamp
+--          ,timestamp_add(timestamp(safe_cast(concat('20',substr(s.first_term,1,2),'-',substr(s.first_term,3,2),'-',substr(s.first_term,5,2),' 00:00:00') as datetime)), interval 168 hour) as end_timestamp
           ,min(s.session_start_at) as first_session_timestamp
         from ${sessions.SQL_TABLE_NAME} s
         where s.first_utm is not null
-        group by 1,2,3,4,5,6,7,8
+        group by 1,2,3,4,5,6
       )
       select
         c.*
         ,coalesce(email.marketing_campaign_id) as marketing_campaign_id
         ,coalesce(email.marketing_campaign_name) as marketing_campaign_name
+        ,coalesce(ul.spend/1000) as marketing_spend
         ,u.* except(utm)
+
       from c
       left join(
         select
@@ -127,6 +129,11 @@ view: campaigns {
         ) t
       ) u on u.utm=c.utm
       left join ${email_campaigns.SQL_TABLE_NAME} email on upper(email.utm)=upper(c.utm)
+      left join(
+        select *
+        from ${general_utm_list.SQL_TABLE_NAME}
+        where spend is not null
+      ) ul on upper(ul.utm)=upper(c.utm)
  ;;
   }
 
@@ -169,16 +176,27 @@ view: campaigns {
     type:  string
     sql: ${TABLE}.marketing_campaign_name ;;
   }
-  dimension_group: start {
-    type: time
-    timeframes: [time, date, hour_of_day, day_of_week_index, week, hour, month, quarter, raw]
-    sql: ${TABLE}.start_timestamp ;;
+  dimension: marketing_spend {
+    type:  number
+    sql: ${TABLE}.marketing_spend ;;
   }
 
-  dimension_group: first_timestamp {
+#   dimension_group: start {
+#     type: time
+#     timeframes: [time, date, hour_of_day, day_of_week_index, week, hour, month, quarter, raw]
+#     sql: ${TABLE}.start_timestamp ;;
+#   }
+#
+#   dimension_group: first_timestamp {
+#     type: time
+#     timeframes: [time, date, hour_of_day, day_of_week_index, week, hour, month, quarter, raw]
+#     sql: ${TABLE}.first_timestamp ;;
+#   }
+
+  dimension_group: first_session_timestamp {
     type: time
     timeframes: [time, date, hour_of_day, day_of_week_index, week, hour, month, quarter, raw]
-    sql: ${TABLE}.first_timestamp ;;
+    sql: ${TABLE}.first_session_timestamp ;;
   }
 
 }

@@ -1,6 +1,13 @@
 view: general_utm_list {
-  sql_table_name: google_sheets.general_utm_list;;
-
+  derived_table: {
+    sql_trigger_value: select count(*) from google_sheets.general_utm_list ;;
+    sql:
+    SELECT *
+    FROM google_sheets.general_utm_list
+    where utm is not null
+    order by _row
+    ;;
+  }
 
   dimension: source {
     type: string

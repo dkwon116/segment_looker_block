@@ -17,18 +17,17 @@ explore: event_facts {
     ALL_FIELDS*,
     -order_items.catch_product_id
   ]
-
-  join: page_facts {
-    view_label: "0_Events"
-    type: left_outer
-    sql_on:event_facts.event_id = page_facts.event_id;;
-    relationship: one_to_one
-  }
-
   join: pages {
     view_label: "1_Page Events"
     type: left_outer
     sql_on: event_facts.event_id = pages.id;;
+    relationship: one_to_one
+  }
+
+  join: page_facts {
+    view_label: "1_Page Events"
+    type: left_outer
+    sql_on: ${page_facts.event_id} = ${event_facts.event_id} ;;
     relationship: one_to_one
   }
 
@@ -72,6 +71,12 @@ explore: event_facts {
     type: left_outer
     sql_on: ${experiment_sessions.experiment_id} =  ${experiment_facts.experiment_id};;
     relationship: many_to_one
+  }
+
+  join: page_path_facts {
+    type: left_outer
+    sql_on: ${page_path_facts.page_path_id}=${event_facts.page_path_id} ;;
+    relationship: one_to_one
   }
 
   join: journeys {
