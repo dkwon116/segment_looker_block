@@ -1,6 +1,65 @@
 
 view: pages {
-  sql_table_name: javascript.pages_view ;;
+
+  derived_table: {
+    sql_trigger_value: SELECT count(*) from javascript.pages_view ;;
+    sql:
+        SELECT
+          * except(name)
+          ,case
+            when name is null then case
+              when context_page_path='/' then 'Daily'
+              when context_page_path='/brands' then 'Brand List'
+              when starts_with(context_page_path,'/brands/') then 'Brand'
+              when starts_with(context_page_path,'/category/') then 'Category'
+              when context_page_path='/hashtags' then 'Hashtag List'
+              when context_page_path in ('/my-page','/user/profile','/me') then 'Profile'
+              when context_page_path='/promotions' then 'Retailer Coupon'
+              when context_page_path='/sale' then 'Sale'
+              when context_page_path='/search' then 'Search'
+              when context_page_path='/signin' then 'Login'
+              when context_page_path in ('/signup','/user/register') then 'Signup'
+              when context_page_path='/user/login' then 'Login'
+              when starts_with(context_page_path,'/view/') then 'Product'
+              when context_page_path='/onboarding' then 'Onboarding'
+              end
+            when name='affiliate' then case
+              when context_page_path='/' then 'Daily'
+              when context_page_path='/promotions/coupons' then 'Retailer Coupon'
+              when context_page_path='/promotions/cashbacks' then 'Cashback Retailer'
+              when starts_with(context_page_path,'/view/') then 'Product'
+              else name
+              end
+            when name in ('Faq','Faq/') then 'FAQ'
+            when name='Home' then 'Daily'
+            when name='MyPage' then 'Profile'
+            when name in ('Payable Cashback List','Cashback Payable List') then 'Available Cashback List'
+            when name='Product List' then case
+              when starts_with(context_page_path,'/brands/') then 'Brand'
+              when starts_with(context_page_path,'/category/') then 'Category'
+              when context_page_path='/new-arrivals' then 'New'
+              when context_page_path='/sale' then 'Sale'
+              else name
+              end
+            when name='Profile' then case
+              when context_page_path='/me/cashback/history/pending' then 'Pending Cashback List'
+              when context_page_path='/me/cashback/history/available' then 'Available Cashback List'
+              when context_page_path='/me/linkout' then 'Linkout'
+              when context_page_path='/me/cashback/history/withdrawn' then 'Paid Cashback List'
+              else name
+              end
+            when name='Promotions' then case
+              when context_page_path in ('/promotions','/promotions/') then 'Retailer Coupon'
+              when context_page_path='/promotions/coupons' then 'Retailer Coupon'
+              when context_page_path='/promotions/cashbacks' then 'Cashback Retailer'
+              else name
+              end
+            when name='product' then 'Product'
+            else name
+          end as name
+        FROM javascript.pages_view
+      ;;
+  }
 
   dimension: id {
     primary_key: yes

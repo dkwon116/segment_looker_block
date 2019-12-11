@@ -8,48 +8,55 @@ view: user_facts {
         UNION DISTINCT
         SELECT cu.id as user_id FROM aurora_smile_ventures.users as cu
       )
-      ,user_attribution as (
+      ,user_attribution_first as (
         SELECT
-        distinct
           s.looker_visitor_id
-          , first_value(s.first_referrer IGNORE NULLS) over(w) as first_referrer
-          , first_value(s.first_source IGNORE NULLS) over(w) as first_source
-          , first_value(s.first_medium IGNORE NULLS) over(w) as first_medium
-          , first_value(s.first_campaign IGNORE NULLS) over(w) as first_campaign
-          , first_value(s.first_content IGNORE NULLS) over(w) as first_content
-          , first_value(s.first_term IGNORE NULLS) over(w) as first_term
-          , last_value(s.last_referrer IGNORE NULLS) over(w) as last_referrer
-          , last_value(s.last_source IGNORE NULLS) over(w) as last_source
-          , last_value(s.last_medium IGNORE NULLS) over(w) as last_medium
-          , last_value(s.last_campaign IGNORE NULLS) over(w) as last_campaign
-          , last_value(s.last_content IGNORE NULLS) over(w) as last_content
-          , last_value(s.last_term IGNORE NULLS) over(w) as last_term
-          , first_value(if(sf.number_of_signed_up_events>0,s.first_source,null) IGNORE NULLS) over(w) as signup_source
-          , first_value(if(sf.number_of_signed_up_events>0,s.first_medium,null) IGNORE NULLS) over(w) as signup_medium
-          , first_value(if(sf.number_of_signed_up_events>0,s.first_campaign,null) IGNORE NULLS) over(w) as signup_campaign
-          , first_value(if(sf.number_of_signed_up_events>0,s.first_content,null) IGNORE NULLS) over(w) as signup_content
-          , first_value(if(sf.number_of_signed_up_events>0,s.first_term,null) IGNORE NULLS) over(w) as signup_term
+          ,s.first_referrer
+          ,s.first_source
+          ,s.first_medium
+          ,s.first_campaign
+          ,s.first_content
+          ,s.first_term
         FROM ${sessions.SQL_TABLE_NAME} as s
-        LEFT JOIN ${session_facts.SQL_TABLE_NAME} as sf
-        ON s.session_id = sf.session_id
-        window w as (partition by s.looker_visitor_id order by s.session_start_at rows between unbounded preceding and unbounded following)
+        WHERE s.session_sequence_number=1
+      )
+      ,user_attribution_signup as (
+        SELECT
+          s.looker_visitor_id
+          ,s.first_referrer as signup_referrer
+          ,s.first_source as signup_source
+          ,s.first_medium as signup_medium
+          ,s.first_campaign as signup_campaign
+          ,s.first_content as signup_content
+          ,s.first_term as signup_term
+        FROM ${sessions.SQL_TABLE_NAME} as s
+        JOIN(
+          SELECT
+            s.looker_visitor_id
+            , MIN(s.session_sequence_number) AS session_sequence_number
+          FROM ${sessions.SQL_TABLE_NAME} as s
+          LEFT JOIN ${session_facts.SQL_TABLE_NAME} as sf ON s.session_id = sf.session_id
+          WHERE sf.number_of_signed_up_events>0
+          GROUP BY 1
+        ) u on u.looker_visitor_id=s.looker_visitor_id and u.session_sequence_number=s.session_sequence_number
       )
 
       SELECT
         au.user_id as looker_visitor_id
         , cu.first_name as name
         , cu.email as email
-        , us.first_source as first_source
-        , us.first_medium as first_medium
-        , us.first_campaign as first_campaign
-        , us.first_content as first_content
-        , us.first_term as first_term
-        , us.first_referrer as first_referrer
+        , uf.first_source as first_source
+        , uf.first_medium as first_medium
+        , uf.first_campaign as first_campaign
+        , uf.first_content as first_content
+        , uf.first_term as first_term
+        , uf.first_referrer as first_referrer
         , us.signup_source as signup_source
         , us.signup_medium as signup_medium
         , us.signup_campaign as signup_campaign
         , us.signup_content as signup_content
         , us.signup_term as signup_term
+        , us.signup_referrer as signup_referrer
         , cu.id as is_user
         , cu.gender as gender
         , cu.created_at as signed_up_date
@@ -70,7 +77,8 @@ view: user_facts {
         , ub.count_orders as favorite_brand_order_products
       FROM all_users as au
       LEFT JOIN aurora_smile_ventures.users as cu ON au.user_id = cu.id
-      LEFT JOIN user_attribution as us ON au.user_id = us.looker_visitor_id
+      LEFT JOIN user_attribution_first as uf ON au.user_id = uf.looker_visitor_id
+      LEFT JOIN user_attribution_signup as us ON au.user_id = us.looker_visitor_id
       LEFT JOIN(
         SELECT
           au.user_id as looker_visitor_id
@@ -115,6 +123,36 @@ view: user_facts {
       ) ub on ub.user_id=au.user_id
     ;;
   }
+#
+#       ,user_attribution as (
+#         SELECT
+#         distinct
+#           s.looker_visitor_id
+#           , first_value(s.first_referrer IGNORE NULLS) over(w) as first_referrer
+#           , first_value(s.first_source IGNORE NULLS) over(w) as first_source
+#           , first_value(s.first_medium IGNORE NULLS) over(w) as first_medium
+#           , first_value(s.first_campaign IGNORE NULLS) over(w) as first_campaign
+#           , first_value(s.first_content IGNORE NULLS) over(w) as first_content
+#           , first_value(s.first_term IGNORE NULLS) over(w) as first_term
+#           , last_value(s.last_referrer IGNORE NULLS) over(w) as last_referrer
+#           , last_value(s.last_source IGNORE NULLS) over(w) as last_source
+#           , last_value(s.last_medium IGNORE NULLS) over(w) as last_medium
+#           , last_value(s.last_campaign IGNORE NULLS) over(w) as last_campaign
+#           , last_value(s.last_content IGNORE NULLS) over(w) as last_content
+#           , last_value(s.last_term IGNORE NULLS) over(w) as last_term
+#           , first_value(if(sf.number_of_signed_up_events>0,s.first_source,null) IGNORE NULLS) over(w) as signup_source
+#           , first_value(if(sf.number_of_signed_up_events>0,s.first_medium,null) IGNORE NULLS) over(w) as signup_medium
+#           , first_value(if(sf.number_of_signed_up_events>0,s.first_campaign,null) IGNORE NULLS) over(w) as signup_campaign
+#           , first_value(if(sf.number_of_signed_up_events>0,s.first_content,null) IGNORE NULLS) over(w) as signup_content
+#           , first_value(if(sf.number_of_signed_up_events>0,s.first_term,null) IGNORE NULLS) over(w) as signup_term
+#         FROM ${sessions.SQL_TABLE_NAME} as s
+#         LEFT JOIN ${session_facts.SQL_TABLE_NAME} as sf
+#         ON s.session_id = sf.session_id
+#         window w as (partition by s.looker_visitor_id order by s.session_start_at rows between unbounded preceding and unbounded following)
+#       )
+
+
+
 
 
 # WITH user_attribution as (
