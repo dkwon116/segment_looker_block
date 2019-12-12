@@ -178,6 +178,21 @@ explore: event_facts {
     relationship: one_to_many
   }
 
+  join: product_list_filtered {
+    view_label: "T_Product List Filtered"
+    type: left_outer
+    sql_on: event_facts.event_id = product_list_filtered.id
+      ;;
+    relationship: one_to_one
+  }
+
+  join: product_list_filtered_in_list {
+    view_label: "T_Product List Filtered"
+    type: left_outer
+    sql_on: ${product_list_filtered.id} = ${product_list_filtered_in_list.id} ;;
+    relationship: one_to_many
+  }
+
   join: product_viewed {
     view_label: "T_Product Viewed"
     type: left_outer

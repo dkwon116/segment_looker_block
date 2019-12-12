@@ -33,9 +33,9 @@
 
 
     dimension: id {
-      primary_key: yes
       type: string
       sql: ${TABLE}.id ;;
+      primary_key: yes
     }
 
     dimension: anonymous_id {
