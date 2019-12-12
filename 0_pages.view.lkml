@@ -22,6 +22,17 @@ view: pages {
               when context_page_path='/user/login' then 'Login'
               when starts_with(context_page_path,'/view/') then 'Product'
               when context_page_path='/onboarding' then 'Onboarding'
+              when context_page_path='/purchase' then 'Cart'
+              when context_page_path='/rankings' then 'Magazine'
+              when context_page_path in ('/forgot-password','/user/forgot-password') then 'Forgot Password'
+              when context_page_path='/customer-center' then 'Customer Center'
+              when context_page_path='/user/account' then 'Account'
+              when context_page_path='/cashback/withdraw' then 'Available Cashback List'
+              when context_page_path in ('/cashback/history','/cashback/withdrawal-history') then 'Paid Cashback List'
+              when context_page_path in ('/purchase/checkout','/purchase/confirm') then 'Checkout'
+              when context_page_path='/cashback/pending' then 'Pending Cashback List'
+              when context_page_path='/promotions/coupons' then 'Retailer Coupon'
+              else 'other'
               end
             when name='affiliate' then case
               when context_page_path='/' then 'Daily'
@@ -39,7 +50,7 @@ view: pages {
               when starts_with(context_page_path,'/category/') then 'Category'
               when context_page_path='/new-arrivals' then 'New'
               when context_page_path='/sale' then 'Sale'
-              else name
+              else 'other'
               end
             when name='Profile' then case
               when context_page_path='/me/cashback/history/pending' then 'Pending Cashback List'
@@ -52,7 +63,7 @@ view: pages {
               when context_page_path in ('/promotions','/promotions/') then 'Retailer Coupon'
               when context_page_path='/promotions/coupons' then 'Retailer Coupon'
               when context_page_path='/promotions/cashbacks' then 'Cashback Retailer'
-              else name
+              else 'other'
               end
             when name='product' then 'Product'
             else name
