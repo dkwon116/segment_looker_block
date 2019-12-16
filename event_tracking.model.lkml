@@ -73,9 +73,9 @@ explore: event_facts {
     relationship: many_to_one
   }
 
-  join: page_path_facts {
+  join: page_path {
     type: left_outer
-    sql_on: ${page_path_facts.page_path_id}=${event_facts.page_path_id} ;;
+    sql_on: ${page_path.page_path_id}=${event_facts.page_path_id} ;;
     relationship: one_to_one
   }
 
@@ -417,9 +417,9 @@ explore: product_events {
     relationship: one_to_one
   }
 
-  join: page_path_facts {
+  join: page_path {
     type: left_outer
-    sql_on: ${page_path_facts.page_path_id}=${event_facts.page_path_id} ;;
+    sql_on: ${page_path.page_path_id}=${event_facts.page_path_id} ;;
     relationship: one_to_one
   }
 
@@ -499,6 +499,12 @@ explore: user_facts {
   join: first_events {
     type: left_outer
     sql_on: ${user_facts.looker_visitor_id} = ${first_events.looker_visitor_id} ;;
+    relationship: one_to_one
+  }
+
+  join: users_deleted {
+    type: left_outer
+    sql_on: ${user_facts.looker_visitor_id} = ${users_deleted.user_id} ;;
     relationship: one_to_one
   }
 }

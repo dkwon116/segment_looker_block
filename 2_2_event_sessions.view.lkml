@@ -14,6 +14,7 @@ view:event_sessions {
         , row_number() over(partition by s.session_id order by e.timestamp, e.event_source) as event_sequence
         , row_number() over(partition by s.session_id, e.event_source order by e.timestamp) as source_sequence
         , e.timestamp
+        , e.event
         , IF(e.event_source='pages' and e.event NOT IN ('Product', 'Signup', 'Login'),
                 e.event,
                 IFNULL(LAST_VALUE(IF(e.event_source='pages' AND e.event NOT IN ('Product', 'Signup', 'Login'), e.event, NULL) IGNORE NULLS) OVER (PARTITION BY s.session_id ORDER BY e.timestamp, e.event_source ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING), 'Direct')) as journey_type

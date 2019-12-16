@@ -56,7 +56,7 @@ view: event_facts {
       left join ${journey_groups.SQL_TABLE_NAME} as jg
         on jg.session_id=es.session_id
         and es.event_sequence between jg.first_journey_group_event_sequence and jg.last_journey_group_event_sequence
-      left join ${page_path_facts.SQL_TABLE_NAME} as p
+      left join ${page_path.SQL_TABLE_NAME} as p
         on p.session_id=es.session_id
         and es.event_sequence between p.first_page_path_event_sequence and p.last_page_path_event_sequence
       left join ${orders.SQL_TABLE_NAME} as o

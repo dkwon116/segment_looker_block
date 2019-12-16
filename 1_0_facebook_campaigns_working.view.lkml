@@ -1,3 +1,0 @@
-view: facebook_campaigns {
-
-}

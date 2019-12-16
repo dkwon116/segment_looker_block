@@ -1,4 +1,4 @@
-view:page_path_facts {
+view:page_path {
   derived_table: {
     sql_trigger_value: select count(*) from ${sessions.SQL_TABLE_NAME} ;;
     sql:
@@ -6,6 +6,7 @@ view:page_path_facts {
       select
         case
           when lag(page_path) over(w) is null then event_sequence
+          when event='Search' then event_sequence
           when page_path<>lag(page_path) over(w) then event_sequence
           else null
         end as first_page_path_event_sequence

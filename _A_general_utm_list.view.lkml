@@ -3,7 +3,8 @@ view: general_utm_list {
     sql_trigger_value: select count(*) from google_sheets.general_utm_list ;;
     sql:
   SELECT
-    title
+    _row
+    ,title
     ,ad_id
     ,spend
     ,landing_url
@@ -17,7 +18,6 @@ view: general_utm_list {
     ,replace(utm," ","") as utm
   from google_sheets.general_utm_list
   where utm is not null
-  order by _row
     ;;
   }
 

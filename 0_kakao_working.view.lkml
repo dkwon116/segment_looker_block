@@ -1,3 +1,0 @@
-view: kakao_activity {
-
-}

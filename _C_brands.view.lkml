@@ -4,7 +4,6 @@ view: brands {
   dimension: id {
     primary_key: yes
     type: string
-    hidden: yes
     sql: ${TABLE}.id ;;
   }
 

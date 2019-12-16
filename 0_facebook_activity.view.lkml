@@ -6,6 +6,7 @@ view: facebook_activity {
         cast(ads.id as string) as ad_id
         ,ads.name as ad_name
         ,ad_sets.id as adset_id
+--        ,ad_sets.name as adset_name
         ,campaigns.id as campaign_id
         ,campaigns.name as campaign_name
         ,campaigns.start_time as campaign_start_time
