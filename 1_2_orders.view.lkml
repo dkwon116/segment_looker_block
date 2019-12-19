@@ -9,18 +9,22 @@ view: orders {
           FROM data_data_api_db.partnerize_events as pe
           LEFT JOIN ${currencies.SQL_TABLE_NAME} as c
             ON DATE(pe.transaction_date) = c.date AND c.unit = pe.currency
-          WHERE pe.item_status = "p"
+          WHERE pe.item_status = "p" and pe._fivetran_deleted = false
           GROUP BY 1
 
           union all
 
           SELECT
-            re.order_id
+            CASE
+              -- Berdorf Goodman
+            WHEN re.advertiser_id = 35300 THEN IF(STARTS_WITH(re.order_id, "WB"), substr(re.order_id, 3,15), re.order_id)
+            ELSE re.order_id END
+            as order_id
             , SUM(re.commissions * c.rate) as commission
           FROM data_data_api_db.rakuten_events as re
           LEFT JOIN ${currencies.SQL_TABLE_NAME} as c
             ON DATE(re.transaction_date) = c.date AND c.unit = re.currency
-          WHERE re.is_event = "N"
+          WHERE re.is_event = "N" and re._fivetran_deleted = false
           -- AND re.order_id = "OMF180249912"
           GROUP BY 1
         ), orders as (
