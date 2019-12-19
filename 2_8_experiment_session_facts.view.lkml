@@ -31,7 +31,11 @@ select
   ,s.order_value
 
 from ${session_facts.SQL_TABLE_NAME} AS s
-join ${experiment_sessions.SQL_TABLE_NAME} AS e ON e.session_id = s.session_id;;
+join ${experiment_sessions.SQL_TABLE_NAME} AS e ON e.session_id = s.session_id
+join ${experiment_facts.SQL_TABLE_NAME} as ef on ef.experiment_id=e.experiment_id
+where s.session_start_at >= '2019-10-09'
+and s.session_start_at between ef.experiment_start_at and ef.experiment_end_at
+;;
 
   }
 

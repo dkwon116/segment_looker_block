@@ -106,6 +106,27 @@ view: product_events {
 
         union all
 
+        select CONCAT(t.product_id, me.event_id) as product_event_id
+          , me.event_id as event_id
+          , t.product_id as product_id
+          , tf.current_path as source_path
+          , CASE
+            WHEN tf.current_path LIKE '/category%' THEN SUBSTR(tf.current_path, 11)
+            WHEN tf.current_path LIKE '/brands/view%' THEN SUBSTR(tf.current_path, 14)
+            WHEN tf.current_path LIKE '/view%' THEN SUBSTR(tf.current_path, 7)
+            ELSE '' END as source_id
+          , 'outlink_sent' as event
+          , me.timestamp
+        from javascript.outlink_sent_view as t
+        inner join ${mapped_events.SQL_TABLE_NAME} as me
+        --on CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') = me.event_id
+          on t.id=me.event_id
+        left join ${track_facts.SQL_TABLE_NAME} as tf
+          on me.event_id = tf.event_id
+        where t.product_id is not null
+
+        union all
+
         select CONCAT(pm.id, me.event_id) as product_event_id
           , me.event_id as event_id
           , pm.id as product_id
@@ -184,6 +205,14 @@ view: product_events {
     sql: ${event_facts.looker_visitor_id} ;;
   }
 
+  measure: count_product_viewed {
+    type: count
+    filters: {
+      field: event
+      value: "product_viewed"
+    }
+  }
+
   measure: count_product_viewed_user {
     type: count_distinct
     sql: ${event_facts.looker_visitor_id} ;;
@@ -193,12 +222,62 @@ view: product_events {
     }
   }
 
+  measure: count_product_list_viewed {
+    type: count
+    filters: {
+      field: event
+      value: "product_list_viewed"
+    }
+  }
+
   measure: count_product_list_viewed_user {
     type: count_distinct
     sql: ${event_facts.looker_visitor_id} ;;
     filters: {
       field: event
       value: "product_list_viewed"
+    }
+  }
+
+  measure: count_outlink_sent {
+    type: count
+    filters: {
+      field: event
+      value: "outlink_sent"
+    }
+  }
+
+  measure: count_outlink_sent_user {
+    type: count_distinct
+    sql: ${event_facts.looker_visitor_id} ;;
+    filters: {
+      field: event
+      value: "outlink_sent"
+    }
+  }
+
+  measure: count_added_to_wishlist {
+    type: count
+    filters: {
+      field: event
+      value: "added_to_wishlist"
+    }
+  }
+
+  measure: count_added_to_wishlist_user {
+    type: count_distinct
+    sql: ${event_facts.looker_visitor_id} ;;
+    filters: {
+      field: event
+      value: "added_to_wishlist"
+    }
+  }
+
+  measure: count_purchased {
+    type: count
+    filters: {
+      field: event
+      value: "order_completed"
     }
   }
 
@@ -222,4 +301,6 @@ view: product_events {
     sql: ${count_product_viewed_user} / NULLIF(${sessions.unique_visitor_count}, 0) ;;
     value_format_name: percent_0
   }
+
+
 }

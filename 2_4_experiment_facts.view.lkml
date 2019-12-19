@@ -27,9 +27,11 @@ view: experiment_facts {
                 ,count(1) as sessions
               from ${experiment_sessions.SQL_TABLE_NAME} e
               join ${sessions.SQL_TABLE_NAME} s on s.session_id=e.session_id
+              where s.session_start_at >= '2019-10-09'
               group by 1,2
             ) e
             where e.sessions>=30
+
             group by 1
           ) t on t.experiment_id=e.experiment_id and s.session_start_at between t.experiment_start_at and t.experiment_end_at
           left join(
@@ -38,6 +40,7 @@ view: experiment_facts {
             union all select '7wAUOphhRq2C9mR-zoOFfQ','191009_CashbackFlow'
             union all select 'cDKNWZjsQaS3zjxNRPqbbg','191009_CashbackBanner'
           ) tmp on tmp.experiment_id=e.experiment_id
+          where s.session_start_at >= '2019-10-09'
           group by 1,2,3,4
         )
         select
@@ -54,6 +57,7 @@ view: experiment_facts {
           select e.experiment_id, count(distinct s.session_id) as all_sessions
           from e
           join ${sessions.SQL_TABLE_NAME} s on s.session_start_at between e.experiment_start_at and e.experiment_end_at
+          where s.session_start_at >= '2019-10-09'
           group by 1
         ) s on s.experiment_id=e.experiment_id
       ) e
@@ -90,14 +94,14 @@ view: experiment_facts {
 
   dimension_group: start {
     type: time
-    timeframes: [date,month]
+    timeframes: [raw,date,month]
     sql: ${TABLE}.experiment_start_at ;;
     group_label: "Experiment"
   }
 
   dimension_group: end {
     type: time
-    timeframes: [date,month]
+    timeframes: [raw,date,month]
     sql: ${TABLE}.experiment_end_at ;;
     group_label: "Experiment"
   }

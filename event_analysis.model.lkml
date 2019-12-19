@@ -49,6 +49,7 @@ explore: active_users {
 }
 
 
+
 #fade-out
 explore: experiment_facts {
   join: experiment_variant_facts {
@@ -80,6 +81,9 @@ explore: experiment_session_facts {
   }
 }
 
+
+
+
 explore: email_activity {
 #   sql_always_where: ${event} = "delivered" ;;
 
@@ -100,6 +104,12 @@ explore: campaign_session_facts {
   join: campaigns {
     type: inner
     sql_on: upper(${campaigns.utm})=upper(${campaign_session_facts.utm}) ;;
+    relationship: one_to_one
+  }
+
+  join: mapped_campaigns {
+    type: inner
+    sql_on: upper(${mapped_campaigns.mapped_utm})=upper(${campaigns.mapped_utm}) ;;
     relationship: one_to_one
   }
 

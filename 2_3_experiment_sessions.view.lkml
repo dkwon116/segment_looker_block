@@ -10,8 +10,10 @@ view: experiment_sessions {
         ,exp.experiment_name
       from ${event_sessions.SQL_TABLE_NAME} e
       join ${experiment.SQL_TABLE_NAME} exp on exp.id=e.event_id
-      where (exp.experiment_name not like '%Unbounce%')
-      or (exp.experiment_name is null)
+      where ((exp.experiment_name not like '%Unbounce%') or (exp.experiment_name is null))
+      and e.timestamp >= '2019-10-09'
+      and exp.timestamp >= '2019-10-09'
+
       ;;
   }
 

@@ -1,5 +1,5 @@
 view: experiment {
-    sql_table_name: javascript.experiment_viewed_view;;
+  sql_table_name: javascript.experiment_viewed_view;;
 
   dimension: id {
     primary_key: yes

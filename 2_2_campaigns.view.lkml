@@ -98,7 +98,7 @@ view: campaigns {
         ,coalesce(email.marketing_campaign_name) as marketing_campaign_name
         ,coalesce(ul.spend/1000) as marketing_spend
         ,u.* except(utm)
-
+        ,coalesce(m.mapped_utm,c.utm) as mapped_utm
       from c
       left join(
         select
@@ -128,6 +128,7 @@ view: campaigns {
           from c
         ) t
       ) u on u.utm=c.utm
+      left join ${general_utm_list_mapped_utm.SQL_TABLE_NAME} m on m.utm=c.utm
       left join ${email_campaigns.SQL_TABLE_NAME} email on upper(email.utm)=upper(c.utm)
       left join(
         select *
@@ -146,6 +147,10 @@ view: campaigns {
       label: "Go to dashboard"
       url: "https://smileventures.au.looker.com/dashboards/78?UTM=%22{{value | encode_url}}%22&Start%20Date=7%20days"
     }
+  }
+  dimension: mapped_utm {
+    type:  string
+    sql: ${TABLE}.mapped_utm ;;
   }
   dimension: source {
     type:  string

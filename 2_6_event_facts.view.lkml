@@ -103,7 +103,7 @@ view: event_facts {
 
   dimension_group: timestamp {
     type: time
-    timeframes: [time, hour, date, week, month]
+    timeframes: [raw, time, hour, date, week, month]
     sql: ${TABLE}.timestamp ;;
   }
 

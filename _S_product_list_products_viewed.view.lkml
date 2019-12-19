@@ -9,7 +9,11 @@ view: products_viewed_in_list {
           , trim(results.brand, '"') as product_brand
           , trim(results.product_id, '"') as product_id
           , trim(results.url, '"') as product_url
-          , cast(results.position as INT64) as position_in_list
+--          , cast(results.position as INT64) as position_in_list
+          ,if(ifnull(safe_cast(results.position as INT64),ifnull(safe_cast(split(trim(results.position,'"'),',')[safe_offset(0)] as INT64),-1)+ifnull(safe_cast(split(trim(results.position,'"'),',')[safe_offset(1)] as INT64),-1)+1)<1,
+            null,
+            ifnull(safe_cast(results.position as INT64),ifnull(safe_cast(split(trim(results.position,'"'),',')[safe_offset(0)] as INT64),-1)+ifnull(safe_cast(split(trim(results.position,'"'),',')[safe_offset(1)] as INT64),-1)+1)
+          ) as position_in_list
         FROM (
           WITH product_data as
             (
@@ -54,7 +58,7 @@ view: products_viewed_in_list {
       quarter,
       year
     ]
-    hidden: yes
+#     hidden: yes
     sql: ${TABLE}.timestamp ;;
   }
 

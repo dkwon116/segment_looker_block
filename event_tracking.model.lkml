@@ -59,17 +59,25 @@ explore: event_facts {
     relationship: one_to_many
   }
 
+  join: mapped_campaigns {
+    type: inner
+    sql_on: upper(${mapped_campaigns.mapped_utm})=upper(${campaigns.mapped_utm}) ;;
+    relationship: one_to_one
+  }
+
   join: experiment_sessions {
     view_label: "0_Sessions"
     type: left_outer
-    sql_on: ${event_facts.session_id} = ${experiment_sessions.session_id} ;;
-    relationship: many_to_one
+    sql_on: ${sessions.session_id} = ${experiment_sessions.session_id} ;;
+    relationship: one_to_many
   }
 
   join: experiment_facts {
     view_label: "0_Sessions"
     type: left_outer
     sql_on: ${experiment_sessions.experiment_id} =  ${experiment_facts.experiment_id};;
+#     sql_where: ${event_facts.timestamp_raw} between ${experiment_facts.start_raw} and ${experiment_facts.end_raw} ;;
+    sql_where: (${event_facts.timestamp_raw} between ${experiment_facts.start_raw} and ${experiment_facts.end_raw}) and (${sessions.start_raw} between ${experiment_facts.start_raw} and ${experiment_facts.end_raw}) ;;
     relationship: many_to_one
   }
 
