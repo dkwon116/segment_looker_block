@@ -45,6 +45,12 @@ view: user_facts {
         au.user_id as looker_visitor_id
         , cu.first_name as name
         , cu.email as email
+        , if(
+          starts_with(regexp_replace(cu.phone, '[^0-9]',''),'8210'),
+          concat('010',substr(regexp_replace(cu.phone, '[^0-9]',''),5)),
+          regexp_replace(cu.phone, '[^0-9]','')
+          ) as phone
+        , cu.terms_accepted as terms_accepted
         , uf.first_source as first_source
         , uf.first_medium as first_medium
         , uf.first_campaign as first_campaign
@@ -265,6 +271,17 @@ view: user_facts {
   dimension: email {
     type: string
     sql: ${TABLE}.email ;;
+  }
+
+  dimension: phone {
+    group_label: "Info"
+    type: string
+    sql: ${TABLE}.phone;;
+  }
+
+  dimension: terms_accepted {
+    type: yesno
+    sql: ${TABLE}.terms_accepted ;;
   }
 
   dimension: is_user {
