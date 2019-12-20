@@ -2,24 +2,24 @@ view: general_utm_list {
   derived_table: {
     sql_trigger_value: select count(*) from google_sheets.general_utm_list ;;
     sql:
-  SELECT
-    _row
-    ,title
-    ,ad_id
-    ,spend
-    ,landing_url
-    ,replace(source," ","") as source
-    ,replace(medium," ","") as medium
-    ,replace(campaign," ","") as campaign
-    ,replace(content," ","") as content
-    ,replace(term," ","") as term
-    ,length
-    ,short_url
-    ,replace(utm," ","") as utm
-    ,replace(mapped_utm," ","") as mapped_utm
-  from google_sheets.general_utm_list
-  where utm is not null
-    ;;
+      SELECT
+        _row
+        ,title
+        ,ad_id
+        ,spend
+        ,landing_url
+        ,replace(source," ","") as source
+        ,replace(medium," ","") as medium
+        ,replace(campaign," ","") as campaign
+        ,replace(content," ","") as content
+        ,replace(term," ","") as term
+        ,length
+        ,short_url
+        ,replace(utm," ","") as utm
+        ,replace(mapped_utm," ","") as mapped_utm
+      from google_sheets.general_utm_list
+      where utm is not null
+        ;;
   }
 
 
