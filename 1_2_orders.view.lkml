@@ -28,7 +28,9 @@ view: orders {
           -- AND re.order_id = "OMF180249912"
           GROUP BY 1
         ), orders as (
-          SELECT e.order_id
+          SELECT
+            e.order_id
+            , concat(e.order_id, "-", substr(e.user_id,1,8)) as order_user_id
             , e.user_id
             , e.vendor
             , e.transaction_at
@@ -40,10 +42,11 @@ view: orders {
             , sum(IF(e.order_type = "R", e.krw_amount, 0)) / 1000 as total_return
             , row_number() over(partition by e.user_id order by e.transaction_at) as order_sequence_number
           FROM ${order_items.SQL_TABLE_NAME} as e
-          GROUP BY 1, 2, 3, 4, 5
+          GROUP BY 1, 2, 3, 4, 5, 6
         )
         SELECT
-          o.order_id
+            order_user_id
+            , o.order_id
             , o.user_id
             , o.vendor
             , o.transaction_at
@@ -63,8 +66,15 @@ view: orders {
     ;;
   }
 
-  dimension: order_id {
+  dimension: order_user_id {
     primary_key: yes
+    type: string
+    sql: ${TABLE}.order_user_id ;;
+    hidden: yes
+  }
+
+  dimension: order_id {
+#     primary_key: yes
     type: string
     sql: ${TABLE}.order_id ;;
   }
