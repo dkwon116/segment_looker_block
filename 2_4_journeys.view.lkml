@@ -2,9 +2,19 @@ view:journeys {
   derived_table: {
     sql_trigger_value: select count(*) from ${sessions.SQL_TABLE_NAME} ;;
     sql:
+--    CREATE TEMP FUNCTION decodeurl(a STRING)
+--    RETURNS STRING
+--    LANGUAGE js AS "try {return decodeURI(a)} catch (e) {return ""}";
     CREATE TEMP FUNCTION decodeurl(a STRING)
     RETURNS STRING
-    LANGUAGE js AS "return decodeURI(a)";
+    LANGUAGE js AS
+      """
+      try {
+        return decodeURI(a);
+        }
+      catch {
+        return "";
+        }""";
 
     with t as(
     -- mark start and end of journey creating first & last
