@@ -2,7 +2,7 @@ connection: "datawarehouse_db"
 
 # include all views in this project
 # - include: "*.dashboard.lookml"  # include all dashboards in this project
-include: "*.view"
+include: "/Views/**/*.view.lkml"
 # - explore: pages
 
 datagroup: orders_datagroup {
