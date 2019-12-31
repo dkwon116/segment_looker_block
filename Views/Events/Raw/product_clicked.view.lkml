@@ -208,6 +208,11 @@ view: product_clicked {
     sql: ${TABLE}.url ;;
   }
 
+  dimension: type {
+    type: string
+    sql: ${TABLE}.type ;;
+  }
+
   dimension: user_id {
     type: string
     sql: ${TABLE}.user_id ;;

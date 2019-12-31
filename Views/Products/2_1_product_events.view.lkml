@@ -45,6 +45,7 @@ view: product_events {
         , e.source_id as source_id
         , lf.name as source_name
         , e.timestamp
+        , e.type
       from (
         select CONCAT(t.product_id, me.event_id) as product_event_id
           , me.event_id as event_id
@@ -57,6 +58,7 @@ view: product_events {
             ELSE '' END as source_id
           , 'product_viewed' as event
           , me.timestamp
+          , null as type
         from javascript.product_viewed_view as t
         inner join ${mapped_events.SQL_TABLE_NAME} as me
         --on CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') = me.event_id
@@ -77,10 +79,32 @@ view: product_events {
             END as source_id
           , 'product_list_viewed' as event
           , me.timestamp
+          , t.type
         from ${products_viewed_in_list.SQL_TABLE_NAME} as t
         inner join ${mapped_events.SQL_TABLE_NAME} as me
         --on CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') = me.event_id
           on t.list_viewed_id=me.event_id
+        left join ${track_facts.SQL_TABLE_NAME} as tf
+          on me.event_id = tf.event_id
+
+        union all
+
+        select CONCAT(t.product_id, me.event_id) as product_event_id
+          , me.event_id as event_id
+          , t.product_id as product_id
+          , tf.current_path as source_path
+          , CASE
+              WHEN tf.current_path LIKE '/category%' THEN SUBSTR(tf.current_path, 11)
+              WHEN tf.current_path LIKE '/brands/view%' THEN SUBSTR(tf.current_path, 14)
+              WHEN tf.current_path LIKE '/view%' THEN SUBSTR(tf.current_path, 7)
+            END as source_id
+          , 'product_clicked' as event
+          , me.timestamp
+          , t.type
+        from ${product_clicked.SQL_TABLE_NAME} as t
+        inner join ${mapped_events.SQL_TABLE_NAME} as me
+        --on CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') = me.event_id
+          on t.id=me.event_id
         left join ${track_facts.SQL_TABLE_NAME} as tf
           on me.event_id = tf.event_id
 
@@ -97,6 +121,7 @@ view: product_events {
             ELSE '' END as source_id
           , 'added_to_wishlist' as event
           , me.timestamp
+          , null as type
         from javascript.product_added_to_wishlist_view as t
         inner join ${mapped_events.SQL_TABLE_NAME} as me
         --on CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') = me.event_id
@@ -117,6 +142,7 @@ view: product_events {
             ELSE '' END as source_id
           , 'outlink_sent' as event
           , me.timestamp
+          , null as type
         from javascript.outlink_sent_view as t
         inner join ${mapped_events.SQL_TABLE_NAME} as me
         --on CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') = me.event_id
@@ -134,6 +160,7 @@ view: product_events {
           , '' as source_id
           , 'order_completed' as event
           , me.timestamp
+          , null as type
         from ${order_items.SQL_TABLE_NAME} as t
         inner join ${mapped_events.SQL_TABLE_NAME} as me
         --on CONCAT(cast(t.transaction_at as string), t.user_id, '-r') = me.event_id
@@ -196,6 +223,12 @@ view: product_events {
     sql: ${TABLE}.timestamp ;;
   }
 
+  dimension: type {
+    type: string
+    sql: ${TABLE}.type ;;
+  }
+
+
   measure: count {
     type: count
   }
@@ -238,6 +271,31 @@ view: product_events {
       value: "product_list_viewed"
     }
   }
+
+  measure: count_product_clicked_viewed {
+    type: count
+    filters: {
+      field: event
+      value: "product_clicked"
+    }
+  }
+
+  measure: count_product_clicked_user {
+    type: count_distinct
+    sql: ${event_facts.looker_visitor_id} ;;
+    filters: {
+      field: event
+      value: "product_clicked"
+    }
+  }
+
+  measure: ctr {
+    type: number
+    sql: ${count_product_clicked_viewed} / NULLIF(${count_product_list_viewed}, 0) ;;
+    value_format_name: percent_2
+  }
+
+
 
   measure: count_outlink_sent {
     type: count

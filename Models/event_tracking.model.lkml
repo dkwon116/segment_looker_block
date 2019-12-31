@@ -389,6 +389,11 @@ explore: product_events {
     relationship: one_to_one
   }
 
+  join: product_clicked {
+    sql_on: ${product_events.event_id} = ${product_clicked.id} ;;
+    relationship: one_to_one
+  }
+
   join: order_items {
     sql_on: ${product_events.event_id} = ${order_items.order_id}
       and ${product_maps.affiliate_product_id} = ${order_items.vendor_product_id};;
