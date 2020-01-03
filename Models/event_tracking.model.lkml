@@ -354,6 +354,12 @@ explore: order_items {
     sql_on: ${products_categories.category_id} = ${category_normalized.id} ;;
     relationship: many_to_one
   }
+
+  join: categories {
+    type: left_outer
+    sql_on: ${products_categories.category_id} = ${categories.id} ;;
+    relationship: one_to_one
+  }
 }
 
 
@@ -369,13 +375,20 @@ explore: product_events {
     type: left_outer
     sql_on: ${product_facts.id} = ${product_maps.product_id} ;;
     relationship: one_to_many
-    fields: []
+#     fields: []
   }
 
   join: products_categories {
     type: left_outer
     sql_on: ${product_maps.product_id} = ${products_categories.product_id} and ${products_categories._fivetran_deleted} = false ;;
+#     sql_on: ${product_events.product_id} = ${products_categories.product_id} ;;
     relationship: many_to_many
+  }
+
+  join: categories {
+    type: left_outer
+    sql_on: ${products_categories.category_id} = ${categories.id} ;;
+    relationship: one_to_one
   }
 
   join: product_viewed {
