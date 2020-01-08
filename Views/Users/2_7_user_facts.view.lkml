@@ -81,6 +81,19 @@ view: user_facts {
         , ui.purchased_vendors
         , ub.brand_name as favorite_brand
         , ub.count_orders as favorite_brand_order_products
+
+        ,case
+          when cu.created_at is null then 'S2CON'
+          when ifnull(ui.orders_completed,0)=0 and ifnull(ui.number_of_outlinks,0)=0 and cu.created_at is not null then 'S3ACT'
+          when ifnull(ui.orders_completed,0)=0 and ifnull(ui.number_of_outlinks,0)>0 and cu.created_at is not null then 'S4ABD'
+          when ifnull(ui.orders_completed,0)=1 then 'S5RET'
+          when ifnull(ui.orders_completed,0)>1 then 'S6RCM'
+          else null
+        end as segment_stage
+--        ,if(cu.created_at is null,null,if(date_diff(current_date, date(ui.last_date), day)<=30,'active','churn')) as segment_active
+        ,if(date_diff(current_date, date(ui.last_date), day)<=30,'active','churn') as segment_active
+        ,if(cu.created_at is null,null,if(date_diff(current_date, date(cu.created_at), day)<=30,'new','existing')) as segment_new
+
       FROM all_users as au
       LEFT JOIN aurora_smile_ventures.users as cu ON au.user_id = cu.id
       LEFT JOIN user_attribution_first as uf ON au.user_id = uf.looker_visitor_id
@@ -556,6 +569,26 @@ view: user_facts {
     sql: ${TABLE}.first_referrer ;;
     group_label: "Acquisition"
   }
+
+  dimension: segment_stage {
+    type: string
+    sql: ${TABLE}.segment_stage ;;
+    group_label: "UserSegment"
+  }
+
+  dimension: segment_active {
+    type: string
+    sql: ${TABLE}.segment_active ;;
+    group_label: "UserSegment"
+  }
+
+  dimension: segment_new {
+    type: string
+    sql: ${TABLE}.segment_new ;;
+    group_label: "UserSegment"
+  }
+
+
 
   dimension: first_referrer_domain {
     type: string

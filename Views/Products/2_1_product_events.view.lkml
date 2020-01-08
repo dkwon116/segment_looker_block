@@ -21,6 +21,7 @@ view: product_events {
 
         select e.product_event_id
         , e.event_id
+        , e.looker_visitor_id
         , e.event
         , e.product_id
         , e.source_path
@@ -46,9 +47,11 @@ view: product_events {
         , lf.name as source_name
         , e.timestamp
         , e.type
+        , e.retailer
       from (
         select CONCAT(t.product_id, me.event_id) as product_event_id
           , me.event_id as event_id
+          , me.looker_visitor_id
           , t.product_id as product_id
           , coalesce(t.prev_path, tf.prev_path) as source_path
           , CASE
@@ -59,6 +62,7 @@ view: product_events {
           , 'product_viewed' as event
           , me.timestamp
           , null as type
+          , null as retailer
         from javascript.product_viewed_view as t
         inner join ${mapped_events.SQL_TABLE_NAME} as me
         --on CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') = me.event_id
@@ -70,6 +74,7 @@ view: product_events {
 
         select CONCAT(t.product_id, me.event_id) as product_event_id
           , me.event_id as event_id
+          , me.looker_visitor_id
           , t.product_id as product_id
           , tf.current_path as source_path
           , CASE
@@ -80,6 +85,7 @@ view: product_events {
           , 'product_list_viewed' as event
           , me.timestamp
           , t.type
+          , null as retailer
         from ${products_viewed_in_list.SQL_TABLE_NAME} as t
         inner join ${mapped_events.SQL_TABLE_NAME} as me
         --on CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') = me.event_id
@@ -91,6 +97,7 @@ view: product_events {
 
         select CONCAT(t.product_id, me.event_id) as product_event_id
           , me.event_id as event_id
+          , me.looker_visitor_id
           , t.product_id as product_id
           , tf.current_path as source_path
           , CASE
@@ -101,6 +108,7 @@ view: product_events {
           , 'product_clicked' as event
           , me.timestamp
           , t.type
+          , null as retailer
         from ${product_clicked.SQL_TABLE_NAME} as t
         inner join ${mapped_events.SQL_TABLE_NAME} as me
         --on CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') = me.event_id
@@ -112,6 +120,7 @@ view: product_events {
 
         select CONCAT(t.product_id, me.event_id) as product_event_id
           , me.event_id as event_id
+          , me.looker_visitor_id
           , t.product_id as product_id
           , tf.current_path as source_path
           , CASE
@@ -122,6 +131,7 @@ view: product_events {
           , 'added_to_wishlist' as event
           , me.timestamp
           , null as type
+          , t.retailer
         from javascript.product_added_to_wishlist_view as t
         inner join ${mapped_events.SQL_TABLE_NAME} as me
         --on CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') = me.event_id
@@ -133,6 +143,7 @@ view: product_events {
 
         select CONCAT(t.product_id, me.event_id) as product_event_id
           , me.event_id as event_id
+          , me.looker_visitor_id
           , t.product_id as product_id
           , tf.current_path as source_path
           , CASE
@@ -143,6 +154,7 @@ view: product_events {
           , 'outlink_sent' as event
           , me.timestamp
           , null as type
+          , t.retailer
         from javascript.outlink_sent_view as t
         inner join ${mapped_events.SQL_TABLE_NAME} as me
         --on CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') = me.event_id
@@ -155,12 +167,14 @@ view: product_events {
 
         select CONCAT(pm.id, me.event_id) as product_event_id
           , me.event_id as event_id
+          , me.looker_visitor_id
           , pm.id as product_id
           , t.vendor as source_path
           , '' as source_id
           , 'order_completed' as event
           , me.timestamp
           , null as type
+          , t.vendor as retailer
         from ${order_items.SQL_TABLE_NAME} as t
         inner join ${mapped_events.SQL_TABLE_NAME} as me
         --on CONCAT(cast(t.transaction_at as string), t.user_id, '-r') = me.event_id
@@ -185,6 +199,11 @@ view: product_events {
   dimension: event_id {
     type: string
     sql: ${TABLE}.event_id ;;
+  }
+
+  dimension: looker_visitor_id {
+    type: string
+    sql: ${TABLE}.looker_visitor_id ;;
   }
 
   dimension: event {
@@ -228,6 +247,10 @@ view: product_events {
     sql: ${TABLE}.type ;;
   }
 
+  dimension: retailer {
+    type: string
+    sql: ${TABLE}.retailer ;;
+  }
 
   measure: count {
     type: count

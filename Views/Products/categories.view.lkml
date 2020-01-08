@@ -2,6 +2,7 @@ view: categories {
 #   sql_table_name: aurora_smile_ventures.categories ;;
 
   derived_table: {
+    sql_trigger_value: select count(*) from ${categories.SQL_TABLE_NAME} ;;
     sql:
       select
         c.*
@@ -11,7 +12,6 @@ view: categories {
         ,if(c.type='category',split(replace(array_to_string([ifnull(c5.name,'1'),ifnull(c4.name,'1'),ifnull(c3.name,'1'),ifnull(c2.name,'1'),ifnull(c.name,'1')],"-"),"1-",""),'-')[safe_offset(2)],null) as category3_name
         ,if(c.type='category',split(replace(array_to_string([ifnull(c5.name,'1'),ifnull(c4.name,'1'),ifnull(c3.name,'1'),ifnull(c2.name,'1'),ifnull(c.name,'1')],"-"),"1-",""),'-')[safe_offset(3)],null) as category4_name
         ,if(c.type='category',split(replace(array_to_string([ifnull(c5.name,'1'),ifnull(c4.name,'1'),ifnull(c3.name,'1'),ifnull(c2.name,'1'),ifnull(c.name,'1')],"-"),"1-",""),'-')[safe_offset(4)],null) as category5_name
-        ,
       from aurora_smile_ventures.categories c
       left join aurora_smile_ventures.categories c2 on c2.id=c.parent_id
       left join aurora_smile_ventures.categories c3 on c3.id=c2.parent_id

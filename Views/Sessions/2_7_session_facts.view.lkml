@@ -10,6 +10,13 @@ view: session_facts {
       , if(f.signed_up is null or f.signed_up>s.session_start_at,true,false) as is_guest_at_session
       , if(f.first_outlink_sent is null or f.first_outlink_sent>s.session_start_at,true,false) as is_pre_outlinked_at_session
       , if(f.first_order_completed is null or f.first_order_completed>s.session_start_at,true,false) as is_pre_purchase_at_session
+      , case
+        when f.signed_up is null or f.signed_up>s.session_start_at then 'S2CON'
+        when (f.first_order_completed is null or f.first_order_completed>s.session_start_at) and (f.first_outlink_sent is null or f.first_outlink_sent>s.session_start_at) then 'S3ACT'
+        when (f.first_order_completed is null or f.first_order_completed>s.session_start_at) and (f.first_outlink_sent is not null and f.first_outlink_sent<=s.session_start_at) then 'S4ABD'
+        when (f.first_order_completed is not null and f.first_order_completed<=s.session_start_at) and (f.second_order_completed is null or f.second_order_completed>s.session_start_at) then 'S5RET'
+        when (f.second_order_completed is not null and f.second_order_completed<=s.session_start_at) then 'S6RCM'
+      end as segment_stage
       , s.session_start_at
       , max(t2s.timestamp) as session_end_at
       , timestamp_diff(max(t2s.timestamp), s.session_start_at, minute) as session_duration_minutes
@@ -46,7 +53,7 @@ view: session_facts {
       on s.session_id = j.session_id and t2s.journey_id = j.journey_id
     left join ${first_events.SQL_TABLE_NAME} as f
       on f.looker_visitor_id=s.looker_visitor_id
-    group by 1,2,3,4,5,6
+    group by 1,2,3,4,5,6,7
 
        ;;
 }
@@ -219,6 +226,12 @@ dimension_group: since_first_purchase {
     type: yesno
     sql: ${TABLE}.is_pre_outlinked_at_session ;;
     group_label: "Session Flags"
+  }
+
+  dimension: segment_stage {
+    type: string
+    sql: ${TABLE}.segment_stage ;;
+    group_label: "UserSegment"
   }
 
 

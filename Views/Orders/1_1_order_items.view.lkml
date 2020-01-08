@@ -110,7 +110,7 @@ view: order_items {
   dimension_group: transaction_at {
     type: time
     sql: ${TABLE}.transaction_at ;;
-    timeframes: [time, hour, date, month, year, raw]
+    timeframes: [time, hour, date, week, month, year, raw]
   }
 
   dimension: vendor {
