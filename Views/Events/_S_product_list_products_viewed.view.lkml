@@ -5,6 +5,7 @@ view: products_viewed_in_list {
           results.list_viewed_id
           , results.timestamp
           , results.anonymous_id
+          , type
           , trim(results.name, '"') as product_name
           , trim(results.brand, '"') as product_brand
           , trim(results.product_id, '"') as product_id
@@ -21,6 +22,7 @@ view: products_viewed_in_list {
                 id as list_viewed_id
                 , timestamp as timestamp
                 , anonymous_id as anonymous_id
+                , type
                 , SPLIT(trim(products,'[]'), '},' ) as products_array
               FROM
                 javascript.product_list_viewed_view
@@ -29,6 +31,7 @@ view: products_viewed_in_list {
             list_viewed_id
             , timestamp as timestamp
             , anonymous_id as anonymous_id
+            , type
             , JSON_EXTRACT(CONCAT(product, '}'), "$.brand") as brand
             , JSON_EXTRACT(CONCAT(product, '}'), "$.name") as name
             , JSON_EXTRACT(CONCAT(product, '}'), "$.product_id") as product_id

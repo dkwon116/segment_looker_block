@@ -11,6 +11,7 @@ view: categories {
         ,if(c.type='category',split(replace(array_to_string([ifnull(c5.name,'1'),ifnull(c4.name,'1'),ifnull(c3.name,'1'),ifnull(c2.name,'1'),ifnull(c.name,'1')],"-"),"1-",""),'-')[safe_offset(2)],null) as category3_name
         ,if(c.type='category',split(replace(array_to_string([ifnull(c5.name,'1'),ifnull(c4.name,'1'),ifnull(c3.name,'1'),ifnull(c2.name,'1'),ifnull(c.name,'1')],"-"),"1-",""),'-')[safe_offset(3)],null) as category4_name
         ,if(c.type='category',split(replace(array_to_string([ifnull(c5.name,'1'),ifnull(c4.name,'1'),ifnull(c3.name,'1'),ifnull(c2.name,'1'),ifnull(c.name,'1')],"-"),"1-",""),'-')[safe_offset(4)],null) as category5_name
+        ,
       from aurora_smile_ventures.categories c
       left join aurora_smile_ventures.categories c2 on c2.id=c.parent_id
       left join aurora_smile_ventures.categories c3 on c3.id=c2.parent_id
@@ -22,7 +23,7 @@ view: categories {
   dimension: id {
     primary_key: yes
     type: string
-    hidden: yes
+#     hidden: yes
     sql: ${TABLE}.id ;;
   }
 
@@ -167,7 +168,7 @@ view: categories {
 #     hidden: yes
   }
 
-  dimension: ful_name {
+  dimension: full_name {
     type: string
     sql: ${TABLE}.full_name ;;
     group_label: "Category"
