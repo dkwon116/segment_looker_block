@@ -4,7 +4,7 @@ view: orders {
     datagroup_trigger: orders_datagroup
     sql: WITH affiliate_commission as (
           SELECT
-            pe.order_id
+            pe.order_id as order_id
             , sum(pe.item_publisher_commission * c.rate) as commission
           FROM data_data_api_db.partnerize_events as pe
           LEFT JOIN ${currencies.SQL_TABLE_NAME} as c

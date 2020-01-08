@@ -7,7 +7,9 @@ view: order_items {
         WITH raw_order_items as (
           SELECT
             CONCAT(e.order_id, "-", e.sku_number, "-", e.order_type) as id
-            ,e.order_id
+            , CASE
+              WHEN e.advertiser_id = "1011l627" THEN substr(e.order_id, 1, 10)
+              ELSE e.order_id END as order_id
             ,e.sku_number as sku_id
             ,first_value(e.transaction_date) over (partition by e.order_id order by e.transaction_date rows between unbounded preceding and unbounded following) as transaction_at
             ,coalesce(r.name, r2.name) as vendor
