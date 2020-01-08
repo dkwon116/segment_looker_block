@@ -218,7 +218,7 @@ view: product_viewed {
 
   dimension: retailer {
     type: string
-    sql: ${TABLE}.retailer ;;
+    sql: lower(${TABLE}.retailer) ;;
   }
 
   dimension_group: sent {
