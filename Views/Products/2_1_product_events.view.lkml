@@ -62,7 +62,7 @@ view: product_events {
           , 'product_viewed' as event
           , me.timestamp
           , null as type
-          , null as retailer
+          , t.retailer
         from javascript.product_viewed_view as t
         inner join ${mapped_events.SQL_TABLE_NAME} as me
         --on CONCAT(cast(t.timestamp AS string), t.anonymous_id, '-t') = me.event_id

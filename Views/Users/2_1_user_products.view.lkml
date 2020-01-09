@@ -10,7 +10,7 @@ view: user_products {
           from ${product_events.SQL_TABLE_NAME}
           where looker_visitor_id is not null
           and product_id is not null
-          and event in ('added_to_wishlist','outlink_sent','order_completed')
+          and event in ('product_viewed','added_to_wishlist','outlink_sent','order_completed')
           -- (select t.user_id ,t.product_id ,'wishlist' as event, upper(retailer) as retailer
           -- from javascript.product_added_to_wishlist_view as t
           -- )
