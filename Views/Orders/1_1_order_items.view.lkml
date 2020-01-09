@@ -42,6 +42,7 @@ view: order_items {
             AND e.order_id NOT IN (SELECT order_id FROM google_sheets.test_orders)
             AND CONCAT(e.order_id, "-", e.sku_number) NOT IN (select order_item from google_sheets.test_order_item)
             AND e.sale_amount <> 0
+            AND e.user NOT IN ${users_deleted.SQL_TABLE_NAME}
         )
 
 
