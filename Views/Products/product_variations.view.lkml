@@ -239,4 +239,10 @@ view: product_variations {
     type: count
     drill_fields: [cloned_from_product_variation_id, product_variation_maps.count]
   }
+
+  measure: price_lowest {
+    type: string
+    sql:  concat(cast(trunc(min(${price})) as string),' ','KRW') ;;
+  }
+
 }

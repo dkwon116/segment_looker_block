@@ -113,6 +113,18 @@ view: products {
     sql: ${TABLE}.gender ;;
   }
 
+  dimension: gender_normalized {
+    type: string
+    sql:
+      case
+        when upper(${TABLE}.gender)='F' then 'Female'
+        when upper(${TABLE}.gender)='M' then 'Male'
+        when upper(${TABLE}.gender)='U' then 'Unisex'
+        else null
+      end
+        ;;
+  }
+
   dimension: id {
     type: string
     sql: ${TABLE}.id ;;
@@ -125,6 +137,11 @@ view: products {
       label: "{{products.supplier._value}}에서 보기"
       url: "{{ products.vendor_base_url._value}}{{ product_facts.vendor_product_id._value | encode_uri }}"
     }
+  }
+
+  dimension: link {
+    type: string
+    sql: concat('https://www.catchfashion.com/view/',${TABLE}.id) ;;
   }
 
   dimension: vendor_base_url {
@@ -275,6 +292,20 @@ view: products {
   dimension: status {
     type: string
     sql: ${TABLE}.status ;;
+  }
+
+  dimension: status_normalized {
+    type: string
+    sql:
+      case
+        when lower(${TABLE}.status) in ('instock','lowstock') then 'in stock'
+        else null
+      end;;
+  }
+
+  dimension: condition_new_fixed {
+    type: string
+    sql: 'new' ;;
   }
 
   dimension: supplier {

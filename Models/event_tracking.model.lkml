@@ -482,8 +482,26 @@ explore: product_facts {
     type: left_outer
     sql_on: ${products_categories.category_id} = ${category_normalized.id} ;;
     relationship: many_to_one
-
   }
+
+  join: categories {
+    type: left_outer
+    sql_on: ${products_categories.category_id} = ${categories.id} ;;
+    relationship: one_to_one
+  }
+
+  join: products {
+    type: left_outer
+    sql_on: ${product_facts.id}=${products.id} ;;
+    relationship: one_to_one
+  }
+
+  join: product_variations {
+    type: left_outer
+    sql_on: ${product_facts.id}=${product_variations.product_id} ;;
+    relationship: one_to_many
+  }
+
 }
 
 

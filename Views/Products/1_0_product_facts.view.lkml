@@ -109,6 +109,6 @@ view: product_facts {
 
   dimension: image_url {
     sql: ${TABLE}.product_image ;;
-    html: <img src="https://{{ value }}" width=300 /> ;;
+    html: <img src="https://{{ value }}" width=150 /> ;;
   }
 }
