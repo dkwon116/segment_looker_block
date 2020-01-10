@@ -48,6 +48,7 @@ view: user_product_facts {
         group by 1,2,3,4
         )
       )
+      where not (count_view=1 and (count_wishlist+count_outlink+count_order)=0)
        ;;
   }
 

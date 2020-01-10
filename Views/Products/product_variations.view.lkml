@@ -1,6 +1,21 @@
 view: product_variations {
-  sql_table_name: aurora_smile_ventures.product_variations ;;
+#   sql_table_name: aurora_smile_ventures.product_variations ;;
   drill_fields: [cloned_from_product_variation_id]
+
+  derived_table: {
+    sql_trigger_value: select count(*) from aurora_smile_ventures.product_variations ;;
+    sql:
+      select t.*
+      from(
+        select
+          *
+          ,trunc(first_value(if(active=true,list_price,null) ignore nulls) over (partition by product_id order by price rows between unbounded preceding and unbounded following)) as lowest_price
+          ,trunc(first_value(if(active=true,price,null) ignore nulls) over (partition by product_id order by price rows between unbounded preceding and unbounded following)) as lowest_sale_price
+        from aurora_smile_ventures.product_variations
+      ) t
+      ;;
+  }
+
 
   dimension: cloned_from_product_variation_id {
     primary_key: yes
@@ -114,6 +129,16 @@ view: product_variations {
   dimension: price {
     type: number
     sql: ${TABLE}.price ;;
+  }
+
+  dimension: lowest_price {
+    type: number
+    sql: ${TABLE}.lowest_price ;;
+  }
+
+  dimension: lowest_sale_price {
+    type: number
+    sql: ${TABLE}.lowest_sale_price ;;
   }
 
   dimension: price_modifier {
@@ -238,11 +263,6 @@ view: product_variations {
   measure: count {
     type: count
     drill_fields: [cloned_from_product_variation_id, product_variation_maps.count]
-  }
-
-  measure: price_lowest {
-    type: string
-    sql:  concat(cast(trunc(min(${price})) as string),' ','KRW') ;;
   }
 
 }
