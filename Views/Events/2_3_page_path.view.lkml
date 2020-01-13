@@ -1,6 +1,6 @@
 view:page_path {
   derived_table: {
-    sql_trigger_value: select count(*) from ${sessions.SQL_TABLE_NAME} ;;
+    sql_trigger_value: select count(*) from ${event_sessions.SQL_TABLE_NAME} ;;
     sql:
 
       with t as(

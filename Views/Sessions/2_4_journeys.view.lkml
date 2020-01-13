@@ -1,6 +1,6 @@
 view:journeys {
   derived_table: {
-    sql_trigger_value: select count(*) from ${sessions.SQL_TABLE_NAME} ;;
+    sql_trigger_value: select count(*) from ${page_path.SQL_TABLE_NAME} ;;
     sql:
 --    CREATE TEMP FUNCTION decodeurl(a STRING)
 --    RETURNS STRING

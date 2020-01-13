@@ -1,10 +1,8 @@
 view: user_products {
   derived_table: {
-    # combine all track events related to product
-    # product list viewed, product viewed, added to wishlist, added to cart, order complete
     sql_trigger_value: select count(*) from ${product_events.SQL_TABLE_NAME} ;;
     sql:
-      select distinct t.*, p.gender, p.brand_id, p.brand_name, c.category2_name as category_name, c.gender as category_gender
+      select distinct t.*, p.gender, p.brand_id, p.brand_name, c.id as category_id, c.category2_name as category_name, c.gender as category_gender
         from(
           select looker_visitor_id, product_id, event, upper(retailer) as retailer
           from ${product_events.SQL_TABLE_NAME}

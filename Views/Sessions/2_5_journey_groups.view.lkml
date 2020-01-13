@@ -1,6 +1,6 @@
 view:journey_groups {
   derived_table: {
-    sql_trigger_value: select count(*) from ${sessions.SQL_TABLE_NAME} ;;
+    sql_trigger_value: select count(*) from ${journeys.SQL_TABLE_NAME} ;;
     sql:
       with t as(
       select
