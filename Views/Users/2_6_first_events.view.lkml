@@ -1,6 +1,6 @@
 view: first_events {
   derived_table: {
-    sql_trigger_value: select count(*) from ${sessions.SQL_TABLE_NAME} ;;
+    sql_trigger_value: select count(*) from ${event_facts.SQL_TABLE_NAME} ;;
     sql:
 
       select

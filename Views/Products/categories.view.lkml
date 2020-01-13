@@ -2,7 +2,7 @@ view: categories {
 #   sql_table_name: aurora_smile_ventures.categories ;;
 
   derived_table: {
-    sql_trigger_value: select count(*) from ${categories.SQL_TABLE_NAME} ;;
+    sql_trigger_value: select count(*) from aurora_smile_ventures.categories ;;
     sql:
       select
         c.*
