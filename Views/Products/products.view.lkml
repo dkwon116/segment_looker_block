@@ -10,7 +10,6 @@ view: products {
 
   dimension: _fivetran_deleted {
     type: yesno
-    hidden: yes
     sql: ${TABLE}._fivetran_deleted ;;
   }
 

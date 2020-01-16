@@ -1,4 +1,4 @@
-view: ticket_fields_view {
+view: zendesk_ticket_fields_view {
   sql_table_name: zendesk.ticket_fields_view ;;
   drill_fields: [id]
 

@@ -1,4 +1,4 @@
-view: attachments_view {
+view: zendesk_attachments_view {
   sql_table_name: zendesk.attachments_view ;;
   drill_fields: [id]
 

@@ -1,4 +1,4 @@
-view: groups_view {
+view: zendesk_groups_view {
   sql_table_name: zendesk.groups_view ;;
   drill_fields: [id]
 

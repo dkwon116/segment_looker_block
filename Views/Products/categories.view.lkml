@@ -6,12 +6,19 @@ view: categories {
     sql:
       select
         c.*
-        ,if(c.type='category',replace(array_to_string([ifnull(c5.name,'1'),ifnull(c4.name,'1'),ifnull(c3.name,'1'),ifnull(c2.name,'1'),ifnull(c.name,'1')],"-"),"1-",""),null) as full_name
-        ,if(c.type='category',split(replace(array_to_string([ifnull(c5.name,'1'),ifnull(c4.name,'1'),ifnull(c3.name,'1'),ifnull(c2.name,'1'),ifnull(c.name,'1')],"-"),"1-",""),'-')[safe_offset(0)],null) as category1_name
-        ,if(c.type='category',split(replace(array_to_string([ifnull(c5.name,'1'),ifnull(c4.name,'1'),ifnull(c3.name,'1'),ifnull(c2.name,'1'),ifnull(c.name,'1')],"-"),"1-",""),'-')[safe_offset(1)],null) as category2_name
-        ,if(c.type='category',split(replace(array_to_string([ifnull(c5.name,'1'),ifnull(c4.name,'1'),ifnull(c3.name,'1'),ifnull(c2.name,'1'),ifnull(c.name,'1')],"-"),"1-",""),'-')[safe_offset(2)],null) as category3_name
-        ,if(c.type='category',split(replace(array_to_string([ifnull(c5.name,'1'),ifnull(c4.name,'1'),ifnull(c3.name,'1'),ifnull(c2.name,'1'),ifnull(c.name,'1')],"-"),"1-",""),'-')[safe_offset(3)],null) as category4_name
-        ,if(c.type='category',split(replace(array_to_string([ifnull(c5.name,'1'),ifnull(c4.name,'1'),ifnull(c3.name,'1'),ifnull(c2.name,'1'),ifnull(c.name,'1')],"-"),"1-",""),'-')[safe_offset(4)],null) as category5_name
+
+        ,if(c.type='category',replace(concat(ifnull(c5.name,"None"),",",ifnull(c4.name,"None"),",",ifnull(c3.name,"None"),",",ifnull(c2.name,"None"),",",ifnull(c.name,"None")),"None,",""),null) as full_name
+        ,if(c.type='category',split(replace(concat(ifnull(c5.name,"None"),",",ifnull(c4.name,"None"),",",ifnull(c3.name,"None"),",",ifnull(c2.name,"None"),",",ifnull(c.name,"None")),"None,",""),",")[safe_offset(0)],null) as category1_name
+        ,if(c.type='category',split(replace(concat(ifnull(c5.name,"None"),",",ifnull(c4.name,"None"),",",ifnull(c3.name,"None"),",",ifnull(c2.name,"None"),",",ifnull(c.name,"None")),"None,",""),",")[safe_offset(1)],null) as category2_name
+        ,if(c.type='category',split(replace(concat(ifnull(c5.name,"None"),",",ifnull(c4.name,"None"),",",ifnull(c3.name,"None"),",",ifnull(c2.name,"None"),",",ifnull(c.name,"None")),"None,",""),",")[safe_offset(2)],null) as category3_name
+        ,if(c.type='category',split(replace(concat(ifnull(c5.name,"None"),",",ifnull(c4.name,"None"),",",ifnull(c3.name,"None"),",",ifnull(c2.name,"None"),",",ifnull(c.name,"None")),"None,",""),",")[safe_offset(3)],null) as category4_name
+        ,if(c.type='category',split(replace(concat(ifnull(c5.name,"None"),",",ifnull(c4.name,"None"),",",ifnull(c3.name,"None"),",",ifnull(c2.name,"None"),",",ifnull(c.name,"None")),"None,",""),",")[safe_offset(4)],null) as category5_name
+
+        ,if(c.type='category',split(replace(concat(ifnull(c5.id,"None"),",",ifnull(c4.id,"None"),",",ifnull(c3.id,"None"),",",ifnull(c2.id,"None"),",",ifnull(c.id,"None")),"None,",""),",")[safe_offset(0)],null) as category1_id
+        ,if(c.type='category',split(replace(concat(ifnull(c5.id,"None"),",",ifnull(c4.id,"None"),",",ifnull(c3.id,"None"),",",ifnull(c2.id,"None"),",",ifnull(c.id,"None")),"None,",""),",")[safe_offset(1)],null) as category2_id
+        ,if(c.type='category',split(replace(concat(ifnull(c5.id,"None"),",",ifnull(c4.id,"None"),",",ifnull(c3.id,"None"),",",ifnull(c2.id,"None"),",",ifnull(c.id,"None")),"None,",""),",")[safe_offset(2)],null) as category3_id
+        ,if(c.type='category',split(replace(concat(ifnull(c5.id,"None"),",",ifnull(c4.id,"None"),",",ifnull(c3.id,"None"),",",ifnull(c2.id,"None"),",",ifnull(c.id,"None")),"None,",""),",")[safe_offset(3)],null) as category4_id
+        ,if(c.type='category',split(replace(concat(ifnull(c5.id,"None"),",",ifnull(c4.id,"None"),",",ifnull(c3.id,"None"),",",ifnull(c2.id,"None"),",",ifnull(c.id,"None")),"None,",""),",")[safe_offset(4)],null) as category5_id
       from aurora_smile_ventures.categories c
       left join aurora_smile_ventures.categories c2 on c2.id=c.parent_id
       left join aurora_smile_ventures.categories c3 on c3.id=c2.parent_id
@@ -199,6 +206,33 @@ view: categories {
     sql: ${TABLE}.category5_name ;;
     group_label: "Category"
   }
+
+  dimension: category1_id {
+    type: string
+    sql: ${TABLE}.category1_id ;;
+    group_label: "Category"
+  }
+  dimension: category2_id {
+    type: string
+    sql: ${TABLE}.category2_id ;;
+    group_label: "Category"
+  }
+  dimension: category3_id {
+    type: string
+    sql: ${TABLE}.category3_id ;;
+    group_label: "Category"
+  }
+  dimension: category4_id {
+    type: string
+    sql: ${TABLE}.category4_id ;;
+    group_label: "Category"
+  }
+  dimension: category5_id {
+    type: string
+    sql: ${TABLE}.category5_id ;;
+    group_label: "Category"
+  }
+
   dimension: note {
     type: string
     sql: ${TABLE}.note ;;

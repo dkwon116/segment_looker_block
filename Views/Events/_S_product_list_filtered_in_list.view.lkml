@@ -93,6 +93,18 @@ dimension: filter_value {
   sql: ${TABLE}.filter_value ;;
 }
 
+  dimension: filter_value_normalized {
+    type: string
+    sql:
+      case
+        when ${TABLE}.event_type='sort' then ${TABLE}.filter_value
+        when ${TABLE}.event_type='filter' and ${TABLE}.filter_type in ('retailers','categories') then cast(array_length(split(trim(${TABLE}.filter_value,"[]"),",")) as string)
+        when ${TABLE}.event_type='filter' and ${TABLE}.filter_type='toggle' then ${TABLE}.filter_value
+        else ${TABLE}.filter_type
+      end
+        ;;
+  }
+
   dimension_group: timestamp {
     type: time
     timeframes: [

@@ -321,6 +321,13 @@ view: event_facts {
     drill_fields: [user_facts.looker_visitor_id, users.name, user_agent]
   }
 
+  measure: unique_count {
+    label: "Number of Unique Events"
+    type: count_distinct
+    sql: ${event_id} ;;
+    drill_fields: [user_facts.looker_visitor_id, users.name, user_agent]
+  }
+
   measure: events_per_visitor {
     label: "Number of Events per Visitor"
     type: number

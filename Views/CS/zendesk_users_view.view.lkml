@@ -1,4 +1,4 @@
-view: users_view {
+view: zendesk_users_view {
   sql_table_name: zendesk.users_view ;;
   drill_fields: [id]
 
