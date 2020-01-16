@@ -36,6 +36,7 @@ view: orders {
             , e.transaction_at
             , e.is_confirmed
             , max(e.process_at) as created_at
+            , count(distinct e.sku_id) as item_count
             , sum(e.quantity) as quantity
             , sum(e.sale_amount) as original_total
             , sum(IF(e.order_type = "P", e.krw_amount, 0)) / 1000 as total
@@ -52,6 +53,7 @@ view: orders {
             , o.transaction_at
             , o.is_confirmed
             , o.created_at
+            , o.item_count
             , o.quantity
             , o.original_total
             , o.total
@@ -124,6 +126,11 @@ view: orders {
   dimension: quantity {
     type: number
     sql: ${TABLE}.quantity ;;
+  }
+
+  dimension: item_count {
+    type: number
+    sql: ${TABLE}.item_count ;;
   }
 
   dimension: original_amount {
@@ -294,6 +301,12 @@ view: orders {
       field: total
       value: ">0"
     }
+  }
+
+  measure: average_item_count {
+    type: average
+    sql: ${item_count} ;;
+    value_format_name: decimal_1
   }
 
   measure: distinct_orders {
