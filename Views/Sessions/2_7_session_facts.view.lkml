@@ -84,7 +84,7 @@ dimension: number_of_track_events_tier {
 
 dimension: is_bounced_session {
   sql:
-      CASE WHEN ${number_of_events} = 1 THEN 'Bounced Session'
+      CASE WHEN ${number_of_page_events} = 1 THEN 'Bounced Session'
       ELSE 'Not Bounced Session' END
        ;;
   group_label: "Session Flags"
