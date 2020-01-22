@@ -7,6 +7,7 @@ view: email_activity {
         ,u.id as looker_visitor_id
       from sendgrid.activity_view s
       left join ${catch_users.SQL_TABLE_NAME} u on u.email=s.email
+      where s.event<>'deferred'
  ;;
   }
 
