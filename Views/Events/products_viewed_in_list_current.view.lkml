@@ -10,7 +10,6 @@ view: products_viewed_in_list_current {
           , trim(results.brand, '"') as product_brand
           , trim(results.product_id, '"') as product_id
           , trim(results.url, '"') as product_url
---          , cast(results.position as INT64) as position_in_list
           ,if(ifnull(safe_cast(results.position as INT64),ifnull(safe_cast(split(trim(results.position,'"'),',')[safe_offset(0)] as INT64),-1)+ifnull(safe_cast(split(trim(results.position,'"'),',')[safe_offset(1)] as INT64),-1)+1)<1,
             null,
             ifnull(safe_cast(results.position as INT64),ifnull(safe_cast(split(trim(results.position,'"'),',')[safe_offset(0)] as INT64),-1)+ifnull(safe_cast(split(trim(results.position,'"'),',')[safe_offset(1)] as INT64),-1)+1)
