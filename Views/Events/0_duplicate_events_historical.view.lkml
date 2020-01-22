@@ -11,9 +11,9 @@ view: duplicate_events_historical {
             from javascript.tracks_view as t
             inner join ${page_aliases_mapping.SQL_TABLE_NAME} as a2v
               on a2v.alias = coalesce(t.user_id, t.anonymous_id)
-            WHERE t.event NOT IN ("product_list_viewed", "experiment_viewed", "search_suggestion_viewed","product_clicked"))
+            WHERE t.event NOT IN ("product_list_viewed", "experiment_viewed", "search_suggestion_viewed","product_clicked")
             and t.timestamp < CAST(FORMAT_TIMESTAMP('%F', CURRENT_TIMESTAMP(), 'Asia/Seoul') AS TIMESTAMP)
-
+            )
           UNION ALL
 
             (SELECT
