@@ -1,15 +1,12 @@
 view: event_facts {
   derived_table: {
     # Rebuilds after sessions rebuilds
-    sql_trigger_value: select count(*) from ${sessions.SQL_TABLE_NAME} ;;
+    sql_trigger_value: select count(*) from ${event_facts_current.SQL_TABLE_NAME} ;;
     sql:
 
-        select *
-        from(
         (select * from ${event_facts_current.SQL_TABLE_NAME})
         union all
         (select * from ${event_facts_historical.SQL_TABLE_NAME})
-        )
 
 
       -- select

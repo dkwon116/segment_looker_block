@@ -1,6 +1,6 @@
 view: event_facts_current {
   derived_table: {
-    sql_trigger_value: select count(*) from ${sessions.SQL_TABLE_NAME} ;;
+    sql_trigger_value: select count(*) from ${journey_groups.SQL_TABLE_NAME} ;;
     sql:
       select
         t.event_id
@@ -43,7 +43,7 @@ view: event_facts_current {
             WHEN t.event in ("retailer_clicked", "About Cashback", "How to Cashback", "Cashback Retailer", "Retailer Coupon", "Promotions") THEN "Cashback"
             ELSE "Other"
           END as event_type
-      from ${mapped_events.SQL_TABLE_NAME} as t
+      from ${mapped_events_current.SQL_TABLE_NAME} as t
       left join ${event_sessions.SQL_TABLE_NAME} as es
         on t.event_id = es.event_id
         and t.looker_visitor_id = es.looker_visitor_id
@@ -64,7 +64,6 @@ view: event_facts_current {
       left join javascript.outlink_sent_view as os
         on t.looker_visitor_id = os.user_id
         and t.event_id=os.id
-      where t.timestamp >= CAST(FORMAT_TIMESTAMP('%F', CURRENT_TIMESTAMP(), 'Asia/Seoul') AS TIMESTAMP)
       ;;
   }
 }

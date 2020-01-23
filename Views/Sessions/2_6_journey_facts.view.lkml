@@ -4,7 +4,7 @@
 
 view: journey_facts {
   derived_table: {
-    sql_trigger_value: select count(*) from ${journeys.SQL_TABLE_NAME} ;;
+    sql_trigger_value: select count(*) from ${event_facts.SQL_TABLE_NAME} ;;
     sql:
       select
         j.journey_id

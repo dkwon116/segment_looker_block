@@ -43,7 +43,7 @@ derived_table: {
             WHEN t.event in ("retailer_clicked", "About Cashback", "How to Cashback", "Cashback Retailer", "Retailer Coupon", "Promotions") THEN "Cashback"
             ELSE "Other"
           END as event_type
-      from ${mapped_events.SQL_TABLE_NAME} as t
+      from ${mapped_events_historical.SQL_TABLE_NAME} as t
       left join ${event_sessions.SQL_TABLE_NAME} as es
         on t.event_id = es.event_id
         and t.looker_visitor_id = es.looker_visitor_id
@@ -64,7 +64,6 @@ derived_table: {
       left join javascript.outlink_sent_view as os
         on t.looker_visitor_id = os.user_id
         and t.event_id=os.id
-      where t.timestamp < CAST(FORMAT_TIMESTAMP('%F', CURRENT_TIMESTAMP(), 'Asia/Seoul') AS TIMESTAMP)
       ;;
 }
 }

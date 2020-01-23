@@ -2,15 +2,12 @@ view: product_events {
   derived_table: {
     # combine all track events related to product
     # product list viewed, product viewed, added to wishlist, added to cart, order complete
-    sql_trigger_value: select count(*) from ${mapped_events.SQL_TABLE_NAME} ;;
+    sql_trigger_value: select count(*) from ${product_events_current.SQL_TABLE_NAME} ;;
     sql:
 
-        select *
-        from(
         (select * from ${product_events_current.SQL_TABLE_NAME})
         union all
         (select * from ${product_events_historical.SQL_TABLE_NAME})
-        )
 
 
       --   with list_facts as (

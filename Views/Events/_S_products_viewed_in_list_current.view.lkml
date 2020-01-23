@@ -24,8 +24,8 @@ view: products_viewed_in_list_current {
                 , type
                 , SPLIT(trim(products,'[]'), '},' ) as products_array
               FROM
-                javascript.product_list_viewed_view
-              WHERE timestamp >= CAST(FORMAT_TIMESTAMP('%F', CURRENT_TIMESTAMP(), 'Asia/Seoul') AS TIMESTAMP)
+                javascript.product_list_viewed
+              WHERE DATE(_PARTITIONTIME) >= CAST(FORMAT_TIMESTAMP('%F', CURRENT_TIMESTAMP(), 'Asia/Seoul') AS DATE)
             )
           SELECT
             list_viewed_id

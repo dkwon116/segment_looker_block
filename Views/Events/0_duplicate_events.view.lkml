@@ -1,16 +1,15 @@
 view: duplicate_events {
   derived_table: {
     # combine track and pages event into single table
-    sql_trigger_value: select count(*) from javascript.tracks_view ;;
+    sql_trigger_value: select count(*) from ${duplicate_events_current.SQL_TABLE_NAME} ;;
     sql:
-
-        select *
+        select
+          distinct id
         from(
-        (select * from ${duplicate_events_current.SQL_TABLE_NAME})
-        union all
-        (select * from ${duplicate_events_historical.SQL_TABLE_NAME})
+          (select * from ${duplicate_events_current.SQL_TABLE_NAME})
+          union all
+          (select * from ${duplicate_events_historical.SQL_TABLE_NAME})
         )
-
             -- SELECT
             -- id
             -- FROM (
@@ -37,5 +36,12 @@ view: duplicate_events {
 
 
     ;;
+  }
+
+  dimension: id {
+    type: string
+    sql: ${TABLE}.id ;;
+    primary_key: yes
+    hidden:  yes
   }
 }

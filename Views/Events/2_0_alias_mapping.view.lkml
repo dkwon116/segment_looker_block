@@ -1,6 +1,6 @@
 view: page_aliases_mapping {
   derived_table: {
-    sql_trigger_value: select count(*) from javascript.tracks_view ;;
+    sql_trigger_value: select count(*) from javascript.tracks ;;
     sql: with
       all_mappings as (
         select
