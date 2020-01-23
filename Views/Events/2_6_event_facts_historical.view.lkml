@@ -1,6 +1,6 @@
 view: event_facts_historical {
 derived_table: {
-  sql_trigger_value: SELECT FORMAT_TIMESTAMP('%F', CURRENT_TIMESTAMP(), 'Asia/Seoul') ;;
+  sql_trigger_value: select count(*) from ${mapped_events_historical.SQL_TABLE_NAME} ;;
   sql:
       select
         t.event_id
