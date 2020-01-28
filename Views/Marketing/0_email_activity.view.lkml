@@ -1,6 +1,7 @@
 view: email_activity {
   derived_table: {
-    sql_trigger_value: select count(*) from sendgrid.activity_view ;;
+#     sql_trigger_value: select count(*) from sendgrid.activity_view ;;
+    sql_trigger_value: SELECT FLOOR((TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),'1970-01-01 00:00:00',SECOND)) / (3*60*60)) ;;
     sql:
       select
         s.*

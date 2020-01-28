@@ -1,6 +1,7 @@
 view: experiment_session_journey_facts {
   derived_table: {
-    sql_trigger_value: select count(*) from ${experiment.SQL_TABLE_NAME} ;;
+#     sql_trigger_value: select count(*) from ${experiment.SQL_TABLE_NAME} ;;
+    sql_trigger_value: SELECT FLOOR((TIMESTAMP_DIFF(CURRENT_TIMESTAMP(),'1970-01-01 00:00:00',SECOND)) / (3*60*60)) ;;
     sql:
 
     select
