@@ -1,6 +1,7 @@
 view: weekly_activities {
   derived_table: {
-    sql_trigger_value: select current_date() ;;
+#     sql_trigger_value: select current_date() ;;
+    sql_trigger_value: SELECT FORMAT_TIMESTAMP('%F', CURRENT_TIMESTAMP(), 'Asia/Seoul') ;;
     # sortkeys: ["product_view_week"]
     # distribution: "user_id"
     sql:WITH
