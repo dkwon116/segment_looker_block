@@ -3,7 +3,8 @@ view: product_variations {
   drill_fields: [cloned_from_product_variation_id]
 
   derived_table: {
-    sql_trigger_value: select count(*) from aurora_smile_ventures.product_variations ;;
+#     sql_trigger_value: select count(*) from aurora_smile_ventures.product_variations ;;
+    sql_trigger_value: select SELECT EXTRACT(HOUR FROM CURRENT_TIMESTAMP());;
     sql:
       select t.*
       from(

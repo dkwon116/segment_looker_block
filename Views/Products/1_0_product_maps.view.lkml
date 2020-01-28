@@ -1,7 +1,8 @@
 view: product_maps {
   derived_table: {
     # Rebuilds after sessions rebuilds
-    sql_trigger_value: select count(*) from ${products.SQL_TABLE_NAME} ;;
+#     sql_trigger_value: select count(*) from ${products.SQL_TABLE_NAME} ;;
+    sql_trigger_value: SELECT EXTRACT(HOUR FROM CURRENT_TIMESTAMP());;
     sql: SELECT
           p.id
           , p.name
